@@ -49,6 +49,8 @@ class PlayerInitSystem(
 
                 it += ViewableComponent(setOf(defaultViewContextID))
 
+                it += PositionComponent()
+
                 it += AxolotlModelComponent
             }
         }
@@ -95,11 +97,8 @@ class PlayerInitSystem(
                     )
                 )
 
-                val positionComponent = entity.getOrNull(PositionComponent)
-
-                if (positionComponent != null) {
-                    player.teleport(positionComponent.position, positionComponent.yawPitch)
-                }
+                val positionComponent = entity[PositionComponent]
+                player.teleport(positionComponent.position, positionComponent.yawPitch)
 
                 player.connection.sendPacket(
                     ClientboundGameEventPacket(
