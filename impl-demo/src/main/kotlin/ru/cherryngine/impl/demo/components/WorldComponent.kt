@@ -1,11 +1,11 @@
-package ru.cherryngine.impl.demo.ecs.testimpl.components
+package ru.cherryngine.impl.demo.components
 
-import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import ru.cherryngine.engine.ecs.EcsComponent
 
 data class WorldComponent(
     var worldName: String,
-) : Component<WorldComponent> {
+) : EcsComponent<WorldComponent> {
     override fun type() = WorldComponent
 
     companion object : ComponentType<WorldComponent>()

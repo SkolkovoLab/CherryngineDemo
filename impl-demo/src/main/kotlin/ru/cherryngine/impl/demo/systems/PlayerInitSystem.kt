@@ -1,15 +1,15 @@
-package ru.cherryngine.impl.demo.ecs.testimpl.systems
+package ru.cherryngine.impl.demo.systems
 
-import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import org.slf4j.LoggerFactory
 import ru.cherryngine.engine.core.PlayerManager
-import ru.cherryngine.impl.demo.ecs.testimpl.components.AxolotlModelComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.components.PlayerComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.components.PositionComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.components.ViewableComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.events.PacketsEvent
+import ru.cherryngine.engine.ecs.EcsEntity
+import ru.cherryngine.engine.ecs.components.PlayerComponent
+import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.engine.ecs.components.ViewableComponent
+import ru.cherryngine.engine.ecs.events.PacketsEvent
+import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.lib.minecraft.protocol.packets.configurations.ServerboundFinishConfigurationPacket
 import ru.cherryngine.lib.minecraft.protocol.packets.play.clientbound.ClientboundGameEventPacket
 import ru.cherryngine.lib.minecraft.protocol.packets.play.clientbound.ClientboundLoginPacket
@@ -59,7 +59,7 @@ class PlayerInitSystem(
         super.onTick()
     }
 
-    override fun onTickEntity(entity: Entity) {
+    override fun onTickEntity(entity: EcsEntity) {
         val playerComponent = entity[PlayerComponent]
         val uuid = playerComponent.uuid
         val packets = playerManager.queues.remove(uuid) ?: return

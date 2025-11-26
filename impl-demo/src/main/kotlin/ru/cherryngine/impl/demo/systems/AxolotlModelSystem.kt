@@ -1,16 +1,16 @@
-package ru.cherryngine.impl.demo.ecs.testimpl.systems
+package ru.cherryngine.impl.demo.systems
 
-import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import net.kyori.adventure.text.Component
 import ru.cherryngine.engine.core.PlayerManager
 import ru.cherryngine.engine.core.entity.McEntity
 import ru.cherryngine.engine.core.view.ViewableProvider
-import ru.cherryngine.impl.demo.ecs.testimpl.components.AxolotlModelComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.components.PlayerComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.components.PositionComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.events.ViewableProvidersEvent
+import ru.cherryngine.engine.ecs.EcsEntity
+import ru.cherryngine.engine.ecs.components.PlayerComponent
+import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.engine.ecs.events.ViewableProvidersEvent
+import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.lib.minecraft.entity.AxolotlMeta
 import ru.cherryngine.lib.minecraft.registry.EntityTypes
 import kotlin.random.Random
@@ -20,14 +20,14 @@ class AxolotlModelSystem(
 ) : IteratingSystem(
     family { all(AxolotlModelComponent) }
 ) {
-    private val models = HashMap<Entity, McEntity>()
+    private val models = HashMap<EcsEntity, McEntity>()
 
     override fun onTick() {
         models.keys.removeIf { !world.contains(it) }
         super.onTick()
     }
 
-    override fun onTickEntity(entity: Entity) {
+    override fun onTickEntity(entity: EcsEntity) {
         val playerComponent = entity.getOrNull(PlayerComponent)
         val name = playerComponent?.uuid?.let { playerManager.getPlayerNullable(it) }?.connection?.gameProfile?.username
         val mcEntity = models.computeIfAbsent(entity) {

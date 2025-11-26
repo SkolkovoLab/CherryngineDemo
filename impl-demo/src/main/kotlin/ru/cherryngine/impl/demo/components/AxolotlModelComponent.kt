@@ -1,4 +1,4 @@
-package ru.cherryngine.impl.demo.ecs.testimpl.components
+package ru.cherryngine.impl.demo.components
 
 import com.github.quillraven.fleks.EntityTag
 

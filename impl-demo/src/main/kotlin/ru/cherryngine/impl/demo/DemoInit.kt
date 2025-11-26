@@ -1,13 +1,17 @@
 package ru.cherryngine.impl.demo
 
-import com.github.quillraven.fleks.World
 import com.github.quillraven.fleks.configureWorld
 import jakarta.inject.Singleton
 import ru.cherryngine.engine.core.PlayerManager
-import ru.cherryngine.impl.demo.ecs.StableTicker
-import ru.cherryngine.impl.demo.ecs.testimpl.components.ViewableComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.components.WorldComponent
-import ru.cherryngine.impl.demo.ecs.testimpl.systems.*
+import ru.cherryngine.engine.core.utils.StableTicker
+import ru.cherryngine.engine.ecs.EcsWorld
+import ru.cherryngine.engine.ecs.components.ViewableComponent
+import ru.cherryngine.engine.ecs.systems.*
+import ru.cherryngine.impl.demo.components.WorldComponent
+import ru.cherryngine.impl.demo.systems.ApartSystem
+import ru.cherryngine.impl.demo.systems.AxolotlModelSystem
+import ru.cherryngine.impl.demo.systems.PlayerInitSystem
+import ru.cherryngine.impl.demo.systems.WorldSystem
 import ru.cherryngine.lib.minecraft.MinecraftServer
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -17,10 +21,10 @@ class DemoInit(
     demoWorlds: DemoWorlds,
     playerManager: PlayerManager,
 ) {
-    val fleksWorld: World
+    val ecsWorld: EcsWorld
 
     init {
-        fleksWorld = configureWorld {
+        ecsWorld = configureWorld {
             systems {
                 // чтение сосотяния клиента
                 add(PlayerInitSystem("street", playerManager))
@@ -39,24 +43,24 @@ class DemoInit(
             }
         }
 
-        fleksWorld.entity {
+        ecsWorld.entity {
             it += ViewableComponent(setOf("street"))
             it += WorldComponent("street")
         }
 
-        fleksWorld.entity {
+        ecsWorld.entity {
             it += ViewableComponent(setOf("apart1"))
             it += WorldComponent("apart1")
         }
 
-        fleksWorld.entity {
+        ecsWorld.entity {
             it += ViewableComponent(setOf("apart2"))
             it += WorldComponent("apart2")
         }
 
         val tickDuration = 50.milliseconds
         val ticker = StableTicker(tickDuration) { _, _ ->
-            fleksWorld.update(tickDuration)
+            ecsWorld.update(tickDuration)
         }
         ticker.start()
         minecraftServer.start(playerManager)

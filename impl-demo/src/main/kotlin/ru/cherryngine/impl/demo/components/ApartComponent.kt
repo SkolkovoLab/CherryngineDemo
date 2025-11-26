@@ -1,11 +1,11 @@
-package ru.cherryngine.impl.demo.ecs.testimpl.components
+package ru.cherryngine.impl.demo.components
 
-import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
+import ru.cherryngine.engine.ecs.EcsComponent
 
 data class ApartComponent(
     var apartName: String,
-) : Component<ApartComponent> {
+) : EcsComponent<ApartComponent> {
     override fun type() = ApartComponent
 
     companion object : ComponentType<ApartComponent>()
