@@ -5,9 +5,9 @@ import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotation.specifier.Range
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Permission
-import ru.cherryngine.engine.core.Player
 import ru.cherryngine.engine.core.commandmanager.CloudCommand
 import ru.cherryngine.engine.core.commandmanager.CommandSender
+import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.getPlayerEntity
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction

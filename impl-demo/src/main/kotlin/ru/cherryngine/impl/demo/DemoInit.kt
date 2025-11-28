@@ -1,8 +1,13 @@
 package ru.cherryngine.impl.demo
 
 import com.github.quillraven.fleks.configureWorld
+import io.micronaut.runtime.event.annotation.EventListener
 import jakarta.inject.Singleton
-import ru.cherryngine.engine.core.PlayerManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import ru.cherryngine.engine.core.events.PlayerConfigurationAsyncEvent
+import ru.cherryngine.engine.core.events.SetGameProfileEvent
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent
@@ -12,12 +17,12 @@ import ru.cherryngine.impl.demo.systems.ApartSystem
 import ru.cherryngine.impl.demo.systems.AxolotlModelSystem
 import ru.cherryngine.impl.demo.systems.PlayerInitSystem
 import ru.cherryngine.impl.demo.systems.WorldSystem
-import ru.cherryngine.lib.minecraft.MinecraftServer
+import ru.cherryngine.lib.minecraft.protocol.types.GameProfile
+import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class DemoInit(
-    minecraftServer: MinecraftServer,
     demoWorlds: DemoWorlds,
     playerManager: PlayerManager,
 ) {
@@ -63,6 +68,16 @@ class DemoInit(
             ecsWorld.update(tickDuration)
         }
         ticker.start()
-        minecraftServer.start(playerManager)
+    }
+
+    @EventListener
+    fun onPlayerConfiguration(event: PlayerConfigurationAsyncEvent) = runBlocking {
+        // для теста подержим игрока в конфигурации 3 секунды
+        delay(3000)
+    }
+
+    @EventListener
+    fun onSetGameProfile(event: SetGameProfileEvent) {
+        event.gameProfile = GameProfile(UUID.randomUUID(), "ebanatina")
     }
 }

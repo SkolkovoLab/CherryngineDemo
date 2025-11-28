@@ -3,7 +3,7 @@ package ru.cherryngine.impl.demo.systems
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import org.slf4j.LoggerFactory
-import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
