@@ -3,8 +3,8 @@ package ru.cherryngine.impl.demo
 import jakarta.inject.Singleton
 import ru.cherryngine.engine.core.world.world.LayerWorldViewableProviderImpl
 import ru.cherryngine.engine.core.world.world.WorldViewableProviderImpl
-import ru.cherryngine.lib.minecraft.registry.DimensionTypes
-import ru.cherryngine.lib.minecraft.registry.registries.DimensionType
+import ru.cherryngine.lib.minecraft.registry.entries.DimensionType
+import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.minecraft.world.World
 import ru.cherryngine.lib.polar.PolarWorldGenerator
 

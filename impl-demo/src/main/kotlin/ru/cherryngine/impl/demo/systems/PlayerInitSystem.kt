@@ -14,7 +14,7 @@ import ru.cherryngine.lib.minecraft.protocol.packets.configurations.ServerboundF
 import ru.cherryngine.lib.minecraft.protocol.packets.play.clientbound.ClientboundGameEventPacket
 import ru.cherryngine.lib.minecraft.protocol.packets.play.clientbound.ClientboundLoginPacket
 import ru.cherryngine.lib.minecraft.protocol.types.GameMode
-import ru.cherryngine.lib.minecraft.registry.DimensionTypes
+import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import java.util.*
 
 class PlayerInitSystem(

@@ -12,7 +12,7 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.events.ViewableProvidersEvent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.lib.minecraft.entity.AxolotlMeta
-import ru.cherryngine.lib.minecraft.registry.EntityTypes
+import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
 import kotlin.random.Random
 
 class AxolotlModelSystem(
