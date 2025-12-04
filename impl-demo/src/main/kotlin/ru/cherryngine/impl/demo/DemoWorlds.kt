@@ -5,16 +5,18 @@ import ru.cherryngine.engine.core.world.world.LayerWorldViewableProviderImpl
 import ru.cherryngine.engine.core.world.world.WorldViewableProviderImpl
 import ru.cherryngine.lib.minecraft.registry.entries.DimensionType
 import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
-import ru.cherryngine.lib.minecraft.world.World
 import ru.cherryngine.lib.polar.PolarWorldGenerator
+import ru.cherryngine.lib.world.Chunk
+import ru.cherryngine.lib.world.World
 
 @Singleton
 class DemoWorlds {
     private fun loadChunks(dimensionType: DimensionType, name: String): World {
         val chunks = PolarWorldGenerator.loadChunks(
             javaClass.getResource("/${name}.polar")!!.readBytes(),
-            dimensionType
-        )
+        ).mapValues { (_, it) ->
+            Chunk(it.sections, it.blockEntities, it.lightData, dimensionType)
+        }
         return World(dimensionType, chunks)
     }
 
