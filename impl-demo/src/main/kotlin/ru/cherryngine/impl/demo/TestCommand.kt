@@ -9,9 +9,14 @@ import ru.cherryngine.engine.core.commandmanager.CloudCommand
 import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.ecs.components.PlayerComponent
+import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.getPlayerEntity
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
 import ru.cherryngine.impl.demo.components.ApartComponent
+import ru.cherryngine.impl.demo.components.CubeModelComponent
+import ru.cherryngine.impl.demo.components.PhysicsComponent
+import ru.cherryngine.lib.math.Transform
 import java.util.*
 
 @CloudCommand
@@ -63,6 +68,23 @@ class TestCommand(
             val tmp = entity[PlayerComponent].uuid
             entity[PlayerComponent].uuid = otherPlayer[PlayerComponent].uuid
             otherPlayer[PlayerComponent].uuid = tmp
+        }
+    }
+
+    @Command("phys")
+    fun physCommand(
+        sender: Player,
+    ) {
+        demoInit.ecsWorld.commandAction {
+            val playerEntity = getPlayerEntity(sender.uuid)
+            val spawnPosition = playerEntity[PositionComponent].position
+
+            entity {
+                it += PhysicsComponent("test", PhysicsComponent.BodyInfo.Cube)
+                it += PositionComponent(spawnPosition)
+                it += CubeModelComponent(Key.key("tnt"), Transform())
+                it += ViewableComponent(setOf("street"))
+            }
         }
     }
 }

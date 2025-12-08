@@ -23,7 +23,7 @@ class AxolotlModelSystem(
     private val models = HashMap<EcsEntity, McEntity>()
 
     override fun onTick() {
-        models.keys.removeIf { !world.contains(it) }
+        models.keys.removeIf { it !in world || AxolotlModelComponent !in it }
         super.onTick()
     }
 

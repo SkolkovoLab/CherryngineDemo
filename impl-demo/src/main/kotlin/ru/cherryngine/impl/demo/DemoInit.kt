@@ -12,11 +12,9 @@ import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.systems.*
+import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.impl.demo.components.WorldComponent
-import ru.cherryngine.impl.demo.systems.ApartSystem
-import ru.cherryngine.impl.demo.systems.AxolotlModelSystem
-import ru.cherryngine.impl.demo.systems.PlayerInitSystem
-import ru.cherryngine.impl.demo.systems.WorldSystem
+import ru.cherryngine.impl.demo.systems.*
 import ru.cherryngine.lib.minecraft.protocol.types.GameProfile
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
@@ -37,7 +35,9 @@ class DemoInit(
 
                 // всякие действия
                 add(CommandActionsSystem())
+                add(PhysicsSystem())
                 add(AxolotlModelSystem(playerManager))
+                add(CubeModelSystem())
                 add(WorldSystem(demoWorlds))
                 add(ApartSystem())
 
@@ -48,19 +48,27 @@ class DemoInit(
             }
         }
 
+        // Основной мир
         ecsWorld.entity {
             it += ViewableComponent(setOf("street"))
             it += WorldComponent("street")
         }
 
+        // Мир apart1
         ecsWorld.entity {
             it += ViewableComponent(setOf("apart1"))
             it += WorldComponent("apart1")
         }
 
+        // Мир apart2
         ecsWorld.entity {
             it += ViewableComponent(setOf("apart2"))
             it += WorldComponent("apart2")
+        }
+
+        // Физический пол
+        ecsWorld.entity {
+            it += PhysicsComponent("test", PhysicsComponent.BodyInfo.Floor(0.0))
         }
 
         val tickDuration = 50.milliseconds
