@@ -15,7 +15,7 @@ import ru.cherryngine.engine.ecs.systems.*
 import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.impl.demo.components.WorldComponent
 import ru.cherryngine.impl.demo.systems.*
-import ru.cherryngine.lib.minecraft.protocol.types.GameProfile
+import ru.cherryngine.lib.minecraft.network.protocol.types.GameProfile
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 

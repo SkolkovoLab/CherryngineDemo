@@ -10,10 +10,10 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.events.PacketsEvent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
-import ru.cherryngine.lib.minecraft.protocol.packets.configurations.ServerboundFinishConfigurationPacket
-import ru.cherryngine.lib.minecraft.protocol.packets.play.clientbound.ClientboundGameEventPacket
-import ru.cherryngine.lib.minecraft.protocol.packets.play.clientbound.ClientboundLoginPacket
-import ru.cherryngine.lib.minecraft.protocol.types.GameMode
+import ru.cherryngine.lib.minecraft.network.protocol.packets.configurations.ServerboundFinishConfigurationPacket
+import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundGameEventPacket
+import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundLoginPacket
+import ru.cherryngine.lib.minecraft.network.protocol.types.GameMode
 import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import java.util.*
 
