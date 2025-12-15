@@ -14,7 +14,7 @@ import ru.cherryngine.lib.minecraft.network.protocol.packets.configurations.Serv
 import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundGameEventPacket
 import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundLoginPacket
 import ru.cherryngine.lib.minecraft.network.protocol.types.GameMode
-import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
+import ru.cherryngine.lib.minecraft.registry.Registries
 import java.util.*
 
 class PlayerInitSystem(
@@ -83,7 +83,7 @@ class PlayerInitSystem(
                         false,
                         true,
                         false,
-                        DimensionTypes.OVERWORLD,
+                        Registries.dimensionType["overworld"],
                         "world",
                         0L,
                         GameMode.SURVIVAL,

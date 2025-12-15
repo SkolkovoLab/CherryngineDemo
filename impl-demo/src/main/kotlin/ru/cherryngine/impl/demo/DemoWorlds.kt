@@ -3,8 +3,8 @@ package ru.cherryngine.impl.demo
 import jakarta.inject.Singleton
 import ru.cherryngine.engine.core.world.world.LayerWorldViewableProviderImpl
 import ru.cherryngine.engine.core.world.world.WorldViewableProviderImpl
-import ru.cherryngine.lib.minecraft.registry.entries.DimensionType
-import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
+import ru.cherryngine.lib.minecraft.registry.Registries
+import ru.cherryngine.lib.minecraft.registry.types.DimensionType
 import ru.cherryngine.lib.polar.PolarWorldGenerator
 import ru.cherryngine.lib.world.Chunk
 import ru.cherryngine.lib.world.World
@@ -20,14 +20,15 @@ class DemoWorlds {
         return World(dimensionType, chunks)
     }
 
-    val normalWorld = WorldViewableProviderImpl(loadChunks(DimensionTypes.OVERWORLD, "de_cache_normal"))
-    val winterWorld = WorldViewableProviderImpl(loadChunks(DimensionTypes.OVERWORLD, "de_cache_winter"))
-    val dustWorld = WorldViewableProviderImpl(loadChunks(DimensionTypes.OVERWORLD, "de_dust2"))
-    val lobbyWorld = WorldViewableProviderImpl(loadChunks(DimensionTypes.OVERWORLD, "lobby"))
+    val dtOverworld = Registries.dimensionType["overworld"]
+    val normalWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_cache_normal"))
+    val winterWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_cache_winter"))
+    val dustWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_dust2"))
+    val lobbyWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "lobby"))
 
-    val streetWorld = WorldViewableProviderImpl(loadChunks(DimensionTypes.OVERWORLD, "street"))
-    val apart1World = LayerWorldViewableProviderImpl(loadChunks(DimensionTypes.OVERWORLD, "apart1"))
-    val apart2World = LayerWorldViewableProviderImpl(loadChunks(DimensionTypes.OVERWORLD, "apart2"))
+    val streetWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "street"))
+    val apart1World = LayerWorldViewableProviderImpl(loadChunks(dtOverworld, "apart1"))
+    val apart2World = LayerWorldViewableProviderImpl(loadChunks(dtOverworld, "apart2"))
 
     val worlds = mapOf(
         "normal" to normalWorld,

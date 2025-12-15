@@ -10,8 +10,7 @@ import ru.cherryngine.engine.ecs.events.ViewableProvidersEvent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.lib.minecraft.entity.ItemDisplayMeta
 import ru.cherryngine.lib.minecraft.item.ItemStack
-import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
-import ru.cherryngine.lib.minecraft.registry.registries.ItemRegistry
+import ru.cherryngine.lib.minecraft.registry.Registries
 import kotlin.random.Random
 
 class CubeModelSystem() : IteratingSystem(
@@ -28,11 +27,11 @@ class CubeModelSystem() : IteratingSystem(
         val component = entity[CubeModelComponent]
         val transform = component.transform
         val mcEntity = models.computeIfAbsent(entity) {
-            McEntity(Random.nextInt(1000, 1_000_000), EntityTypes.ITEM_DISPLAY)
+            McEntity(Random.nextInt(1000, 1_000_000), Registries.entityType["item_display"])
         }
 
         with(mcEntity) {
-            metadata[ItemDisplayMeta.DISPLAYED_ITEM] = ItemStack(ItemRegistry[component.material])
+            metadata[ItemDisplayMeta.DISPLAYED_ITEM] = ItemStack(Registries.item[component.material])
             metadata[ItemDisplayMeta.HAS_NO_GRAVITY] = true
             metadata[ItemDisplayMeta.TRANSLATION] = transform.translation
             metadata[ItemDisplayMeta.ROTATION_LEFT] = transform.rotation
