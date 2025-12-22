@@ -4,6 +4,7 @@ import jakarta.inject.Singleton
 import ru.cherryngine.engine.core.world.world.LayerWorldViewableProviderImpl
 import ru.cherryngine.engine.core.world.world.WorldViewableProviderImpl
 import ru.cherryngine.lib.minecraft.registry.Registries
+import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.minecraft.registry.types.DimensionType
 import ru.cherryngine.lib.polar.PolarWorldGenerator
 import ru.cherryngine.lib.world.Chunk
@@ -20,7 +21,7 @@ class DemoWorlds {
         return World(dimensionType, chunks)
     }
 
-    val dtOverworld = Registries.dimensionType["overworld"]
+    val dtOverworld = Registries.dimensionType[DimensionTypes.OVERWORLD].value
     val normalWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_cache_normal"))
     val winterWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_cache_winter"))
     val dustWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_dust2"))
