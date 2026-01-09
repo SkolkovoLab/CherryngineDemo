@@ -16,6 +16,7 @@ import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandA
 import ru.cherryngine.impl.demo.components.ApartComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
+import ru.cherryngine.impl.demo.components.WorldComponent
 import ru.cherryngine.lib.math.Transform
 import java.util.*
 
@@ -68,6 +69,17 @@ class TestCommand(
             val tmp = entity[PlayerComponent].uuid
             entity[PlayerComponent].uuid = otherPlayer[PlayerComponent].uuid
             otherPlayer[PlayerComponent].uuid = tmp
+        }
+    }
+
+    @Command("viewcontext <contexts>")
+    fun viewContextCommand(
+        sender: Player,
+        contexts: String,
+    ) {
+        demoInit.ecsWorld.commandAction {
+            val entity = getPlayerEntity(sender.uuid)
+            entity[PlayerComponent].viewContextIDs = contexts.split(",").toSet()
         }
     }
 

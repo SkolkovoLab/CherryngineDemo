@@ -48,22 +48,11 @@ class DemoInit(
             }
         }
 
-        // Основной мир
-        ecsWorld.entity {
-            it += ViewableComponent(setOf("street"))
-            it += WorldComponent("street")
-        }
-
-        // Мир apart1
-        ecsWorld.entity {
-            it += ViewableComponent(setOf("apart1"))
-            it += WorldComponent("apart1")
-        }
-
-        // Мир apart2
-        ecsWorld.entity {
-            it += ViewableComponent(setOf("apart2"))
-            it += WorldComponent("apart2")
+        demoWorlds.worlds.keys.forEach { worldName ->
+            ecsWorld.entity {
+                it += ViewableComponent(setOf(worldName))
+                it += WorldComponent(worldName)
+            }
         }
 
         // Физический пол
