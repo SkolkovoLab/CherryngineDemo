@@ -1,35 +1,41 @@
 package ru.cherryngine.impl.demo
 
 import jakarta.inject.Singleton
-import ru.cherryngine.engine.core.world.world.LayerWorldViewableProviderImpl
-import ru.cherryngine.engine.core.world.world.WorldViewableProviderImpl
+import ru.cherryngine.lib.minecraft.network.protocol.types.SectionPos
 import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.minecraft.registry.types.DimensionType
 import ru.cherryngine.lib.polar.PolarWorldGenerator
-import ru.cherryngine.lib.world.Chunk
-import ru.cherryngine.lib.world.World
+import ru.cherryngine.lib.world.BaseWorld
 
 @Singleton
 class DemoWorlds {
-    private fun loadChunks(dimensionType: DimensionType, name: String): World {
-        val chunks = PolarWorldGenerator.loadChunks(
+    private fun loadChunks(dimensionType: DimensionType, name: String): BaseWorld {
+        val polarChunks = PolarWorldGenerator.loadChunks(
             javaClass.getResource("/${name}.polar")!!.readBytes(),
-        ).mapValues { (_, it) ->
-            Chunk(it.sections, it.blockEntities, it.lightData, dimensionType)
+        )
+
+        val baseWorld = BaseWorld(dimensionType)
+        polarChunks.forEach { (pos, result) ->
+            baseWorld.lightDataMap[pos.pack()] = result.lightData
+            result.sections.forEachIndexed { i, section ->
+                baseWorld.sectionsMap[SectionPos(pos.x, i + baseWorld.minSection, pos.z).pack()] = section
+            }
         }
-        return World(dimensionType, chunks)
+
+        return baseWorld
     }
 
-    val dtOverworld = Registries.dimensionType[DimensionTypes.OVERWORLD].value
-    val normalWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_cache_normal"))
-    val winterWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_cache_winter"))
-    val dustWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "de_dust2"))
-    val lobbyWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "lobby"))
+    private val overworld = Registries.dimensionType[DimensionTypes.OVERWORLD].value
 
-    val streetWorld = WorldViewableProviderImpl(loadChunks(dtOverworld, "street"))
-    val apart1World = LayerWorldViewableProviderImpl(loadChunks(dtOverworld, "apart1"))
-    val apart2World = LayerWorldViewableProviderImpl(loadChunks(dtOverworld, "apart2"))
+    val normalWorld = loadChunks(overworld, "de_cache_normal")
+    val winterWorld = loadChunks(overworld, "de_cache_winter")
+    val dustWorld = loadChunks(overworld, "de_dust2")
+    val lobbyWorld = loadChunks(overworld, "lobby")
+
+    val streetWorld = loadChunks(overworld, "street")
+    val apart1World = loadChunks(overworld, "apart1")
+    val apart2World = loadChunks(overworld, "apart2")
 
     val worlds = mapOf(
         "normal" to normalWorld,

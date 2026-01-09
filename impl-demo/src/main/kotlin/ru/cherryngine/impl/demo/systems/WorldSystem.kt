@@ -18,7 +18,7 @@ class WorldSystem(
         val world = demoWorlds.worlds[worldName] ?: return
         entity.configure {
             val event = it.getOrAdd(ViewableProvidersEvent, ::ViewableProvidersEvent)
-            event.staticViewableProviders += world
+            event.worlds += world
         }
     }
 }

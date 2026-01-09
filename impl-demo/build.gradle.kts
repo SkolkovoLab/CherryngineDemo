@@ -9,6 +9,6 @@ dependencies {
 
     api(engine(":lib-polar"))
 
-    api(engine(":engine-integration:viaversion"))
-    api(engine(":engine-integration:grim"))
+//    api(engine(":engine-integration:viaversion"))
+//    api(engine(":engine-integration:grim"))
 }
