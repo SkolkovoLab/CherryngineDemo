@@ -7,6 +7,7 @@ import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.minecraft.registry.types.DimensionType
 import ru.cherryngine.lib.polar.PolarWorldGenerator
 import ru.cherryngine.lib.world.BaseWorld
+import ru.cherryngine.lib.world.VisibleBarriersWorld
 
 @Singleton
 class DemoWorlds {
@@ -19,7 +20,7 @@ class DemoWorlds {
         polarChunks.forEach { (pos, result) ->
             baseWorld.lightDataMap[pos.pack()] = result.lightData
             result.sections.forEachIndexed { i, section ->
-                baseWorld.sectionsMap[SectionPos(pos.x, i + baseWorld.minSection, pos.z).pack()] = section
+                baseWorld.sectionsMap[SectionPos(pos.x, i + baseWorld.dimensionType.minY / 16, pos.z).pack()] = section
             }
         }
 
@@ -29,6 +30,7 @@ class DemoWorlds {
     private val overworld = Registries.dimensionType[DimensionTypes.OVERWORLD].value
 
     val normalWorld = loadChunks(overworld, "de_cache_normal")
+    val normalBarriersWorld = VisibleBarriersWorld(normalWorld)
     val winterWorld = loadChunks(overworld, "de_cache_winter")
     val dustWorld = loadChunks(overworld, "de_dust2")
     val lobbyWorld = loadChunks(overworld, "lobby")
@@ -39,6 +41,7 @@ class DemoWorlds {
 
     val worlds = mapOf(
         "normal" to normalWorld,
+        "normalBarriers" to normalBarriersWorld,
         "winter" to winterWorld,
         "dust" to dustWorld,
         "lobby" to lobbyWorld,
