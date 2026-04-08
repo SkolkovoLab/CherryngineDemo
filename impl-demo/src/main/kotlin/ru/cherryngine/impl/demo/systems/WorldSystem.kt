@@ -18,7 +18,7 @@ class WorldSystem(
         val layer = demoWorlds.layers[worldName] ?: return
         entity.configure {
             val event = it.getOrAdd(ViewableProvidersEvent, ::ViewableProvidersEvent)
-            event.layers += LayerEntry(layer, 0)
+            event.layers += LayerEntry(layer, entity[WorldComponent].priority)
             if (event.dimensionType == null) event.dimensionType = demoWorlds.overworld
         }
     }

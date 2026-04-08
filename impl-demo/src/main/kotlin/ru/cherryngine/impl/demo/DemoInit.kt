@@ -48,10 +48,11 @@ class DemoInit(
             }
         }
 
+        val apartNames = setOf("apart1", "apart2")
         demoWorlds.layers.keys.forEach { worldName ->
             ecsWorld.entity {
                 it += ViewableComponent(setOf(worldName))
-                it += WorldComponent(worldName)
+                it += WorldComponent(worldName, priority = if (worldName in apartNames) 10 else 0)
             }
         }
 
