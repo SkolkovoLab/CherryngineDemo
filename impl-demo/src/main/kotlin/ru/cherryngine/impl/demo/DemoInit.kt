@@ -12,7 +12,7 @@ import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.systems.*
-import ru.cherryngine.lib.world.ChunkPool
+import ru.cherryngine.engine.core.ChunkPool
 import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.impl.demo.components.WorldComponent
 import ru.cherryngine.impl.demo.systems.*
@@ -24,6 +24,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class DemoInit(
     demoWorlds: DemoWorlds,
     playerManager: PlayerManager,
+    chunkPool: ChunkPool,
 ) {
     val ecsWorld: EcsWorld
 
@@ -43,7 +44,7 @@ class DemoInit(
                 add(ApartSystem())
 
                 // завершение
-                add(ViewSystem(playerManager, chunkPool = ChunkPool()))
+                add(ViewSystem(playerManager, chunkPool))
                 add(WriteClientPositionSystem(playerManager))
                 add(ClearEventsSystem())
             }
