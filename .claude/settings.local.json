@@ -6,7 +6,10 @@
       "Bash(xargs cat:*)",
       "Bash(xargs head:*)",
       "Bash(./gradlew :impl-demo:compileKotlin)",
-      "Bash(./gradlew :impl-demo:run)"
+      "Bash(./gradlew :impl-demo:run)",
+      "Bash(grep -E \"\\\\.\\(kt|java\\)$\")",
+      "mcp__ide__getDiagnostics",
+      "Bash(./gradlew classes:*)"
     ]
   }
 }

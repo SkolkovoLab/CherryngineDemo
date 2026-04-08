@@ -12,6 +12,7 @@ import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.systems.*
+import ru.cherryngine.lib.world.ChunkPool
 import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.impl.demo.components.WorldComponent
 import ru.cherryngine.impl.demo.systems.*
@@ -42,7 +43,7 @@ class DemoInit(
                 add(ApartSystem())
 
                 // завершение
-                add(ViewSystem(playerManager))
+                add(ViewSystem(playerManager, chunkPool = ChunkPool()))
                 add(WriteClientPositionSystem(playerManager))
                 add(ClearEventsSystem())
             }
