@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config:*)",
+      "Bash(xargs grep:*)",
+      "Bash(xargs cat:*)",
+      "Bash(xargs head:*)",
+      "Bash(./gradlew :impl-demo:compileKotlin)",
+      "Bash(./gradlew :impl-demo:run)"
+    ]
+  }
+}

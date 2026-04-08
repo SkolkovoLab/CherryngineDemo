@@ -1,52 +1,39 @@
 package ru.cherryngine.impl.demo
 
 import jakarta.inject.Singleton
-import ru.cherryngine.lib.minecraft.network.protocol.types.SectionPos
 import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.minecraft.registry.types.DimensionType
 import ru.cherryngine.lib.polar.PolarWorldGenerator
-import ru.cherryngine.lib.world.BaseWorld
-import ru.cherryngine.lib.world.VisibleBarriersWorld
+import ru.cherryngine.lib.world.ImmutableLayer
 
 @Singleton
 class DemoWorlds {
-    private fun loadChunks(dimensionType: DimensionType, name: String): BaseWorld {
-        val polarChunks = PolarWorldGenerator.loadChunks(
+    val overworld: DimensionType = Registries.dimensionType[DimensionTypes.OVERWORLD].value
+
+    private fun loadLayer(name: String): ImmutableLayer =
+        PolarWorldGenerator.loadAsLayer(
             javaClass.getResource("/${name}.polar")!!.readBytes(),
+            overworld,
+            name,
         )
 
-        val baseWorld = BaseWorld(dimensionType)
-        polarChunks.forEach { (pos, result) ->
-            baseWorld.lightDataMap[pos.pack()] = result.lightData
-            result.sections.forEachIndexed { i, section ->
-                baseWorld.sectionsMap[SectionPos(pos.x, i + baseWorld.dimensionType.minY / 16, pos.z).pack()] = section
-            }
-        }
+    val normalLayer = loadLayer("de_cache_normal")
+    val winterLayer = loadLayer("de_cache_winter")
+    val dustLayer = loadLayer("de_dust2")
+    val lobbyLayer = loadLayer("lobby")
 
-        return baseWorld
-    }
+    val streetLayer = loadLayer("street")
+    val apart1Layer = loadLayer("apart1")
+    val apart2Layer = loadLayer("apart2")
 
-    private val overworld = Registries.dimensionType[DimensionTypes.OVERWORLD].value
-
-    val normalWorld = loadChunks(overworld, "de_cache_normal")
-    val normalBarriersWorld = VisibleBarriersWorld(normalWorld)
-    val winterWorld = loadChunks(overworld, "de_cache_winter")
-    val dustWorld = loadChunks(overworld, "de_dust2")
-    val lobbyWorld = loadChunks(overworld, "lobby")
-
-    val streetWorld = loadChunks(overworld, "street")
-    val apart1World = loadChunks(overworld, "apart1")
-    val apart2World = loadChunks(overworld, "apart2")
-
-    val worlds = mapOf(
-        "normal" to normalWorld,
-        "normalBarriers" to normalBarriersWorld,
-        "winter" to winterWorld,
-        "dust" to dustWorld,
-        "lobby" to lobbyWorld,
-        "street" to streetWorld,
-        "apart1" to apart1World,
-        "apart2" to apart2World,
+    val layers = mapOf(
+        "normal" to normalLayer,
+        "winter" to winterLayer,
+        "dust" to dustLayer,
+        "lobby" to lobbyLayer,
+        "street" to streetLayer,
+        "apart1" to apart1Layer,
+        "apart2" to apart2Layer,
     )
 }

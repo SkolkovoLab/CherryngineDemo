@@ -48,7 +48,7 @@ class DemoInit(
             }
         }
 
-        demoWorlds.worlds.keys.forEach { worldName ->
+        demoWorlds.layers.keys.forEach { worldName ->
             ecsWorld.entity {
                 it += ViewableComponent(setOf(worldName))
                 it += WorldComponent(worldName)
