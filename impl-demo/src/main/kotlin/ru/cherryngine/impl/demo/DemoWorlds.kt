@@ -6,28 +6,37 @@ import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.minecraft.registry.types.DimensionType
 import ru.cherryngine.lib.polar.PolarWorldGenerator
 import ru.cherryngine.lib.world.ImmutableLayer
+import ru.cherryngine.lib.world.Layer
+import ru.cherryngine.lib.world.MutableLayer
 
 @Singleton
 class DemoWorlds {
     val overworld: DimensionType = Registries.dimensionType[DimensionTypes.OVERWORLD].value
 
-    private fun loadLayer(name: String): ImmutableLayer =
+    private fun loadImmutableLayer(name: String): ImmutableLayer =
         PolarWorldGenerator.loadAsLayer(
             javaClass.getResource("/${name}.polar")!!.readBytes(),
             overworld,
             name,
         )
 
-    val normalLayer = loadLayer("de_cache_normal")
-    val winterLayer = loadLayer("de_cache_winter")
-    val dustLayer = loadLayer("de_dust2")
-    val lobbyLayer = loadLayer("lobby")
+    private fun loadMutableLayer(name: String): MutableLayer =
+        PolarWorldGenerator.loadAsMutableLayer(
+            javaClass.getResource("/${name}.polar")!!.readBytes(),
+            overworld,
+            name,
+        )
 
-    val streetLayer = loadLayer("street")
-    val apart1Layer = loadLayer("apart1")
-    val apart2Layer = loadLayer("apart2")
+    val normalLayer = loadImmutableLayer("de_cache_normal")
+    val winterLayer = loadImmutableLayer("de_cache_winter")
+    val dustLayer = loadImmutableLayer("de_dust2")
+    val lobbyLayer = loadImmutableLayer("lobby")
 
-    val layers = mapOf(
+    val streetLayer = loadImmutableLayer("street")
+    val apart1Layer = loadImmutableLayer("apart1")
+    val apart2Layer = loadMutableLayer("apart2")
+
+    val layers: Map<String, Layer> = mapOf(
         "normal" to normalLayer,
         "winter" to winterLayer,
         "dust" to dustLayer,
