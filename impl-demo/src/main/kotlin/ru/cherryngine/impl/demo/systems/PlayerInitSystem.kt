@@ -10,6 +10,7 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.events.PacketsEvent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
+import ru.cherryngine.lib.minecraft.network.protocol.packets.ServerboundPacket
 import ru.cherryngine.lib.minecraft.network.protocol.packets.configurations.ServerboundFinishConfigurationPacket
 import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundGameEventPacket
 import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundLoginPacket
@@ -25,22 +26,36 @@ class PlayerInitSystem(
     family { all(PlayerComponent) }
 ) {
     private val logger = LoggerFactory.getLogger(PlayerInitSystem::class.java)
+    private var tickPackets: Map<UUID, MutableList<ServerboundPacket>> = emptyMap()
 
     override fun onTick() {
-        val skipCreate = mutableSetOf<UUID>()
-        world.family { all(PlayerComponent) }.forEach {
-            val playerComponent = it[PlayerComponent]
-            if (playerComponent.uuid in playerManager.toCreatePlayers) {
-                skipCreate.add(playerComponent.uuid)
-            }
-            if (playerComponent.uuid in playerManager.toRemovePlayers) {
-//                it.remove()
+        // Drain leave channel → remove entities
+        val toRemove = mutableSetOf<UUID>()
+        while (true) {
+            val result = playerManager.playerLeaveChannel.tryReceive()
+            if (result.isSuccess) toRemove.add(result.getOrThrow()) else break
+        }
+        if (toRemove.isNotEmpty()) {
+            world.family { all(PlayerComponent) }.forEach {
+                val playerComponent = it[PlayerComponent]
+                if (playerComponent.uuid in toRemove) {
+//                    it.remove()
+                }
             }
         }
-        playerManager.toRemovePlayers.clear()
 
-        playerManager.toCreatePlayers.forEach { player ->
-            if (player in skipCreate) return@forEach
+        // Drain join channel → create entities
+        val toCreate = mutableListOf<UUID>()
+        while (true) {
+            val result = playerManager.playerJoinChannel.tryReceive()
+            if (result.isSuccess) toCreate.add(result.getOrThrow()) else break
+        }
+        val existingUUIDs = mutableSetOf<UUID>()
+        world.family { all(PlayerComponent) }.forEach {
+            existingUUIDs.add(it[PlayerComponent].uuid)
+        }
+        toCreate.forEach { player ->
+            if (player in existingUUIDs) return@forEach
             logger.info("Creating ECS entity for player $player")
             world.entity {
                 it += PlayerComponent(
@@ -55,7 +70,17 @@ class PlayerInitSystem(
                 it += AxolotlModelComponent
             }
         }
-        playerManager.toCreatePlayers.clear()
+
+        // Drain packet channel → build local map
+        val packets = mutableMapOf<UUID, MutableList<ServerboundPacket>>()
+        while (true) {
+            val result = playerManager.packetChannel.tryReceive()
+            if (result.isSuccess) {
+                val (uuid, packet) = result.getOrThrow()
+                packets.getOrPut(uuid) { mutableListOf() }.add(packet)
+            } else break
+        }
+        tickPackets = packets
 
         super.onTick()
     }
@@ -63,7 +88,7 @@ class PlayerInitSystem(
     override fun onTickEntity(entity: EcsEntity) {
         val playerComponent = entity[PlayerComponent]
         val uuid = playerComponent.uuid
-        val packets = playerManager.queues.remove(uuid) ?: return
+        val packets = tickPackets[uuid] ?: return
 
         entity.configure {
             it += PacketsEvent(packets)

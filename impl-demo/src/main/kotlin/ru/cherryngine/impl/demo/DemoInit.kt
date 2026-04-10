@@ -76,8 +76,8 @@ class DemoInit(
         delay(3000)
     }
 
-    @EventListener
-    fun onSetGameProfile(event: SetGameProfileEvent) {
-        event.gameProfile = GameProfile(UUID.randomUUID(), "ebanatina")
-    }
+//    @EventListener
+//    fun onSetGameProfile(event: SetGameProfileEvent) {
+//        event.gameProfile = GameProfile(UUID.randomUUID(), "ebanatina")
+//    }
 }
