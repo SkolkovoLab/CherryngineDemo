@@ -6,13 +6,15 @@ import jakarta.inject.Singleton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import ru.cherryngine.engine.core.ChunkPool
-import ru.cherryngine.engine.core.entity.McEntityRegistry
+import ru.cherryngine.engine.ecs.systems.mc_entity.McEntityRegistry
 import ru.cherryngine.engine.core.events.PlayerConfigurationAsyncEvent
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.systems.*
+import ru.cherryngine.engine.ecs.systems.mc_entity.McEntityBeginTickSystem
+import ru.cherryngine.engine.ecs.systems.mc_entity.McEntityEndTickSystem
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.impl.demo.components.WorldComponent
@@ -34,13 +36,15 @@ class DemoInit(
 
         ecsWorld = configureWorld {
             systems {
-                // чтение сосотяния клиента
+//                add(McEntityBeginTickSystem(mcEntityRegistry))
+
+                // чтение состояния клиента
                 add(PlayerInitSystem("street", playerManager))
                 add(ReadClientPositionSystem(playerManager))
 
                 // всякие действия
                 add(CommandActionsSystem())
-                add(AxolotlModelSystem(playerManager))
+                add(AxolotlModelSystem(playerManager, mcEntityRegistry))
                 add(CubeModelSystem(mcEntityRegistry))
                 add(WorldSystem(demoWorlds))
                 add(ApartSystem())
@@ -49,6 +53,7 @@ class DemoInit(
                 // завершение
                 add(ViewSystem(playerManager, chunkPool))
                 add(WriteClientPositionSystem(playerManager))
+//                add(McEntityEndTickSystem(mcEntityRegistry))
                 add(ClearEventsSystem())
             }
         }

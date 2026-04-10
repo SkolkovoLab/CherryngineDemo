@@ -67,7 +67,7 @@ class PlayerInitSystem(
 
                 it += PositionComponent()
 
-                it += AxolotlModelComponent
+                it += AxolotlModelComponent()
             }
         }
 

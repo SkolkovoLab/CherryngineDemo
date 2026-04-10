@@ -3,7 +3,7 @@ package ru.cherryngine.impl.demo.systems
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import ru.cherryngine.engine.core.entity.McEntity
-import ru.cherryngine.engine.core.entity.McEntityRegistry
+import ru.cherryngine.engine.ecs.systems.mc_entity.McEntityRegistry
 import ru.cherryngine.engine.core.view.ViewableProvider
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PositionComponent
@@ -20,14 +20,6 @@ class CubeModelSystem(
 ) : IteratingSystem(
     family { all(CubeModelComponent) }
 ) {
-    override fun onTick() {
-        mcEntityRegistry.beginTick()
-        super.onTick()
-        mcEntityRegistry.endTick { mcEntity ->
-            // despawn пакеты отправятся через ViewSystem, когда entity пропадёт из ViewableProviders
-        }
-    }
-
     override fun onTickEntity(entity: EcsEntity) {
         val component = entity[CubeModelComponent]
         val transform = component.transform
