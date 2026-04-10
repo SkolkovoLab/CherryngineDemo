@@ -5,10 +5,10 @@ import io.micronaut.runtime.event.annotation.EventListener
 import jakarta.inject.Singleton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import ru.cherryngine.engine.core.ChunkPool
-import ru.cherryngine.engine.ecs.systems.mc_entity.McEntityRegistry
-import ru.cherryngine.engine.core.events.PlayerConfigurationAsyncEvent
-import ru.cherryngine.engine.core.player.PlayerManager
+import ru.cherryngine.engine.minecraft.ChunkPool
+import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
+import ru.cherryngine.engine.minecraft.events.PlayerConfigurationAsyncEvent
+import ru.cherryngine.engine.minecraft.player.PlayerManager
 import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent

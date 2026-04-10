@@ -2,9 +2,9 @@ package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
-import ru.cherryngine.engine.core.entity.McEntity
-import ru.cherryngine.engine.ecs.systems.mc_entity.McEntityRegistry
-import ru.cherryngine.engine.core.view.ViewableProvider
+import ru.cherryngine.engine.minecraft.entity.McEntity
+import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
+import ru.cherryngine.engine.minecraft.view.ViewableProvider
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.events.ViewableProvidersEvent
