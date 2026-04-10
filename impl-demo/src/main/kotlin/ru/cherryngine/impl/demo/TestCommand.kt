@@ -8,6 +8,7 @@ import org.incendo.cloud.annotations.Permission
 import ru.cherryngine.engine.core.commandmanager.CloudCommand
 import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.player.Player
+import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
@@ -16,7 +17,6 @@ import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandA
 import ru.cherryngine.impl.demo.components.ApartComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
-import ru.cherryngine.impl.demo.components.WorldComponent
 import ru.cherryngine.lib.math.Transform
 import java.util.*
 
@@ -83,8 +83,8 @@ class TestCommand(
         }
     }
 
-    @Command("phys")
-    fun physCommand(
+    @Command("phys cube")
+    fun physCubeCommand(
         sender: Player,
     ) {
         demoInit.ecsWorld.commandAction {
@@ -96,6 +96,43 @@ class TestCommand(
                 it += PositionComponent(spawnPosition)
                 it += CubeModelComponent(material = Key.key("tnt"), transform = Transform())
                 it += ViewableComponent(setOf("street"))
+            }
+        }
+    }
+
+    @Command("phys clear")
+    fun physClearCommand(
+        sender: Player,
+    ) {
+        demoInit.ecsWorld.commandAction {
+            val toRemove = mutableListOf<EcsEntity>()
+            family { all(PhysicsComponent) }.forEach { toRemove.add(it) }
+            toRemove.forEach { it.remove() }
+            sender.sendMessage("Removed ${toRemove.size} physics entities")
+        }
+    }
+
+    @Command("phys remove")
+    fun physRemoveCommand(
+        sender: Player,
+    ) {
+        demoInit.ecsWorld.commandAction {
+            val playerPos = getPlayerEntity(sender.uuid)[PositionComponent].position
+            var closest: EcsEntity? = null
+            var closestDistSq = Double.MAX_VALUE
+            family { all(PhysicsComponent, PositionComponent) }.forEach { entity ->
+                if (PlayerComponent in entity) return@forEach
+                val distSq = (entity[PositionComponent].position - playerPos).lengthSquared()
+                if (distSq < closestDistSq) {
+                    closestDistSq = distSq
+                    closest = entity
+                }
+            }
+            if (closest != null) {
+                closest.remove()
+                sender.sendMessage("Removed nearest physics entity")
+            } else {
+                sender.sendMessage("No physics entities found")
             }
         }
     }

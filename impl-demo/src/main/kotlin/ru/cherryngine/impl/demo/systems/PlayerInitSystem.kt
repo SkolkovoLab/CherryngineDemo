@@ -39,7 +39,7 @@ class PlayerInitSystem(
             world.family { all(PlayerComponent) }.forEach {
                 val playerComponent = it[PlayerComponent]
                 if (playerComponent.uuid in toRemove) {
-//                    it.remove()
+                    it.remove()
                 }
             }
         }
