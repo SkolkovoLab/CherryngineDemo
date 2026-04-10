@@ -8,6 +8,8 @@ import kotlinx.coroutines.runBlocking
 import ru.cherryngine.engine.minecraft.ChunkPool
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.engine.minecraft.events.PlayerConfigurationAsyncEvent
+import ru.cherryngine.engine.minecraft.player.MinecraftPlayerInputProvider
+import ru.cherryngine.engine.minecraft.player.MinecraftPlayerOutputProvider
 import ru.cherryngine.engine.minecraft.player.PlayerManager
 import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
@@ -33,6 +35,8 @@ class DemoInit(
         val physicsSpace = PhysicsSpace()
         val terrainGenerator = TerrainGenerator(physicsSpace)
         val mcEntityRegistry = McEntityRegistry()
+        val inputProvider = MinecraftPlayerInputProvider(playerManager)
+        val outputProvider = MinecraftPlayerOutputProvider(playerManager)
 
         ecsWorld = configureWorld {
             systems {
@@ -40,7 +44,7 @@ class DemoInit(
 
                 // чтение состояния клиента
                 add(PlayerInitSystem("street", playerManager))
-                add(ReadClientPositionSystem(playerManager))
+                add(ReadClientPositionSystem(inputProvider))
 
                 // всякие действия
                 add(CommandActionsSystem())
@@ -52,7 +56,7 @@ class DemoInit(
 
                 // завершение
                 add(ViewSystem(playerManager, chunkPool))
-                add(WriteClientPositionSystem(playerManager))
+                add(WriteClientPositionSystem(outputProvider))
 //                add(McEntityEndTickSystem(mcEntityRegistry))
                 add(ClearEventsSystem())
             }
