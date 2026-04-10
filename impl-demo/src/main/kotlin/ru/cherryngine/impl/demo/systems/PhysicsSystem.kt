@@ -14,70 +14,61 @@ import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.lib.math.Vec3D
 
-class PhysicsSystem : IteratingSystem(
+class PhysicsSystem(
+    private val physicsSpace: PhysicsSpace,
+    private val terrainGenerator: TerrainGenerator,
+) : IteratingSystem(
     family { all(PhysicsComponent) }
 ) {
-    private val physicsSpace = PhysicsSpace()
-    private val terrainGenerator = TerrainGenerator(physicsSpace)
-
-    private val bodies = HashMap<EcsEntity, BodyEntry>()
-
-    private data class BodyEntry(
-        val body: PhysicsSpace.PhysicsBody,
-        val physContextIDs: Set<String>,
-    )
-
     override fun onTick() {
-        onSort()
+        physicsSpace.beginTick()
 
-        // Удаляем тела для удалённых entity
-        bodies.entries.removeIf { (entity, entry) ->
-            if (entity !in world || PhysicsComponent !in entity) {
-                physicsSpace.unregisterBodyContexts(entry.body)
-                entry.body.remove()
-                true
-            } else false
-        }
-
-        // Собираем слои из ECS (аналог ViewSystem)
-        val layers = collectLayers()
-
-        // Собираем активные динамические тела для TerrainGenerator
-        val activeBodies = mutableListOf<ActiveBodyInfo>()
-        for ((_, entry) in bodies) {
-            if (entry.physContextIDs.isEmpty()) continue
-            activeBodies.add(ActiveBodyInfo(entry.body.getWorldBounds(), entry.physContextIDs))
-        }
-
-        // Обновляем terrain
-        terrainGenerator.step(activeBodies, layers)
-
-        // Тикаем физику
-        physicsSpace.update(50f / 1000f)
-
-        // Sync transform → ECS
-        family.forEach { onTickEntity(it) }
-    }
-
-    override fun onTickEntity(entity: EcsEntity) {
-        val physicsComponent = entity[PhysicsComponent]
-
-        val entry = bodies.computeIfAbsent(entity) {
-            when (physicsComponent.bodyInfo) {
-                is PhysicsComponent.BodyInfo.Cube -> {
-                    val spawnPos = entity.getOrNull(PositionComponent)?.position ?: Vec3D.ZERO
-                    val body = physicsSpace.addCube(spawnPos, Vec3D.ONE)
-                    if (physicsComponent.physContextIDs.isNotEmpty()) {
-                        physicsSpace.registerBodyContexts(body, physicsComponent.physContextIDs)
-                    }
-                    BodyEntry(body, physicsComponent.physContextIDs)
+        // keepAlive + создание тел
+        family.forEach { entity ->
+            val comp = entity[PhysicsComponent]
+            val pos = entity.getOrNull(PositionComponent)?.position ?: Vec3D.ZERO
+            physicsSpace.keepAlive(comp.physicsId)
+            physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
+                when (comp.bodyInfo) {
+                    is PhysicsComponent.BodyInfo.Cube -> physicsSpace.addCube(pos, Vec3D.ONE)
                 }
             }
         }
 
-        if (physicsComponent.bodyInfo == PhysicsComponent.BodyInfo.Cube) {
+        // Собираем активные тела для TerrainGenerator
+        val activeBodies = family.mapNotNull { entity ->
+            val comp = entity[PhysicsComponent]
+            if (comp.physContextIDs.isEmpty()) return@mapNotNull null
+            val body = physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
+                when (comp.bodyInfo) {
+                    is PhysicsComponent.BodyInfo.Cube -> physicsSpace.addCube(Vec3D.ZERO, Vec3D.ONE)
+                }
+            }
+            ActiveBodyInfo(body.getWorldBounds(), comp.physContextIDs)
+        }
+
+        val layers = collectLayers()
+        terrainGenerator.step(activeBodies, layers)
+
+        physicsSpace.update(50f / 1000f)
+
+        // Sync transform → ECS
+        family.forEach { onTickEntity(it) }
+
+        physicsSpace.endTick()
+    }
+
+    override fun onTickEntity(entity: EcsEntity) {
+        val comp = entity[PhysicsComponent]
+        val body = physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
+            when (comp.bodyInfo) {
+                is PhysicsComponent.BodyInfo.Cube -> physicsSpace.addCube(Vec3D.ZERO, Vec3D.ONE)
+            }
+        }
+
+        if (comp.bodyInfo == PhysicsComponent.BodyInfo.Cube) {
             entity.configure {
-                val transform = entry.body.getTransform()
+                val transform = body.getTransform()
                 it.getOrNull(PositionComponent)?.position = transform.translation
                 it.getOrNull(CubeModelComponent)?.transform = transform.copy(translation = Vec3D.ZERO)
             }

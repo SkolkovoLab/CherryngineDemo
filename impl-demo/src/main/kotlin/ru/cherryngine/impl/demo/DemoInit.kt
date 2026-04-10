@@ -5,10 +5,13 @@ import io.micronaut.runtime.event.annotation.EventListener
 import jakarta.inject.Singleton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import ru.cherryngine.engine.core.entity.McEntityRegistry
 import ru.cherryngine.engine.core.events.PlayerConfigurationAsyncEvent
 import ru.cherryngine.engine.core.events.SetGameProfileEvent
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.utils.StableTicker
+import ru.cherryngine.engine.physics.PhysicsSpace
+import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.systems.*
@@ -24,6 +27,9 @@ class DemoInit(
     demoWorlds: DemoWorlds,
     playerManager: PlayerManager,
     chunkPool: ChunkPool,
+    physicsSpace: PhysicsSpace,
+    terrainGenerator: TerrainGenerator,
+    mcEntityRegistry: McEntityRegistry,
 ) {
     val ecsWorld: EcsWorld
 
@@ -37,10 +43,10 @@ class DemoInit(
                 // всякие действия
                 add(CommandActionsSystem())
                 add(AxolotlModelSystem(playerManager))
-                add(CubeModelSystem())
+                add(CubeModelSystem(mcEntityRegistry))
                 add(WorldSystem(demoWorlds))
                 add(ApartSystem())
-                add(PhysicsSystem())
+                add(PhysicsSystem(physicsSpace, terrainGenerator))
 
                 // завершение
                 add(ViewSystem(playerManager, chunkPool))

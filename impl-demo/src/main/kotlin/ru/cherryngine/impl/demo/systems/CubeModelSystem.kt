@@ -3,6 +3,7 @@ package ru.cherryngine.impl.demo.systems
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import ru.cherryngine.engine.core.entity.McEntity
+import ru.cherryngine.engine.core.entity.McEntityRegistry
 import ru.cherryngine.engine.core.view.ViewableProvider
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PositionComponent
@@ -14,20 +15,25 @@ import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
 import kotlin.random.Random
 
-class CubeModelSystem() : IteratingSystem(
+class CubeModelSystem(
+    private val mcEntityRegistry: McEntityRegistry,
+) : IteratingSystem(
     family { all(CubeModelComponent) }
 ) {
-    private val models = HashMap<EcsEntity, McEntity>()
-
     override fun onTick() {
-        models.keys.removeIf { it !in world || CubeModelComponent !in it }
+        mcEntityRegistry.beginTick()
         super.onTick()
+        mcEntityRegistry.endTick { mcEntity ->
+            // despawn пакеты отправятся через ViewSystem, когда entity пропадёт из ViewableProviders
+        }
     }
 
     override fun onTickEntity(entity: EcsEntity) {
         val component = entity[CubeModelComponent]
         val transform = component.transform
-        val mcEntity = models.computeIfAbsent(entity) {
+
+        mcEntityRegistry.keepAlive(component.mcEntityId)
+        val mcEntity = mcEntityRegistry.getOrCreate(component.mcEntityId) {
             McEntity(Random.nextInt(1000, 1_000_000), Registries.entityType[EntityTypes.ITEM_DISPLAY].value)
         }
 
