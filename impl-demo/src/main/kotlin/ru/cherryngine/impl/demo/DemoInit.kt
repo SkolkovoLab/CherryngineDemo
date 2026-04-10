@@ -13,7 +13,6 @@ import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.systems.*
 import ru.cherryngine.engine.core.ChunkPool
-import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.impl.demo.components.WorldComponent
 import ru.cherryngine.impl.demo.systems.*
 import ru.cherryngine.lib.minecraft.network.protocol.types.GameProfile
@@ -37,11 +36,11 @@ class DemoInit(
 
                 // всякие действия
                 add(CommandActionsSystem())
-                add(PhysicsSystem())
                 add(AxolotlModelSystem(playerManager))
                 add(CubeModelSystem())
                 add(WorldSystem(demoWorlds))
                 add(ApartSystem())
+                add(PhysicsSystem())
 
                 // завершение
                 add(ViewSystem(playerManager, chunkPool))
@@ -56,11 +55,6 @@ class DemoInit(
                 it += ViewableComponent(setOf(worldName))
                 it += WorldComponent(worldName, priority = if (worldName in apartNames) 10 else 0)
             }
-        }
-
-        // Физический пол
-        ecsWorld.entity {
-            it += PhysicsComponent("test", PhysicsComponent.BodyInfo.Floor(0.0))
         }
 
         val tickDuration = 50.milliseconds

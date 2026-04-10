@@ -92,7 +92,7 @@ class TestCommand(
             val spawnPosition = playerEntity[PositionComponent].position
 
             entity {
-                it += PhysicsComponent("test", PhysicsComponent.BodyInfo.Cube)
+                it += PhysicsComponent(PhysicsComponent.BodyInfo.Cube, setOf("street"))
                 it += PositionComponent(spawnPosition)
                 it += CubeModelComponent(Key.key("tnt"), Transform())
                 it += ViewableComponent(setOf("street"))

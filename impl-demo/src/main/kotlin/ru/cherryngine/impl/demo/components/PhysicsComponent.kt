@@ -4,8 +4,8 @@ import com.github.quillraven.fleks.ComponentType
 import ru.cherryngine.engine.ecs.EcsComponent
 
 data class PhysicsComponent(
-    var spaceName: String,
     val bodyInfo: BodyInfo,
+    val physContextIDs: Set<String> = emptySet(),
 ) : EcsComponent<PhysicsComponent> {
     override fun type() = PhysicsComponent
 
@@ -13,8 +13,5 @@ data class PhysicsComponent(
 
     sealed interface BodyInfo {
         object Cube : BodyInfo
-        data class Floor(
-            val y: Double,
-        ) : BodyInfo
     }
 }
