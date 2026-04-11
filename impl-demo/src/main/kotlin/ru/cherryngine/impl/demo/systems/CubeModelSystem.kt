@@ -2,42 +2,41 @@ package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
-import ru.cherryngine.engine.minecraft.entity.McEntity
-import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
-import ru.cherryngine.lib.minecraft.entity.ItemDisplayMeta
-import ru.cherryngine.lib.minecraft.item.ItemStack
-import ru.cherryngine.lib.minecraft.registry.Registries
-import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
-import kotlin.random.Random
+import ru.cherryngine.impl.demo.view.CubeView
+import ru.cherryngine.impl.demo.view.CubeViewFactory
+import java.util.UUID
 
 class CubeModelSystem(
-    private val mcEntityRegistry: McEntityRegistry,
+    private val viewFactory: CubeViewFactory,
 ) : IteratingSystem(
     family { all(CubeModelComponent) }
 ) {
+    private val views = HashMap<UUID, CubeView>()
+
+    override fun onTick() {
+        val activeIds = mutableSetOf<UUID>()
+        family.forEach { activeIds.add(it[CubeModelComponent].modelId) }
+        views.keys.removeIf { uuid ->
+            if (uuid !in activeIds) { views[uuid]?.destroy(); true } else false
+        }
+        super.onTick()
+    }
+
     override fun onTickEntity(entity: EcsEntity) {
         val component = entity[CubeModelComponent]
-        val transform = component.transform
+        val view = views.getOrPut(component.modelId) { viewFactory.create() }
 
-        mcEntityRegistry.keepAlive(component.mcEntityId)
-        val mcEntity = mcEntityRegistry.getOrCreate(component.mcEntityId) {
-            McEntity(Random.nextInt(1000, 1_000_000), Registries.entityType[EntityTypes.ITEM_DISPLAY].value)
+        view.updateMaterial(component.material)
+        view.updateTransform(component.transform)
+        entity.getOrNull(PositionComponent)?.also {
+            view.updatePosition(it.position, it.yawPitch)
         }
-
-        with(mcEntity) {
-            metadata[ItemDisplayMeta.DISPLAYED_ITEM] = ItemStack(Registries.item[component.material].value)
-            metadata[ItemDisplayMeta.HAS_NO_GRAVITY] = true
-            metadata[ItemDisplayMeta.TRANSLATION] = transform.translation
-            metadata[ItemDisplayMeta.ROTATION_LEFT] = transform.rotation
-            metadata[ItemDisplayMeta.SCALE] = transform.scale
-            resendMeta()
-        }
-
-        entity.getOrNull(PositionComponent)?.also { posComponent ->
-            mcEntity.teleport(posComponent.position, posComponent.yawPitch)
+        entity.getOrNull(ViewableComponent)?.also {
+            view.setViewContextIDs(it.viewContextIDs)
         }
     }
 }

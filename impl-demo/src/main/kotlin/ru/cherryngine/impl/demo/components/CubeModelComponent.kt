@@ -7,7 +7,7 @@ import ru.cherryngine.lib.math.Transform
 import java.util.*
 
 data class CubeModelComponent(
-    val mcEntityId: UUID = UUID.randomUUID(),
+    val modelId: UUID = UUID.randomUUID(),
     var material: Key,
     var transform: Transform,
 ) : EcsComponent<CubeModelComponent> {

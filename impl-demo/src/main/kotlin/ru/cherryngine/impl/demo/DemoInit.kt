@@ -1,52 +1,44 @@
 package ru.cherryngine.impl.demo
 
 import com.github.quillraven.fleks.configureWorld
-import io.micronaut.runtime.event.annotation.EventListener
 import jakarta.inject.Singleton
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import ru.cherryngine.engine.minecraft.ChunkPool
-import ru.cherryngine.engine.minecraft.MinecraftWorldServiceHandler
-import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
-import ru.cherryngine.engine.minecraft.events.PlayerConfigurationAsyncEvent
-import ru.cherryngine.engine.minecraft.player.MinecraftPlayerInputProvider
-import ru.cherryngine.engine.minecraft.player.MinecraftPlayerOutputProvider
-import ru.cherryngine.engine.minecraft.systems.McEntityBeginTickSystem
-import ru.cherryngine.engine.minecraft.systems.McEntityEndTickSystem
-import ru.cherryngine.engine.minecraft.systems.MinecraftViewSystem
+import ru.cherryngine.engine.core.PlayerInputProvider
 import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.core.PlayerOutputProvider
 import ru.cherryngine.engine.core.WorldService
 import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.systems.*
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
+import ru.cherryngine.engine.physics.terrain.TerrainLayerProvider
 import ru.cherryngine.impl.demo.systems.*
+import ru.cherryngine.impl.demo.view.AxolotlViewFactory
+import ru.cherryngine.impl.demo.view.CubeViewFactory
 import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class DemoInit(
-    demoWorlds: DemoWorlds,
+    worldProvider: GameWorldProvider,
     playerManager: PlayerManager,
     worldService: WorldService,
-    worldServiceHandler: MinecraftWorldServiceHandler,
-    chunkPool: ChunkPool,
+    axolotlViewFactory: AxolotlViewFactory,
+    cubeViewFactory: CubeViewFactory,
+    inputProvider: PlayerInputProvider,
+    outputProvider: PlayerOutputProvider,
+    terrainLayerProvider: TerrainLayerProvider,
+    ecsSystems: List<DemoEcsSystemProvider>,
 ) {
     val ecsWorld: EcsWorld
 
     init {
         val physicsSpace = PhysicsSpace()
         val terrainGenerator = TerrainGenerator(physicsSpace)
-        val mcEntityRegistry = McEntityRegistry()
-        val inputProvider = MinecraftPlayerInputProvider(playerManager)
-        val outputProvider = MinecraftPlayerOutputProvider(playerManager)
-
-        // Регистрация слоёв (один раз, не каждый тик)
-        WorldSystem(demoWorlds, worldServiceHandler)
 
         ecsWorld = configureWorld {
             systems {
-                add(McEntityBeginTickSystem(mcEntityRegistry))
+                // ранние платформенные системы (beginTick и т.д.)
+                ecsSystems.forEach { it.addEarlySystems(this) }
 
                 // чтение состояния клиента
                 add(PlayerInitSystem("street", playerManager))
@@ -54,18 +46,18 @@ class DemoInit(
 
                 // всякие действия
                 add(CommandActionsSystem())
-                add(AxolotlModelSystem(playerManager, mcEntityRegistry))
-                add(CubeModelSystem(mcEntityRegistry))
+                add(AxolotlModelSystem(axolotlViewFactory, playerManager))
+                add(CubeModelSystem(cubeViewFactory))
                 add(ApartSystem())
-                add(PhysicsSystem(physicsSpace, terrainGenerator, worldServiceHandler))
+                add(PhysicsSystem(physicsSpace, terrainGenerator, terrainLayerProvider))
 
                 // синхронизация контекстов → world service
                 add(ViewContextSyncSystem(worldService, playerManager))
 
-                // завершение
-                add(MinecraftViewSystem(playerManager, chunkPool, worldServiceHandler, mcEntityRegistry))
+                // поздние платформенные системы (view, endTick и т.д.)
+                ecsSystems.forEach { it.addLateSystems(this) }
+
                 add(WriteClientPositionSystem(outputProvider))
-                add(McEntityEndTickSystem(mcEntityRegistry))
                 add(ClearEventsSystem())
             }
         }
@@ -75,11 +67,5 @@ class DemoInit(
             ecsWorld.update(tickDuration)
         }
         ticker.start()
-    }
-
-    @EventListener
-    fun onPlayerConfiguration(event: PlayerConfigurationAsyncEvent) = runBlocking {
-        // для теста подержим игрока в конфигурации 3 секунды
-        delay(3000)
     }
 }

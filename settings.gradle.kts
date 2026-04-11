@@ -7,6 +7,7 @@ rootProject.name = "CherryngineDemo"
 
 include(
     "impl-demo",
+    "impl-demo:minecraft",
 )
 
 dependencyResolutionManagement {

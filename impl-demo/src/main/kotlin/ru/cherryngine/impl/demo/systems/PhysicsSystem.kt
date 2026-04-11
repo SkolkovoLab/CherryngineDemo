@@ -4,11 +4,10 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PositionComponent
-import ru.cherryngine.engine.minecraft.MinecraftWorldServiceHandler
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.ActiveBodyInfo
-import ru.cherryngine.engine.physics.terrain.LayerWithContext
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
+import ru.cherryngine.engine.physics.terrain.TerrainLayerProvider
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.lib.math.Vec3D
@@ -16,7 +15,7 @@ import ru.cherryngine.lib.math.Vec3D
 class PhysicsSystem(
     private val physicsSpace: PhysicsSpace,
     private val terrainGenerator: TerrainGenerator,
-    private val worldServiceHandler: MinecraftWorldServiceHandler,
+    private val terrainLayerProvider: TerrainLayerProvider,
 ) : IteratingSystem(
     family { all(PhysicsComponent) }
 ) {
@@ -47,7 +46,7 @@ class PhysicsSystem(
             ActiveBodyInfo(body.getWorldBounds(), comp.physContextIDs)
         }
 
-        val layers = collectLayers()
+        val layers = terrainLayerProvider.collectLayers()
         terrainGenerator.step(activeBodies, layers)
 
         physicsSpace.update(50f / 1000f)
@@ -73,17 +72,5 @@ class PhysicsSystem(
                 it.getOrNull(CubeModelComponent)?.transform = transform.copy(translation = Vec3D.ZERO)
             }
         }
-    }
-
-    private fun collectLayers(): List<LayerWithContext> {
-        val dimensionType = worldServiceHandler.dimensionType ?: return emptyList()
-        val result = mutableListOf<LayerWithContext>()
-        // Собираем все зарегистрированные слои с их контекстами
-        for ((contextID, layers) in worldServiceHandler.getLayersByContext()) {
-            for (layerEntry in layers) {
-                result.add(LayerWithContext(layerEntry, setOf(contextID), dimensionType))
-            }
-        }
-        return result
     }
 }

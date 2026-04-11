@@ -5,7 +5,7 @@ import ru.cherryngine.engine.ecs.EcsComponent
 import java.util.*
 
 data class AxolotlModelComponent(
-    val mcEntityId: UUID = UUID.randomUUID(),
+    val modelId: UUID = UUID.randomUUID(),
 ) : EcsComponent<AxolotlModelComponent> {
     override fun type() = AxolotlModelComponent
 

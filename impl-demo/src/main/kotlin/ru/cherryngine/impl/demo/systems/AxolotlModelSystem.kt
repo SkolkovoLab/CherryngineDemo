@@ -2,45 +2,48 @@ package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
-import net.kyori.adventure.text.Component
-import ru.cherryngine.engine.minecraft.entity.McEntity
-import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.engine.core.PlayerManager
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
-import ru.cherryngine.lib.minecraft.entity.AxolotlMeta
-import ru.cherryngine.lib.minecraft.registry.Registries
-import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
-import kotlin.random.Random
+import ru.cherryngine.impl.demo.view.AxolotlView
+import ru.cherryngine.impl.demo.view.AxolotlViewFactory
+import java.util.UUID
 
 class AxolotlModelSystem(
-    val playerManager: PlayerManager,
-    private val mcEntityRegistry: McEntityRegistry,
+    private val viewFactory: AxolotlViewFactory,
+    private val playerManager: PlayerManager,
 ) : IteratingSystem(
     family { all(AxolotlModelComponent) }
 ) {
+    private val views = HashMap<UUID, AxolotlView>()
+
+    override fun onTick() {
+        val activeIds = mutableSetOf<UUID>()
+        family.forEach { activeIds.add(it[AxolotlModelComponent].modelId) }
+        views.keys.removeIf { uuid ->
+            if (uuid !in activeIds) { views[uuid]?.destroy(); true } else false
+        }
+        super.onTick()
+    }
+
     override fun onTickEntity(entity: EcsEntity) {
         val component = entity[AxolotlModelComponent]
-        val playerComponent = entity.getOrNull(PlayerComponent)
-        val name = playerComponent?.uuid?.let { playerManager.getPlayerNullable(it) }?.username
+        val view = views.getOrPut(component.modelId) { viewFactory.create() }
 
-        mcEntityRegistry.keepAlive(component.mcEntityId)
-        val mcEntity = mcEntityRegistry.getOrCreate(component.mcEntityId) {
-            McEntity(Random.nextInt(1000, 1_000_000), Registries.entityType[EntityTypes.AXOLOTL].value).apply {
-                metadata[AxolotlMeta.HAS_NO_GRAVITY] = true
-                metadata[AxolotlMeta.VARIANT] = AxolotlMeta.Variant.entries.random()
-                if (name != null) metadata[AxolotlMeta.CUSTOM_NAME] = Component.text(name)
-                metadata[AxolotlMeta.CUSTOM_NAME_VISIBLE] = true
-                if (playerComponent != null) {
-                    viewerPredicate = { it != playerManager.getPlayerNullable(playerComponent.uuid) }
-                }
-            }
+        entity.getOrNull(PositionComponent)?.also {
+            view.updatePosition(it.position, it.yawPitch)
         }
 
-        entity.getOrNull(PositionComponent)?.also { posComponent ->
-            mcEntity.teleport(posComponent.position, posComponent.yawPitch)
+        val playerUuid = entity.getOrNull(PlayerComponent)?.uuid
+        val name = playerUuid?.let { playerManager.getPlayerNullable(it)?.username }
+        view.setName(name)
+        view.setHiddenFromPlayer(playerUuid)
+
+        entity.getOrNull(ViewableComponent)?.also {
+            view.setViewContextIDs(it.viewContextIDs)
         }
     }
 }

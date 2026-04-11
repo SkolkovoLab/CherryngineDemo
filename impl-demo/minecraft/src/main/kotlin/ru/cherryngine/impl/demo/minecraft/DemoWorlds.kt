@@ -1,4 +1,4 @@
-package ru.cherryngine.impl.demo
+package ru.cherryngine.impl.demo.minecraft
 
 import jakarta.inject.Singleton
 import ru.cherryngine.lib.minecraft.registry.Registries
@@ -9,8 +9,13 @@ import ru.cherryngine.lib.world.ImmutableLayer
 import ru.cherryngine.lib.world.Layer
 import ru.cherryngine.lib.world.MutableLayer
 
+import ru.cherryngine.impl.demo.GameWorldProvider
+
 @Singleton
-class DemoWorlds {
+class DemoWorlds : GameWorldProvider {
+    override val worldNames = setOf("normal", "winter", "dust", "lobby", "street", "apart1", "apart2")
+    override val apartNames = setOf("apart1", "apart2")
+
     val overworld: DimensionType = Registries.dimensionType[DimensionTypes.OVERWORLD].value
 
     private fun loadImmutableLayer(name: String): ImmutableLayer =

@@ -1,4 +1,4 @@
-package ru.cherryngine.impl.demo
+package ru.cherryngine.impl.demo.minecraft
 
 import net.kyori.adventure.key.Key
 import org.incendo.cloud.annotation.specifier.Greedy
@@ -14,6 +14,7 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.getPlayerEntity
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
+import ru.cherryngine.impl.demo.DemoInit
 import ru.cherryngine.impl.demo.components.ApartComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
