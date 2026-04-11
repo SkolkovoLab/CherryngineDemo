@@ -2,12 +2,14 @@ package ru.cherryngine.impl.demo
 
 import com.github.quillraven.fleks.configureWorld
 import jakarta.inject.Singleton
+import ru.cherryngine.engine.core.Instance
 import ru.cherryngine.engine.core.PlayerInputProvider
 import ru.cherryngine.engine.core.PlayerManager
 import ru.cherryngine.engine.core.PlayerOutputProvider
+import ru.cherryngine.engine.core.Tickable
 import ru.cherryngine.engine.core.WorldService
-import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
+import ru.cherryngine.engine.ecs.EcsWorldTickable
 import ru.cherryngine.engine.ecs.systems.*
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
@@ -27,9 +29,10 @@ class DemoInit(
     inputProvider: PlayerInputProvider,
     outputProvider: PlayerOutputProvider,
     terrainLayerProvider: TerrainLayerProvider,
-    ecsSystems: List<DemoEcsSystemProvider>,
+    platformTickables: List<Tickable>,
 ) {
     val ecsWorld: EcsWorld
+    val instance: Instance
 
     init {
         val physicsSpace = PhysicsSpace()
@@ -37,9 +40,6 @@ class DemoInit(
 
         ecsWorld = configureWorld {
             systems {
-                // ранние платформенные системы (beginTick и т.д.)
-                ecsSystems.forEach { it.addEarlySystems(this) }
-
                 // чтение состояния клиента
                 add(PlayerInitSystem("street", playerManager))
                 add(ReadClientPositionSystem(inputProvider))
@@ -54,18 +54,15 @@ class DemoInit(
                 // синхронизация контекстов → world service
                 add(ViewContextSyncSystem(worldService, playerManager))
 
-                // поздние платформенные системы (view, endTick и т.д.)
-                ecsSystems.forEach { it.addLateSystems(this) }
-
                 add(WriteClientPositionSystem(outputProvider))
                 add(ClearEventsSystem())
             }
         }
 
-        val tickDuration = 50.milliseconds
-        val ticker = StableTicker(tickDuration) { _, _ ->
-            ecsWorld.update(tickDuration)
-        }
-        ticker.start()
+        instance = Instance(
+            tickDuration = 50.milliseconds,
+            tickables = listOf(EcsWorldTickable(ecsWorld)) + platformTickables,
+        )
+        instance.start()
     }
 }

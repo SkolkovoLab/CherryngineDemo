@@ -21,7 +21,6 @@ class MinecraftAxolotlView(
     private val modelId: UUID = UUID.randomUUID()
 
     init {
-        mcEntityRegistry.keepAlive(modelId)
         mcEntityRegistry.getOrCreate(modelId) {
             McEntity(Random.nextInt(1000, 1_000_000), Registries.entityType[EntityTypes.AXOLOTL].value).apply {
                 metadata[AxolotlMeta.HAS_NO_GRAVITY] = true
@@ -32,7 +31,6 @@ class MinecraftAxolotlView(
     }
 
     override fun updatePosition(position: Vec3D, yawPitch: YawPitch) {
-        mcEntityRegistry.keepAlive(modelId)
         mcEntityRegistry.get(modelId)?.teleport(position, yawPitch)
     }
 

@@ -20,14 +20,12 @@ class MinecraftCubeView(
     private val modelId: UUID = UUID.randomUUID()
 
     init {
-        mcEntityRegistry.keepAlive(modelId)
         mcEntityRegistry.getOrCreate(modelId) {
             McEntity(Random.nextInt(1000, 1_000_000), Registries.entityType[EntityTypes.ITEM_DISPLAY].value)
         }
     }
 
     override fun updatePosition(position: Vec3D, yawPitch: YawPitch) {
-        mcEntityRegistry.keepAlive(modelId)
         mcEntityRegistry.get(modelId)?.teleport(position, yawPitch)
     }
 
