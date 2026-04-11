@@ -6,21 +6,21 @@ import jakarta.inject.Singleton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import ru.cherryngine.engine.minecraft.ChunkPool
+import ru.cherryngine.engine.minecraft.MinecraftWorldServiceHandler
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.engine.minecraft.events.PlayerConfigurationAsyncEvent
-import ru.cherryngine.engine.minecraft.player.MinecraftConnectionService
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayerInputProvider
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayerOutputProvider
+import ru.cherryngine.engine.minecraft.systems.McEntityBeginTickSystem
+import ru.cherryngine.engine.minecraft.systems.McEntityEndTickSystem
+import ru.cherryngine.engine.minecraft.systems.MinecraftViewSystem
 import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.core.WorldService
 import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
-import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.systems.*
-import ru.cherryngine.engine.ecs.systems.mc_entity.McEntityBeginTickSystem
-import ru.cherryngine.engine.ecs.systems.mc_entity.McEntityEndTickSystem
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
-import ru.cherryngine.impl.demo.components.WorldComponent
 import ru.cherryngine.impl.demo.systems.*
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -28,7 +28,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class DemoInit(
     demoWorlds: DemoWorlds,
     playerManager: PlayerManager,
-    connectionService: MinecraftConnectionService,
+    worldService: WorldService,
+    worldServiceHandler: MinecraftWorldServiceHandler,
     chunkPool: ChunkPool,
 ) {
     val ecsWorld: EcsWorld
@@ -40,35 +41,32 @@ class DemoInit(
         val inputProvider = MinecraftPlayerInputProvider(playerManager)
         val outputProvider = MinecraftPlayerOutputProvider(playerManager)
 
+        // Регистрация слоёв (один раз, не каждый тик)
+        WorldSystem(demoWorlds, worldServiceHandler)
+
         ecsWorld = configureWorld {
             systems {
-//                add(McEntityBeginTickSystem(mcEntityRegistry))
+                add(McEntityBeginTickSystem(mcEntityRegistry))
 
                 // чтение состояния клиента
-                add(PlayerInitSystem("street", playerManager, connectionService))
+                add(PlayerInitSystem("street", playerManager))
                 add(ReadClientPositionSystem(inputProvider))
 
                 // всякие действия
                 add(CommandActionsSystem())
                 add(AxolotlModelSystem(playerManager, mcEntityRegistry))
                 add(CubeModelSystem(mcEntityRegistry))
-                add(WorldSystem(demoWorlds))
                 add(ApartSystem())
-                add(PhysicsSystem(physicsSpace, terrainGenerator))
+                add(PhysicsSystem(physicsSpace, terrainGenerator, worldServiceHandler))
+
+                // синхронизация контекстов → world service
+                add(ViewContextSyncSystem(worldService, playerManager))
 
                 // завершение
-                add(ViewSystem(playerManager, chunkPool))
+                add(MinecraftViewSystem(playerManager, chunkPool, worldServiceHandler, mcEntityRegistry))
                 add(WriteClientPositionSystem(outputProvider))
-//                add(McEntityEndTickSystem(mcEntityRegistry))
+                add(McEntityEndTickSystem(mcEntityRegistry))
                 add(ClearEventsSystem())
-            }
-        }
-
-        val apartNames = setOf("apart1", "apart2")
-        demoWorlds.layers.keys.forEach { worldName ->
-            ecsWorld.entity {
-                it += ViewableComponent(setOf(worldName))
-                it += WorldComponent(worldName, priority = if (worldName in apartNames) 10 else 0)
             }
         }
 
@@ -84,9 +82,4 @@ class DemoInit(
         // для теста подержим игрока в конфигурации 3 секунды
         delay(3000)
     }
-
-//    @EventListener
-//    fun onSetGameProfile(event: SetGameProfileEvent) {
-//        event.gameProfile = GameProfile(UUID.randomUUID(), "ebanatina")
-//    }
 }

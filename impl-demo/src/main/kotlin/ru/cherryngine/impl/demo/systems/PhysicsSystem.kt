@@ -4,8 +4,7 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PositionComponent
-import ru.cherryngine.engine.ecs.components.ViewableComponent
-import ru.cherryngine.engine.ecs.events.ViewableProvidersEvent
+import ru.cherryngine.engine.minecraft.MinecraftWorldServiceHandler
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.ActiveBodyInfo
 import ru.cherryngine.engine.physics.terrain.LayerWithContext
@@ -17,6 +16,7 @@ import ru.cherryngine.lib.math.Vec3D
 class PhysicsSystem(
     private val physicsSpace: PhysicsSpace,
     private val terrainGenerator: TerrainGenerator,
+    private val worldServiceHandler: MinecraftWorldServiceHandler,
 ) : IteratingSystem(
     family { all(PhysicsComponent) }
 ) {
@@ -76,13 +76,12 @@ class PhysicsSystem(
     }
 
     private fun collectLayers(): List<LayerWithContext> {
+        val dimensionType = worldServiceHandler.dimensionType ?: return emptyList()
         val result = mutableListOf<LayerWithContext>()
-        world.family { all(ViewableComponent, ViewableProvidersEvent) }.forEach { viewableEntity ->
-            val viewableComponent = viewableEntity[ViewableComponent]
-            val event = viewableEntity[ViewableProvidersEvent]
-            val dimensionType = event.dimensionType ?: return@forEach
-            for (layerEntry in event.layers) {
-                result.add(LayerWithContext(layerEntry, viewableComponent.viewContextIDs, dimensionType))
+        // Собираем все зарегистрированные слои с их контекстами
+        for ((contextID, layers) in worldServiceHandler.getLayersByContext()) {
+            for (layerEntry in layers) {
+                result.add(LayerWithContext(layerEntry, setOf(contextID), dimensionType))
             }
         }
         return result

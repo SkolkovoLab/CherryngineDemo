@@ -6,11 +6,9 @@ import net.kyori.adventure.text.Component
 import ru.cherryngine.engine.minecraft.entity.McEntity
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.engine.core.PlayerManager
-import ru.cherryngine.engine.minecraft.view.ViewableProvider
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
-import ru.cherryngine.engine.ecs.events.ViewableProvidersEvent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.lib.minecraft.entity.AxolotlMeta
 import ru.cherryngine.lib.minecraft.registry.Registries
@@ -43,12 +41,6 @@ class AxolotlModelSystem(
 
         entity.getOrNull(PositionComponent)?.also { posComponent ->
             mcEntity.teleport(posComponent.position, posComponent.yawPitch)
-        }
-
-        val viewableProvider = ViewableProvider.Static(setOf(mcEntity))
-        entity.configure {
-            val event = it.getOrAdd(ViewableProvidersEvent, ::ViewableProvidersEvent)
-            event.viewableProviders += viewableProvider
         }
     }
 }
