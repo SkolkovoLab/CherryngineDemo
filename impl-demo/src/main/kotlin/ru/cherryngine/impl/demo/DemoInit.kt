@@ -17,6 +17,8 @@ import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.engine.physics.terrain.TerrainLayerProvider
 import ru.cherryngine.impl.demo.systems.*
+import ru.cherryngine.impl.demo.view.CompositeAxolotlViewFactory
+import ru.cherryngine.impl.demo.view.CompositeCubeViewFactory
 import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
@@ -27,14 +29,17 @@ class DemoInit(
     inputProvider: PlayerInputProvider,
     outputProvider: PlayerOutputProvider,
     terrainLayerProvider: TerrainLayerProvider,
-    setupFactory: DemoInstanceSetupFactory,
+    setupFactories: List<DemoInstanceSetupFactory>,
 ) {
     val ecsWorld: EcsWorld
     val playerIndex: PlayerIndex
     val instance: Instance
 
     init {
-        val setup = setupFactory.create()
+        val setups = setupFactories.map { it.create() }
+
+        val axolotlViewFactory = CompositeAxolotlViewFactory(setups.map { it.axolotlViewFactory })
+        val cubeViewFactory = CompositeCubeViewFactory(setups.map { it.cubeViewFactory })
 
         val physicsSpace = PhysicsSpace()
         val terrainGenerator = TerrainGenerator(physicsSpace)
@@ -47,20 +52,14 @@ class DemoInit(
                 onRemove(playerFamily) { entity -> playerIndex.onRemove(entity[PlayerComponent].uuid) }
             }
             systems {
-                // чтение состояния клиента
                 add(PlayerInitSystem("street", playerManager))
                 add(ReadClientPositionSystem(inputProvider))
-
-                // всякие действия
                 add(CommandActionsSystem())
-                add(AxolotlModelSystem(setup.axolotlViewFactory, playerManager))
-                add(CubeModelSystem(setup.cubeViewFactory))
+                add(AxolotlModelSystem(axolotlViewFactory, playerManager))
+                add(CubeModelSystem(cubeViewFactory))
                 add(ApartSystem())
                 add(PhysicsSystem(physicsSpace, terrainGenerator, terrainLayerProvider))
-
-                // синхронизация контекстов → world service
                 add(ViewContextSyncSystem(worldService, playerManager))
-
                 add(WriteClientPositionSystem(outputProvider))
                 add(ClearEventsSystem())
             }
@@ -68,7 +67,7 @@ class DemoInit(
 
         instance = Instance(
             tickDuration = 50.milliseconds,
-            tickables = listOf(EcsWorldTickable(ecsWorld)) + setup.createTickables(),
+            tickables = listOf(EcsWorldTickable(ecsWorld)) + setups.flatMap { it.createTickables() },
         )
         instance.start()
     }
