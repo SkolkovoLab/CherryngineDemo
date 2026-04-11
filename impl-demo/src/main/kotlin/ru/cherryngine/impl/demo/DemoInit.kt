@@ -8,9 +8,10 @@ import kotlinx.coroutines.runBlocking
 import ru.cherryngine.engine.minecraft.ChunkPool
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.engine.minecraft.events.PlayerConfigurationAsyncEvent
+import ru.cherryngine.engine.minecraft.player.MinecraftConnectionService
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayerInputProvider
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayerOutputProvider
-import ru.cherryngine.engine.minecraft.player.PlayerManager
+import ru.cherryngine.engine.core.PlayerManager
 import ru.cherryngine.engine.core.utils.StableTicker
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.ViewableComponent
@@ -27,6 +28,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class DemoInit(
     demoWorlds: DemoWorlds,
     playerManager: PlayerManager,
+    connectionService: MinecraftConnectionService,
     chunkPool: ChunkPool,
 ) {
     val ecsWorld: EcsWorld
@@ -43,7 +45,7 @@ class DemoInit(
 //                add(McEntityBeginTickSystem(mcEntityRegistry))
 
                 // чтение состояния клиента
-                add(PlayerInitSystem("street", playerManager))
+                add(PlayerInitSystem("street", playerManager, connectionService))
                 add(ReadClientPositionSystem(inputProvider))
 
                 // всякие действия

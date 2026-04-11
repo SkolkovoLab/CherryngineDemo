@@ -3,7 +3,9 @@ package ru.cherryngine.impl.demo.systems
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import org.slf4j.LoggerFactory
-import ru.cherryngine.engine.minecraft.player.PlayerManager
+import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.minecraft.player.MinecraftConnectionService
+import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
@@ -22,6 +24,7 @@ import java.util.*
 class PlayerInitSystem(
     val defaultViewContextID: String,
     val playerManager: PlayerManager,
+    val connectionService: MinecraftConnectionService,
 ) : IteratingSystem(
     family { all(PlayerComponent) }
 ) {
@@ -74,7 +77,7 @@ class PlayerInitSystem(
         // Drain packet channel → build local map
         val packets = mutableMapOf<UUID, MutableList<ServerboundPacket>>()
         while (true) {
-            val result = playerManager.packetChannel.tryReceive()
+            val result = connectionService.packetChannel.tryReceive()
             if (result.isSuccess) {
                 val (uuid, packet) = result.getOrThrow()
                 packets.getOrPut(uuid) { mutableListOf() }.add(packet)
@@ -94,7 +97,7 @@ class PlayerInitSystem(
             it += PacketsEvent(packets)
         }
 
-        val player = playerManager.getPlayerNullable(uuid) ?: return
+        val player = playerManager.getPlayerNullable(uuid) as? MinecraftPlayer ?: return
 
         packets.forEach { packet ->
             if (packet is ServerboundFinishConfigurationPacket) {

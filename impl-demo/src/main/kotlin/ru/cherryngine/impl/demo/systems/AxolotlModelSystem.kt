@@ -5,7 +5,7 @@ import com.github.quillraven.fleks.World.Companion.family
 import net.kyori.adventure.text.Component
 import ru.cherryngine.engine.minecraft.entity.McEntity
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
-import ru.cherryngine.engine.minecraft.player.PlayerManager
+import ru.cherryngine.engine.core.PlayerManager
 import ru.cherryngine.engine.minecraft.view.ViewableProvider
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
@@ -26,7 +26,7 @@ class AxolotlModelSystem(
     override fun onTickEntity(entity: EcsEntity) {
         val component = entity[AxolotlModelComponent]
         val playerComponent = entity.getOrNull(PlayerComponent)
-        val name = playerComponent?.uuid?.let { playerManager.getPlayerNullable(it) }?.connection?.gameProfile?.username
+        val name = playerComponent?.uuid?.let { playerManager.getPlayerNullable(it) }?.username
 
         mcEntityRegistry.keepAlive(component.mcEntityId)
         val mcEntity = mcEntityRegistry.getOrCreate(component.mcEntityId) {

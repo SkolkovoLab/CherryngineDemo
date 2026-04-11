@@ -7,7 +7,7 @@ import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Permission
 import ru.cherryngine.engine.minecraft.commandmanager.CloudCommand
 import ru.cherryngine.engine.core.commandmanager.CommandSender
-import ru.cherryngine.engine.minecraft.player.Player
+import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
@@ -39,7 +39,7 @@ class TestCommand(
 
     @Command("apart <apartId>")
     fun apartCommand(
-        sender: Player,
+        sender: MinecraftPlayer,
         apartId: String,
     ) {
         demoInit.ecsWorld.commandAction {
@@ -60,8 +60,8 @@ class TestCommand(
 
     @Command("swap <other>")
     fun swapCommand(
-        sender: Player,
-        other: Player,
+        sender: MinecraftPlayer,
+        other: MinecraftPlayer,
     ) {
         demoInit.ecsWorld.commandAction {
             val entity = getPlayerEntity(sender.uuid)
@@ -74,7 +74,7 @@ class TestCommand(
 
     @Command("viewcontext <contexts>")
     fun viewContextCommand(
-        sender: Player,
+        sender: MinecraftPlayer,
         contexts: String,
     ) {
         demoInit.ecsWorld.commandAction {
@@ -85,7 +85,7 @@ class TestCommand(
 
     @Command("phys cube")
     fun physCubeCommand(
-        sender: Player,
+        sender: MinecraftPlayer,
     ) {
         demoInit.ecsWorld.commandAction {
             val playerEntity = getPlayerEntity(sender.uuid)
@@ -102,7 +102,7 @@ class TestCommand(
 
     @Command("phys clear")
     fun physClearCommand(
-        sender: Player,
+        sender: MinecraftPlayer,
     ) {
         demoInit.ecsWorld.commandAction {
             val toRemove = mutableListOf<EcsEntity>()
@@ -114,7 +114,7 @@ class TestCommand(
 
     @Command("phys remove")
     fun physRemoveCommand(
-        sender: Player,
+        sender: MinecraftPlayer,
     ) {
         demoInit.ecsWorld.commandAction {
             val playerPos = getPlayerEntity(sender.uuid)[PositionComponent].position
