@@ -12,7 +12,6 @@ import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
-import ru.cherryngine.engine.ecs.getPlayerEntity
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
 import ru.cherryngine.impl.demo.DemoInit
 import ru.cherryngine.impl.demo.components.ApartComponent
@@ -44,7 +43,7 @@ class TestCommand(
         apartId: String,
     ) {
         demoInit.ecsWorld.commandAction {
-            val entity = getPlayerEntity(sender.uuid)
+            val entity = demoInit.playerIndex.getOrThrow(sender.uuid)
             if (apartId == "null") {
                 entity.configure {
                     it -= ApartComponent
@@ -65,8 +64,8 @@ class TestCommand(
         other: MinecraftPlayer,
     ) {
         demoInit.ecsWorld.commandAction {
-            val entity = getPlayerEntity(sender.uuid)
-            val otherPlayer = getPlayerEntity(other.uuid)
+            val entity = demoInit.playerIndex.getOrThrow(sender.uuid)
+            val otherPlayer = demoInit.playerIndex.getOrThrow(other.uuid)
             val tmp = entity[PlayerComponent].uuid
             entity[PlayerComponent].uuid = otherPlayer[PlayerComponent].uuid
             otherPlayer[PlayerComponent].uuid = tmp
@@ -79,7 +78,7 @@ class TestCommand(
         contexts: String,
     ) {
         demoInit.ecsWorld.commandAction {
-            val entity = getPlayerEntity(sender.uuid)
+            val entity = demoInit.playerIndex.getOrThrow(sender.uuid)
             entity[PlayerComponent].viewContextIDs = contexts.split(",").toSet()
         }
     }
@@ -89,7 +88,7 @@ class TestCommand(
         sender: MinecraftPlayer,
     ) {
         demoInit.ecsWorld.commandAction {
-            val playerEntity = getPlayerEntity(sender.uuid)
+            val playerEntity = demoInit.playerIndex.getOrThrow(sender.uuid)
             val spawnPosition = playerEntity[PositionComponent].position
 
             entity {
@@ -118,7 +117,7 @@ class TestCommand(
         sender: MinecraftPlayer,
     ) {
         demoInit.ecsWorld.commandAction {
-            val playerPos = getPlayerEntity(sender.uuid)[PositionComponent].position
+            val playerPos = demoInit.playerIndex.getOrThrow(sender.uuid)[PositionComponent].position
             var closest: EcsEntity? = null
             var closestDistSq = Double.MAX_VALUE
             family { all(PhysicsComponent, PositionComponent) }.forEach { entity ->
