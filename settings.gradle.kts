@@ -8,6 +8,7 @@ rootProject.name = "CherryngineDemo"
 include(
     "impl-demo",
     "impl-demo:minecraft",
+    "impl-demo:mcprotocollib",
 )
 
 dependencyResolutionManagement {

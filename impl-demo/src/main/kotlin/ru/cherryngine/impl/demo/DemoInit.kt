@@ -26,8 +26,8 @@ class DemoInit(
     worldProvider: GameWorldProvider,
     playerManager: PlayerManager,
     worldService: WorldService,
-    inputProvider: PlayerInputProvider,
-    outputProvider: PlayerOutputProvider,
+    inputProviders: List<PlayerInputProvider>,
+    outputProviders: List<PlayerOutputProvider>,
     terrainLayerProvider: TerrainLayerProvider,
     setupFactories: List<DemoInstanceSetupFactory>,
 ) {
@@ -36,6 +36,9 @@ class DemoInit(
     val instance: Instance
 
     init {
+        val inputProvider = CompositePlayerInputProvider(inputProviders)
+        val outputProvider = CompositePlayerOutputProvider(outputProviders)
+
         val setups = setupFactories.map { it.create() }
 
         val axolotlViewFactory = CompositeAxolotlViewFactory(setups.map { it.axolotlViewFactory })
