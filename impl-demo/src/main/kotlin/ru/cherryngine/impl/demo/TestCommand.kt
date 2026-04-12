@@ -1,28 +1,28 @@
-package ru.cherryngine.impl.demo.minecraft
+package ru.cherryngine.impl.demo
 
 import net.kyori.adventure.key.Key
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotation.specifier.Range
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Permission
-import ru.cherryngine.engine.minecraft.commandmanager.CloudCommand
+import ru.cherryngine.engine.core.Player
 import ru.cherryngine.engine.core.commandmanager.CommandSender
-import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
 import ru.cherryngine.engine.ecs.EcsEntity
+import ru.cherryngine.engine.ecs.EcsWorld
+import ru.cherryngine.engine.ecs.PlayerIndex
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
-import ru.cherryngine.impl.demo.DemoInit
 import ru.cherryngine.impl.demo.components.ApartComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.lib.math.Transform
 import java.util.*
 
-@CloudCommand
 class TestCommand(
-    private val demoInit: DemoInit,
+    private val ecsWorld: EcsWorld,
+    private val playerIndex: PlayerIndex,
 ) {
     @Command("testcommand <string> <int> <key> <uuid> <greedy>")
     @Permission("command.test")
@@ -39,11 +39,11 @@ class TestCommand(
 
     @Command("apart <apartId>")
     fun apartCommand(
-        sender: MinecraftPlayer,
+        sender: Player,
         apartId: String,
     ) {
-        demoInit.ecsWorld.commandAction {
-            val entity = demoInit.playerIndex.getOrThrow(sender.uuid)
+        ecsWorld.commandAction {
+            val entity = playerIndex.getOrThrow(sender.uuid)
             if (apartId == "null") {
                 entity.configure {
                     it -= ApartComponent
@@ -60,12 +60,12 @@ class TestCommand(
 
     @Command("swap <other>")
     fun swapCommand(
-        sender: MinecraftPlayer,
-        other: MinecraftPlayer,
+        sender: Player,
+        other: Player,
     ) {
-        demoInit.ecsWorld.commandAction {
-            val entity = demoInit.playerIndex.getOrThrow(sender.uuid)
-            val otherPlayer = demoInit.playerIndex.getOrThrow(other.uuid)
+        ecsWorld.commandAction {
+            val entity = playerIndex.getOrThrow(sender.uuid)
+            val otherPlayer = playerIndex.getOrThrow(other.uuid)
             val tmp = entity[PlayerComponent].uuid
             entity[PlayerComponent].uuid = otherPlayer[PlayerComponent].uuid
             otherPlayer[PlayerComponent].uuid = tmp
@@ -74,21 +74,21 @@ class TestCommand(
 
     @Command("viewcontext <contexts>")
     fun viewContextCommand(
-        sender: MinecraftPlayer,
+        sender: Player,
         contexts: String,
     ) {
-        demoInit.ecsWorld.commandAction {
-            val entity = demoInit.playerIndex.getOrThrow(sender.uuid)
+        ecsWorld.commandAction {
+            val entity = playerIndex.getOrThrow(sender.uuid)
             entity[PlayerComponent].viewContextIDs = contexts.split(",").toSet()
         }
     }
 
     @Command("phys cube")
     fun physCubeCommand(
-        sender: MinecraftPlayer,
+        sender: Player,
     ) {
-        demoInit.ecsWorld.commandAction {
-            val playerEntity = demoInit.playerIndex.getOrThrow(sender.uuid)
+        ecsWorld.commandAction {
+            val playerEntity = playerIndex.getOrThrow(sender.uuid)
             val spawnPosition = playerEntity[PositionComponent].position
 
             entity {
@@ -102,9 +102,9 @@ class TestCommand(
 
     @Command("phys clear")
     fun physClearCommand(
-        sender: MinecraftPlayer,
+        sender: Player,
     ) {
-        demoInit.ecsWorld.commandAction {
+        ecsWorld.commandAction {
             val toRemove = mutableListOf<EcsEntity>()
             family { all(PhysicsComponent) }.forEach { toRemove.add(it) }
             toRemove.forEach { it.remove() }
@@ -114,10 +114,10 @@ class TestCommand(
 
     @Command("phys remove")
     fun physRemoveCommand(
-        sender: MinecraftPlayer,
+        sender: Player,
     ) {
-        demoInit.ecsWorld.commandAction {
-            val playerPos = demoInit.playerIndex.getOrThrow(sender.uuid)[PositionComponent].position
+        ecsWorld.commandAction {
+            val playerPos = playerIndex.getOrThrow(sender.uuid)[PositionComponent].position
             var closest: EcsEntity? = null
             var closestDistSq = Double.MAX_VALUE
             family { all(PhysicsComponent, PositionComponent) }.forEach { entity ->

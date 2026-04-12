@@ -3,11 +3,14 @@ package ru.cherryngine.impl.demo
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.configureWorld
 import jakarta.inject.Singleton
+import org.slf4j.Logger
 import ru.cherryngine.engine.core.Instance
 import ru.cherryngine.engine.core.PlayerInputProvider
 import ru.cherryngine.engine.core.PlayerManager
 import ru.cherryngine.engine.core.PlayerOutputProvider
 import ru.cherryngine.engine.core.WorldService
+import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
+import ru.cherryngine.engine.core.commandmanager.CommandParserRegistrar
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.EcsWorldTickable
 import ru.cherryngine.engine.ecs.PlayerIndex
@@ -30,7 +33,10 @@ class DemoInit(
     outputProviders: List<PlayerOutputProvider>,
     terrainLayerProvider: TerrainLayerProvider,
     setupFactories: List<DemoInstanceSetupFactory>,
+    parserRegistrars: List<CommandParserRegistrar>,
+    private val logger: Logger,
 ) {
+    val commandManager: CherryngineCommandManager
     val ecsWorld: EcsWorld
     val playerIndex: PlayerIndex
     val instance: Instance
@@ -67,6 +73,10 @@ class DemoInit(
                 add(ClearEventsSystem())
             }
         }
+
+        commandManager = CherryngineCommandManager(logger)
+        parserRegistrars.forEach { it.registerParsers(commandManager) }
+        commandManager.registerCommands(TestCommand(ecsWorld, playerIndex))
 
         instance = Instance(
             tickDuration = 50.milliseconds,
