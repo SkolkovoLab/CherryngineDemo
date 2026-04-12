@@ -1,6 +1,6 @@
 package ru.cherryngine.impl.demo.mcprotocollib
 
-import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntityRegistry
 import ru.cherryngine.impl.demo.view.AxolotlView
 import ru.cherryngine.impl.demo.view.AxolotlViewFactory

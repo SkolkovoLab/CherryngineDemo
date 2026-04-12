@@ -1,7 +1,7 @@
 package ru.cherryngine.impl.demo.mcprotocollib
 
 import jakarta.inject.Singleton
-import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibChunkPool
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibWorldServiceHandler
 import ru.cherryngine.impl.demo.DemoInstanceSetup

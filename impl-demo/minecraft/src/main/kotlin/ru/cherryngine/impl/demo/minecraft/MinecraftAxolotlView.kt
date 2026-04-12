@@ -1,7 +1,7 @@
 package ru.cherryngine.impl.demo.minecraft
 
 import net.kyori.adventure.text.Component
-import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.minecraft.entity.McEntity
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
@@ -11,7 +11,7 @@ import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.lib.minecraft.entity.AxolotlMeta
 import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random
 
 class MinecraftAxolotlView(

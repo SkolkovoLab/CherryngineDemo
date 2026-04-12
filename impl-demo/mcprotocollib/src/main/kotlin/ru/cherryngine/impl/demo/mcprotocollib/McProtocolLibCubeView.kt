@@ -14,7 +14,7 @@ import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.lib.minecraft.registry.Registries
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack as McplItemStack
 

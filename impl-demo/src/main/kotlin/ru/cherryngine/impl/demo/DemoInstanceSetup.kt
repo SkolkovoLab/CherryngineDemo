@@ -1,7 +1,7 @@
 package ru.cherryngine.impl.demo
 
-import ru.cherryngine.engine.core.InstanceSetup
-import ru.cherryngine.engine.core.InstanceSetupFactory
+import ru.cherryngine.engine.core.instance.InstanceSetup
+import ru.cherryngine.engine.core.instance.InstanceSetupFactory
 import ru.cherryngine.impl.demo.view.AxolotlViewFactory
 import ru.cherryngine.impl.demo.view.CubeViewFactory
 

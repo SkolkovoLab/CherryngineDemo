@@ -1,10 +1,10 @@
 package ru.cherryngine.impl.demo
 
 import net.kyori.adventure.text.Component
-import ru.cherryngine.engine.core.PlayerOutputProvider
+import ru.cherryngine.engine.core.player.PlayerOutputProvider
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import java.util.UUID
+import java.util.*
 
 class CompositePlayerOutputProvider(
     private val providers: List<PlayerOutputProvider>,

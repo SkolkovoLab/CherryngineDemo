@@ -1,9 +1,9 @@
 package ru.cherryngine.impl.demo
 
-import ru.cherryngine.engine.core.PlayerInputProvider
+import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import java.util.UUID
+import java.util.*
 
 class CompositePlayerInputProvider(
     private val providers: List<PlayerInputProvider>,

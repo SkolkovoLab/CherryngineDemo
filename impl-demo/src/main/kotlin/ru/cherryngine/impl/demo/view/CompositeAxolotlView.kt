@@ -2,7 +2,7 @@ package ru.cherryngine.impl.demo.view
 
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import java.util.UUID
+import java.util.*
 
 class CompositeAxolotlView(
     private val views: List<AxolotlView>

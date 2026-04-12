@@ -8,7 +8,7 @@ import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.view.CubeView
 import ru.cherryngine.impl.demo.view.CubeViewFactory
-import java.util.UUID
+import java.util.*
 
 class CubeModelSystem(
     private val viewFactory: CubeViewFactory,

@@ -11,7 +11,7 @@ import ru.cherryngine.lib.minecraft.entity.ItemDisplayMeta
 import ru.cherryngine.lib.minecraft.item.ItemStack
 import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random
 
 class MinecraftCubeView(

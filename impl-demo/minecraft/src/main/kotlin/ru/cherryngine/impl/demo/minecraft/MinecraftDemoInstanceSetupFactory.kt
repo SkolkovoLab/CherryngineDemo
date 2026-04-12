@@ -1,7 +1,7 @@
 package ru.cherryngine.impl.demo.minecraft
 
 import jakarta.inject.Singleton
-import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.minecraft.ChunkPool
 import ru.cherryngine.engine.minecraft.MinecraftWorldServiceHandler
 import ru.cherryngine.impl.demo.DemoInstanceSetup

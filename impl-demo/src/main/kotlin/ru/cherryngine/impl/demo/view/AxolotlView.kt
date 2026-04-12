@@ -2,7 +2,7 @@ package ru.cherryngine.impl.demo.view
 
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import java.util.UUID
+import java.util.*
 
 interface AxolotlView {
     fun updatePosition(position: Vec3D, yawPitch: YawPitch)

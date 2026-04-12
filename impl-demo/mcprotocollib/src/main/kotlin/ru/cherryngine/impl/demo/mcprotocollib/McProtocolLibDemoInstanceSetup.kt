@@ -1,7 +1,7 @@
 package ru.cherryngine.impl.demo.mcprotocollib
 
-import ru.cherryngine.engine.core.PlayerManager
-import ru.cherryngine.engine.core.Tickable
+import ru.cherryngine.engine.core.instance.Tickable
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibChunkPool
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntityRegistry
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibViewTickable

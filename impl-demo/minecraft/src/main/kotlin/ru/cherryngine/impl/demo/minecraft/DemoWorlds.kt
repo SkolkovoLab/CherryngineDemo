@@ -1,6 +1,7 @@
 package ru.cherryngine.impl.demo.minecraft
 
 import jakarta.inject.Singleton
+import ru.cherryngine.impl.demo.GameWorldProvider
 import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.minecraft.registry.types.DimensionType
@@ -8,8 +9,6 @@ import ru.cherryngine.lib.polar.PolarWorldGenerator
 import ru.cherryngine.lib.world.ImmutableLayer
 import ru.cherryngine.lib.world.Layer
 import ru.cherryngine.lib.world.MutableLayer
-
-import ru.cherryngine.impl.demo.GameWorldProvider
 
 @Singleton
 class DemoWorlds : GameWorldProvider {

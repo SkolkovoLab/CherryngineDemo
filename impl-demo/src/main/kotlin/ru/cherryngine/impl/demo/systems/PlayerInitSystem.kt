@@ -2,7 +2,7 @@ package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IntervalSystem
 import org.slf4j.LoggerFactory
-import ru.cherryngine.engine.core.PlayerManager
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
