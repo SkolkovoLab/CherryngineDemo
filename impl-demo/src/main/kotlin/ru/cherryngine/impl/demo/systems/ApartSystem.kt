@@ -13,10 +13,10 @@ import ru.cherryngine.lib.math.Vec3D
 class ApartSystem : IteratingSystem(
     family { all(PlayerComponent, PositionComponent, ApartComponent) }
 ) {
-    val enterCuboid = Cuboid(Vec3D(-1.0, -1.0, 7.0), Vec3D(1.0, 3.0, 8.0))
-    val exitCuboid = Cuboid(Vec3D(-1.0, -1.0, 8.0), Vec3D(1.0, 3.0, 9.0))
-    val enterPosition = Vec3D(0.0, 0.0, 9.5)
-    val exitPosition = Vec3D(0.0, 0.0, 6.5)
+    val enterCuboid = Cuboid(Vec3D(274.0, 56.0, 172.0), Vec3D(276.0, 58.0, 173.0))
+    val exitCuboid = Cuboid(Vec3D(274.0, 60.0, 177.0), Vec3D(276.0, 62.0, 178.0))
+    val enterPosition = Vec3D(275.0, 60.0, 176.5)
+    val exitPosition = Vec3D(275.0, 56.0, 173.5)
 
     override fun onTickEntity(entity: EcsEntity) {
         val playerComponent = entity[PlayerComponent]
@@ -26,7 +26,7 @@ class ApartSystem : IteratingSystem(
             val apartName = entity.getOrNull(ApartComponent)?.apartName
             if (apartName != null) {
                 positionComponent.position = enterPosition
-                playerComponent.viewContextIDs = setOf("street", apartName)
+                playerComponent.viewContextIDs = setOf("gm_construct", apartName)
                 entity.getOrNull(ViewableComponent)?.viewContextIDs = setOf(apartName)
             }
         }
@@ -34,8 +34,8 @@ class ApartSystem : IteratingSystem(
         if (exitCuboid.isInside(positionComponent.position)) {
             positionComponent.position = exitPosition
 
-            playerComponent.viewContextIDs = setOf("street")
-            entity.getOrNull(ViewableComponent)?.viewContextIDs = setOf("street")
+            playerComponent.viewContextIDs = setOf("gm_construct")
+            entity.getOrNull(ViewableComponent)?.viewContextIDs = setOf("gm_construct")
         }
     }
 }

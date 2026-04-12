@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import java.util.*
@@ -52,7 +53,7 @@ class PlayerInitSystem(
 
                 it += ViewableComponent(setOf(defaultViewContextID))
 
-                it += PositionComponent()
+                it += PositionComponent(Vec3D(164.0, 58.0, 170.0))
 
                 it += AxolotlModelComponent()
             }

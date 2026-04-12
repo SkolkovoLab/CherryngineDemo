@@ -12,7 +12,6 @@ import ru.cherryngine.lib.world.MutableLayer
 
 @Singleton
 class DemoWorlds : GameWorldProvider {
-    override val worldNames = setOf("normal", "winter", "dust", "lobby", "street", "apart1", "apart2")
     override val apartNames = setOf("apart1", "apart2")
 
     val overworld: DimensionType = Registries.dimensionType[DimensionTypes.OVERWORLD].value
@@ -31,21 +30,12 @@ class DemoWorlds : GameWorldProvider {
             name,
         )
 
-    val normalLayer = loadImmutableLayer("de_cache_normal")
-    val winterLayer = loadImmutableLayer("de_cache_winter")
-    val dustLayer = loadImmutableLayer("de_dust2")
-    val lobbyLayer = loadImmutableLayer("lobby")
-
-    val streetLayer = loadImmutableLayer("street")
+    val gmConstructLayer = loadImmutableLayer("gm_construct")
     val apart1Layer = loadImmutableLayer("apart1")
     val apart2Layer = loadMutableLayer("apart2")
 
     val layers: Map<String, Layer> = mapOf(
-        "normal" to normalLayer,
-        "winter" to winterLayer,
-        "dust" to dustLayer,
-        "lobby" to lobbyLayer,
-        "street" to streetLayer,
+        "gm_construct" to gmConstructLayer,
         "apart1" to apart1Layer,
         "apart2" to apart2Layer,
     )

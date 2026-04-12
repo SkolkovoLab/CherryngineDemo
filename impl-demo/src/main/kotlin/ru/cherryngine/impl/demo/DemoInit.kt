@@ -62,7 +62,7 @@ class DemoInit(
                 onRemove(playerFamily) { entity -> playerIndex.onRemove(entity[PlayerComponent].uuid) }
             }
             systems {
-                add(PlayerInitSystem("street", playerManager))
+                add(PlayerInitSystem("gm_construct", playerManager))
                 add(ReadClientPositionSystem(inputProvider))
                 add(CommandActionsSystem())
                 add(AxolotlModelSystem(axolotlViewFactory, playerManager))
