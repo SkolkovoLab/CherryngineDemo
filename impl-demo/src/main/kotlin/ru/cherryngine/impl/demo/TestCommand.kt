@@ -90,12 +90,13 @@ class TestCommand(
         ecsWorld.commandAction {
             val playerEntity = playerIndex.getOrThrow(sender.uuid)
             val spawnPosition = playerEntity[PositionComponent].position
+            val contexts = playerEntity[PlayerComponent].viewContextIDs
 
             entity {
-                it += PhysicsComponent(bodyInfo = PhysicsComponent.BodyInfo.Cube, physContextIDs = setOf("street"))
+                it += PhysicsComponent(bodyInfo = PhysicsComponent.BodyInfo.Cube, physContextIDs = contexts)
                 it += PositionComponent(spawnPosition)
                 it += CubeModelComponent(material = Key.key("tnt"), transform = Transform())
-                it += ViewableComponent(setOf("street"))
+                it += ViewableComponent(contexts)
             }
         }
     }
