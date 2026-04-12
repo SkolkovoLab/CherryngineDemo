@@ -1,5 +1,6 @@
 package ru.cherryngine.impl.demo.minecraft
 
+import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.minecraft.ChunkPool
@@ -14,6 +15,7 @@ class MinecraftDemoInstanceSetup(
     private val playerManager: PlayerManager,
     private val chunkPool: ChunkPool,
     private val worldServiceHandler: MinecraftWorldServiceHandler,
+    private val serverWorld: ServerWorld,
 ) : DemoInstanceSetup {
     private val mcEntityRegistry = McEntityRegistry()
 
@@ -24,6 +26,6 @@ class MinecraftDemoInstanceSetup(
         MinecraftCubeViewFactory(mcEntityRegistry)
 
     override fun createTickables(): List<Tickable> = listOf(
-        MinecraftViewTickable(playerManager, chunkPool, worldServiceHandler, mcEntityRegistry)
+        MinecraftViewTickable(playerManager, chunkPool, worldServiceHandler, mcEntityRegistry, serverWorld)
     )
 }

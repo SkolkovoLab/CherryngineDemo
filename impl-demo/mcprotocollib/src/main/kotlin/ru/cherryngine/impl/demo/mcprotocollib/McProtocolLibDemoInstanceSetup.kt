@@ -1,5 +1,6 @@
 package ru.cherryngine.impl.demo.mcprotocollib
 
+import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibChunkPool
@@ -14,6 +15,7 @@ class McProtocolLibDemoInstanceSetup(
     private val playerManager: PlayerManager,
     private val chunkPool: McProtocolLibChunkPool,
     private val worldServiceHandler: McProtocolLibWorldServiceHandler,
+    private val serverWorld: ServerWorld,
 ) : DemoInstanceSetup {
     private val entityRegistry = McProtocolLibEntityRegistry()
 
@@ -24,6 +26,6 @@ class McProtocolLibDemoInstanceSetup(
         McProtocolLibCubeViewFactory(entityRegistry)
 
     override fun createTickables(): List<Tickable> = listOf(
-        McProtocolLibViewTickable(playerManager, chunkPool, worldServiceHandler, entityRegistry)
+        McProtocolLibViewTickable(playerManager, chunkPool, worldServiceHandler, entityRegistry, serverWorld)
     )
 }

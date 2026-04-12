@@ -1,7 +1,7 @@
 package ru.cherryngine.impl.demo.mcprotocollib
 
 import jakarta.inject.Singleton
-import ru.cherryngine.engine.mcprotocollib.McProtocolLibWorldServiceHandler
+import ru.cherryngine.impl.demo.DemoInit
 import ru.cherryngine.impl.demo.GameWorldProvider
 import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
@@ -11,9 +11,10 @@ import ru.cherryngine.lib.world.LayerEntry
 @Singleton
 class McProtocolLibWorldSystem(
     demoWorlds: GameWorldProvider,
-    worldServiceHandler: McProtocolLibWorldServiceHandler,
+    demoInit: DemoInit,
 ) {
     init {
+        val serverWorld = demoInit.serverWorld
         val overworld = Registries.dimensionType[DimensionTypes.OVERWORLD].value
 
         val polarFileNames = mapOf(
@@ -40,9 +41,9 @@ class McProtocolLibWorldSystem(
             }
 
             val priority = if (worldName in demoWorlds.apartNames) 10 else 0
-            worldServiceHandler.registerLayer(worldName, LayerEntry(layer, priority))
+            serverWorld.registerLayer(worldName, LayerEntry(layer, priority))
         }
 
-        worldServiceHandler.dimensionType = overworld
+        serverWorld.dimensionType = overworld
     }
 }

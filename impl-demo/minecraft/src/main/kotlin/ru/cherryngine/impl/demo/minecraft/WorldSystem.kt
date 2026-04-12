@@ -1,19 +1,21 @@
 package ru.cherryngine.impl.demo.minecraft
 
 import jakarta.inject.Singleton
-import ru.cherryngine.engine.minecraft.MinecraftWorldServiceHandler
+import ru.cherryngine.impl.demo.DemoInit
 import ru.cherryngine.lib.world.LayerEntry
 
 @Singleton
 class WorldSystem(
     demoWorlds: DemoWorlds,
-    worldServiceHandler: MinecraftWorldServiceHandler,
+    demoInit: DemoInit,
 ) {
     init {
+        val serverWorld = demoInit.serverWorld
         demoWorlds.layers.forEach { (worldName, layer) ->
             val priority = if (worldName in demoWorlds.apartNames) 10 else 0
-            worldServiceHandler.registerLayer(worldName, LayerEntry(layer, priority))
+            val entry = LayerEntry(layer, priority)
+            serverWorld.registerLayer(worldName, entry)
         }
-        worldServiceHandler.dimensionType = demoWorlds.overworld
+        serverWorld.dimensionType = demoWorlds.overworld
     }
 }

@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.commandmanager.CommandParserRegistrar
 import ru.cherryngine.engine.core.instance.Instance
+import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
@@ -18,7 +19,6 @@ import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.systems.*
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
-import ru.cherryngine.engine.physics.terrain.TerrainLayerProvider
 import ru.cherryngine.impl.demo.systems.*
 import ru.cherryngine.impl.demo.view.CompositeAxolotlViewFactory
 import ru.cherryngine.impl.demo.view.CompositeCubeViewFactory
@@ -31,7 +31,6 @@ class DemoInit(
     worldService: WorldService,
     inputProviders: List<PlayerInputProvider>,
     outputProviders: List<PlayerOutputProvider>,
-    terrainLayerProvider: TerrainLayerProvider,
     setupFactories: List<DemoInstanceSetupFactory>,
     parserRegistrars: List<CommandParserRegistrar>,
     private val logger: Logger,
@@ -40,12 +39,14 @@ class DemoInit(
     val ecsWorld: EcsWorld
     val playerIndex: PlayerIndex
     val instance: Instance
+    val serverWorld: ServerWorld
 
     init {
         val inputProvider = CompositePlayerInputProvider(inputProviders)
         val outputProvider = CompositePlayerOutputProvider(outputProviders)
 
-        val setups = setupFactories.map { it.create() }
+        serverWorld = ServerWorld()
+        val setups = setupFactories.map { it.create(serverWorld) }
 
         val axolotlViewFactory = CompositeAxolotlViewFactory(setups.map { it.axolotlViewFactory })
         val cubeViewFactory = CompositeCubeViewFactory(setups.map { it.cubeViewFactory })
@@ -67,7 +68,7 @@ class DemoInit(
                 add(AxolotlModelSystem(axolotlViewFactory, playerManager))
                 add(CubeModelSystem(cubeViewFactory))
                 add(ApartSystem())
-                add(PhysicsSystem(physicsSpace, terrainGenerator, terrainLayerProvider))
+                add(PhysicsSystem(physicsSpace, terrainGenerator, serverWorld))
                 add(ViewContextSyncSystem(worldService, playerManager))
                 add(WriteClientPositionSystem(outputProvider))
                 add(ClearEventsSystem())
