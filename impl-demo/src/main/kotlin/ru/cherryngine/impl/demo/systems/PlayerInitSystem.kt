@@ -1,13 +1,17 @@
 package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IntervalSystem
+import net.kyori.adventure.key.Key
 import org.slf4j.LoggerFactory
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
+import ru.cherryngine.impl.demo.components.CubeModelComponent
+import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
 import java.util.*
 
@@ -27,8 +31,12 @@ class PlayerInitSystem(
         }
         if (toRemove.isNotEmpty()) {
             world.family { all(PlayerComponent) }.forEach {
-                val playerComponent = it[PlayerComponent]
-                if (playerComponent.uuid in toRemove) {
+                if (it[PlayerComponent].uuid in toRemove) {
+                    it.remove()
+                }
+            }
+            world.family { all(HitboxVisualizationComponent) }.forEach {
+                if (it[HitboxVisualizationComponent].ownerUuid in toRemove) {
                     it.remove()
                 }
             }
@@ -63,6 +71,17 @@ class PlayerInitSystem(
                     bodyInfo = PhysicsComponent.BodyInfo.Player,
                     physContextIDs = setOf(defaultViewContextID)
                 )
+            }
+
+            // Визуализация хитбокса — отдельная entity
+            world.entity {
+                it += PositionComponent(spawnPosition)
+                it += ViewableComponent(setOf(defaultViewContextID))
+                it += CubeModelComponent(
+                    material = Key.key("red_stained_glass"),
+                    transform = Transform(scale = Vec3D(0.6, 1.8, 0.6))
+                )
+                it += HitboxVisualizationComponent(playerUuid)
             }
         }
     }

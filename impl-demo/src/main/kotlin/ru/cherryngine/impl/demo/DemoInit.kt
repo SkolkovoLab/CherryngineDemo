@@ -50,6 +50,8 @@ class DemoInit(
                 setups.forEach { it.outputProvider.teleport(uuid, position, yawPitch) }
             override fun sendMessage(uuid: UUID, message: Component) =
                 setups.forEach { it.outputProvider.sendMessage(uuid, message) }
+            override fun setVelocity(uuid: UUID, velocity: Vec3D) =
+                setups.forEach { it.outputProvider.setVelocity(uuid, velocity) }
         }
 
         val axolotlRenderers = setups.map { it.axolotlRenderer }
@@ -66,7 +68,7 @@ class DemoInit(
                 add(AxolotlModelSystem(axolotlRenderers, playerManager))
                 add(CubeModelSystem(cubeRenderers))
                 add(ApartSystem())
-                add(PhysicsSystem(physicsSpace, terrainGenerator, serverWorld))
+                add(PhysicsSystem(physicsSpace, terrainGenerator, serverWorld, outputProvider))
                 add(ViewContextSyncSystem(worldService, playerManager))
                 add(WriteClientPositionSystem(outputProvider))
                 add(ClearEventsSystem())
