@@ -36,6 +36,7 @@ class PhysicsSystem(
         }
 
         // Собираем активные тела для TerrainGenerator
+        val delta = 50f / 1000f
         val activeBodies = family.mapNotNull { entity ->
             val comp = entity[PhysicsComponent]
             if (comp.physContextIDs.isEmpty()) return@mapNotNull null
@@ -44,7 +45,7 @@ class PhysicsSystem(
                     is PhysicsComponent.BodyInfo.Cube -> physicsSpace.addCube(Vec3D.ZERO, Vec3D.ONE)
                 }
             }
-            ActiveBodyInfo(body.getWorldBounds(), comp.physContextIDs)
+            ActiveBodyInfo(body.getWorldBounds(), body.getLinearVelocity(), comp.physContextIDs)
         }
 
         val layers = serverWorld.getLayersByContext()
@@ -52,9 +53,9 @@ class PhysicsSystem(
                 val dt = serverWorld.dimensionType ?: return@flatMap emptyList()
                 entries.map { LayerWithContext(it, setOf(contextID), dt) }
             }
-        terrainGenerator.step(activeBodies, layers)
+        terrainGenerator.step(delta, activeBodies, layers)
 
-        physicsSpace.update(50f / 1000f)
+        physicsSpace.update(delta)
 
         // Sync transform → ECS
         family.forEach { onTickEntity(it) }
