@@ -8,6 +8,7 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
+import ru.cherryngine.impl.demo.components.PhysicsComponent
 import java.util.*
 
 class PlayerInitSystem(
@@ -57,6 +58,11 @@ class PlayerInitSystem(
                 it += PositionComponent(spawnPosition)
 
                 it += AxolotlModelComponent()
+
+                it += PhysicsComponent(
+                    bodyInfo = PhysicsComponent.BodyInfo.Player,
+                    physContextIDs = setOf(defaultViewContextID)
+                )
             }
         }
     }

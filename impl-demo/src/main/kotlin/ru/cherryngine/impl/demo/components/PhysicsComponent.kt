@@ -15,5 +15,6 @@ data class PhysicsComponent(
 
     sealed interface BodyInfo {
         object Cube : BodyInfo
+        object Player : BodyInfo
     }
 }

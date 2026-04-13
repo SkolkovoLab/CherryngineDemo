@@ -31,6 +31,7 @@ class PhysicsSystem(
             physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
                 when (comp.bodyInfo) {
                     is PhysicsComponent.BodyInfo.Cube -> physicsSpace.addCube(pos, Vec3D.ONE)
+                    is PhysicsComponent.BodyInfo.Player -> physicsSpace.addPlayer(pos)
                 }
             }
         }
@@ -43,6 +44,7 @@ class PhysicsSystem(
             val body = physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
                 when (comp.bodyInfo) {
                     is PhysicsComponent.BodyInfo.Cube -> physicsSpace.addCube(Vec3D.ZERO, Vec3D.ONE)
+                    is PhysicsComponent.BodyInfo.Player -> physicsSpace.addPlayer(Vec3D.ZERO)
                 }
             }
             ActiveBodyInfo(body.getWorldBounds(), body.getLinearVelocity(), comp.physContextIDs)
@@ -68,14 +70,21 @@ class PhysicsSystem(
         val body = physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
             when (comp.bodyInfo) {
                 is PhysicsComponent.BodyInfo.Cube -> physicsSpace.addCube(Vec3D.ZERO, Vec3D.ONE)
+                is PhysicsComponent.BodyInfo.Player -> physicsSpace.addPlayer(Vec3D.ZERO)
             }
         }
 
-        if (comp.bodyInfo == PhysicsComponent.BodyInfo.Cube) {
-            entity.configure {
-                val transform = body.getTransform()
-                it.getOrNull(PositionComponent)?.position = transform.translation
-                it.getOrNull(CubeModelComponent)?.transform = transform.copy(translation = Vec3D.ZERO)
+        when (comp.bodyInfo) {
+            is PhysicsComponent.BodyInfo.Cube -> {
+                entity.configure {
+                    val transform = body.getTransform()
+                    it.getOrNull(PositionComponent)?.position = transform.translation
+                    it.getOrNull(CubeModelComponent)?.transform = transform.copy(translation = Vec3D.ZERO)
+                }
+            }
+            is PhysicsComponent.BodyInfo.Player -> {
+                val pos = entity.getOrNull(PositionComponent)?.position ?: return
+                body.moveKinematic(pos, 50f / 1000f)
             }
         }
     }

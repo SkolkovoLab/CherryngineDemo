@@ -24,6 +24,9 @@ class MinecraftCubeRenderer(
             Random.nextInt(1000, 1_000_000),
             Registries.entityType[EntityTypes.ITEM_DISPLAY].value
         )
+        mcEntity.metadata[ItemDisplayMeta.HAS_NO_GRAVITY] = true
+        mcEntity.metadata[ItemDisplayMeta.TRANSFORMATION_INTERPOLATION_DURATION] = 1
+        mcEntity.metadata[ItemDisplayMeta.POSITION_ROTATION_INTERPOLATION_DURATION] = 1
         entities[id] = mcEntity
         mcEntityRegistry.add(mcEntity)
     }
@@ -45,10 +48,10 @@ class MinecraftCubeRenderer(
         mcEntity.teleport(position, yawPitch)
         mcEntity.viewContextIDs = viewContextIDs
         mcEntity.metadata[ItemDisplayMeta.DISPLAYED_ITEM] = ItemStack(Registries.item[material].value)
-        mcEntity.metadata[ItemDisplayMeta.HAS_NO_GRAVITY] = true
         mcEntity.metadata[ItemDisplayMeta.TRANSLATION] = transform.translation
         mcEntity.metadata[ItemDisplayMeta.ROTATION_LEFT] = transform.rotation
         mcEntity.metadata[ItemDisplayMeta.SCALE] = transform.scale
+        mcEntity.metadata[ItemDisplayMeta.INTERPOLATION_DELAY] = 0
         mcEntity.resendMeta()
     }
 }

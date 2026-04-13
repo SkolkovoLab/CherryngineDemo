@@ -5,6 +5,7 @@ import org.cloudburstmc.math.imaginary.Quaternionf
 import org.cloudburstmc.math.vector.Vector3f
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.MetadataTypes
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.BooleanEntityMetadata
+import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.IntEntityMetadata
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ObjectEntityMetadata
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntity
@@ -28,6 +29,9 @@ class McProtocolLibCubeRenderer(
             Random.nextInt(1000, 1_000_000),
             EntityType.ITEM_DISPLAY
         )
+        entity.setMetadata(5, BooleanEntityMetadata(5, MetadataTypes.BOOLEAN, true))
+        entity.setMetadata(9, IntEntityMetadata(9, MetadataTypes.INT, 1))
+        entity.setMetadata(10, IntEntityMetadata(10, MetadataTypes.INT, 1))
         entities[id] = entity
         entityRegistry.add(entity)
     }
@@ -50,7 +54,6 @@ class McProtocolLibCubeRenderer(
         entity.viewContextIDs = viewContextIDs
         val itemId = Registries.item[material].value.id
         entity.setMetadata(23, ObjectEntityMetadata(23, MetadataTypes.ITEM_STACK, McplItemStack(itemId, 1)))
-        entity.setMetadata(5, BooleanEntityMetadata(5, MetadataTypes.BOOLEAN, true))
         entity.setMetadata(
             11, ObjectEntityMetadata(11, MetadataTypes.VECTOR3,
                 Vector3f.from(transform.translation.x.toFloat(), transform.translation.y.toFloat(), transform.translation.z.toFloat()))
@@ -63,6 +66,7 @@ class McProtocolLibCubeRenderer(
             12, ObjectEntityMetadata(12, MetadataTypes.VECTOR3,
                 Vector3f.from(transform.scale.x.toFloat(), transform.scale.y.toFloat(), transform.scale.z.toFloat()))
         )
+        entity.setMetadata(8, IntEntityMetadata(8, MetadataTypes.INT, 0))
         entity.resendMeta()
     }
 }
