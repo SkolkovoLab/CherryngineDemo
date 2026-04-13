@@ -12,8 +12,10 @@ import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayerInputProvider
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayerOutputProvider
 import ru.cherryngine.impl.demo.DemoInstanceSetup
-import ru.cherryngine.impl.demo.view.AxolotlViewFactory
-import ru.cherryngine.impl.demo.view.CubeViewFactory
+import ru.cherryngine.impl.demo.minecraft.renderer.MinecraftAxolotlRenderer
+import ru.cherryngine.impl.demo.minecraft.renderer.MinecraftCubeRenderer
+import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
+import ru.cherryngine.impl.demo.renderer.CubeRenderer
 
 class MinecraftDemoInstanceSetup(
     private val playerManager: PlayerManager,
@@ -23,11 +25,11 @@ class MinecraftDemoInstanceSetup(
 ) : DemoInstanceSetup {
     private val mcEntityRegistry = McEntityRegistry()
 
-    override val axolotlViewFactory: AxolotlViewFactory =
-        MinecraftAxolotlViewFactory(mcEntityRegistry, playerManager)
+    override val axolotlRenderer: AxolotlRenderer =
+        MinecraftAxolotlRenderer(mcEntityRegistry, playerManager)
 
-    override val cubeViewFactory: CubeViewFactory =
-        MinecraftCubeViewFactory(mcEntityRegistry)
+    override val cubeRenderer: CubeRenderer =
+        MinecraftCubeRenderer(mcEntityRegistry)
 
     override val inputProvider: PlayerInputProvider =
         MinecraftPlayerInputProvider(playerManager)

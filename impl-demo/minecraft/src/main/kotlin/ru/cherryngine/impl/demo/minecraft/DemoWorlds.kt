@@ -1,7 +1,6 @@
 package ru.cherryngine.impl.demo.minecraft
 
 import jakarta.inject.Singleton
-import ru.cherryngine.impl.demo.GameWorldProvider
 import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.minecraft.registry.types.DimensionType
@@ -11,8 +10,8 @@ import ru.cherryngine.lib.world.Layer
 import ru.cherryngine.lib.world.MutableLayer
 
 @Singleton
-class DemoWorlds : GameWorldProvider {
-    override val apartNames = setOf("apart1", "apart2")
+class DemoWorlds {
+    val apartNames = setOf("apart1", "apart2")
 
     val overworld: DimensionType = Registries.dimensionType[DimensionTypes.OVERWORLD].value
 

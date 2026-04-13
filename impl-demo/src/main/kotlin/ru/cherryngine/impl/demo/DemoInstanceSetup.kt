@@ -5,12 +5,12 @@ import ru.cherryngine.engine.core.instance.InstanceSetupFactory
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
-import ru.cherryngine.impl.demo.view.AxolotlViewFactory
-import ru.cherryngine.impl.demo.view.CubeViewFactory
+import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
+import ru.cherryngine.impl.demo.renderer.CubeRenderer
 
 interface DemoInstanceSetup : InstanceSetup {
-    val axolotlViewFactory: AxolotlViewFactory
-    val cubeViewFactory: CubeViewFactory
+    val axolotlRenderer: AxolotlRenderer
+    val cubeRenderer: CubeRenderer
     val inputProvider: PlayerInputProvider
     val outputProvider: PlayerOutputProvider
 }

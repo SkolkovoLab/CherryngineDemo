@@ -12,8 +12,10 @@ import ru.cherryngine.engine.mcprotocollib.McProtocolLibPlayerOutputProvider
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibViewTickable
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibWorldServiceHandler
 import ru.cherryngine.impl.demo.DemoInstanceSetup
-import ru.cherryngine.impl.demo.view.AxolotlViewFactory
-import ru.cherryngine.impl.demo.view.CubeViewFactory
+import ru.cherryngine.impl.demo.mcprotocollib.renderer.McProtocolLibAxolotlRenderer
+import ru.cherryngine.impl.demo.mcprotocollib.renderer.McProtocolLibCubeRenderer
+import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
+import ru.cherryngine.impl.demo.renderer.CubeRenderer
 
 class McProtocolLibDemoInstanceSetup(
     private val playerManager: PlayerManager,
@@ -23,11 +25,11 @@ class McProtocolLibDemoInstanceSetup(
 ) : DemoInstanceSetup {
     private val entityRegistry = McProtocolLibEntityRegistry()
 
-    override val axolotlViewFactory: AxolotlViewFactory =
-        McProtocolLibAxolotlViewFactory(entityRegistry, playerManager)
+    override val axolotlRenderer: AxolotlRenderer =
+        McProtocolLibAxolotlRenderer(entityRegistry, playerManager)
 
-    override val cubeViewFactory: CubeViewFactory =
-        McProtocolLibCubeViewFactory(entityRegistry)
+    override val cubeRenderer: CubeRenderer =
+        McProtocolLibCubeRenderer(entityRegistry)
 
     override val inputProvider: PlayerInputProvider =
         McProtocolLibPlayerInputProvider(playerManager)

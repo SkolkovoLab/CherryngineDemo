@@ -8,42 +8,57 @@ import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
-import ru.cherryngine.impl.demo.view.AxolotlView
-import ru.cherryngine.impl.demo.view.AxolotlViewFactory
+import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
+import ru.cherryngine.lib.math.Vec3D
+import ru.cherryngine.lib.math.YawPitch
 import java.util.*
 
 class AxolotlModelSystem(
-    private val viewFactory: AxolotlViewFactory,
+    private val renderers: List<AxolotlRenderer>,
     private val playerManager: PlayerManager,
 ) : IteratingSystem(
     family { all(AxolotlModelComponent) }
 ) {
-    private val views = HashMap<UUID, AxolotlView>()
+    private val activeIds = HashSet<UUID>()
 
     override fun onTick() {
-        val activeIds = mutableSetOf<UUID>()
-        family.forEach { activeIds.add(it[AxolotlModelComponent].modelId) }
-        views.keys.removeIf { uuid ->
-            if (uuid !in activeIds) { views[uuid]?.destroy(); true } else false
+        val currentIds = mutableSetOf<UUID>()
+        family.forEach { currentIds.add(it[AxolotlModelComponent].modelId) }
+
+        // Remove entities that no longer exist
+        activeIds.removeIf { id ->
+            if (id !in currentIds) {
+                renderers.forEach { it.onRemove(id) }
+                true
+            } else false
         }
+
+        // Add new entities
+        currentIds.forEach { id ->
+            if (activeIds.add(id)) {
+                renderers.forEach { it.onAdd(id) }
+            }
+        }
+
         super.onTick()
     }
 
     override fun onTickEntity(entity: EcsEntity) {
-        val component = entity[AxolotlModelComponent]
-        val view = views.getOrPut(component.modelId) { viewFactory.create() }
-
-        entity.getOrNull(PositionComponent)?.also {
-            view.updatePosition(it.position, it.yawPitch)
-        }
-
+        val id = entity[AxolotlModelComponent].modelId
+        val pos = entity.getOrNull(PositionComponent)
         val playerUuid = entity.getOrNull(PlayerComponent)?.uuid
         val name = playerUuid?.let { playerManager.getPlayerNullable(it)?.username }
-        view.setName(name)
-        view.setHiddenFromPlayer(playerUuid)
+        val viewContextIDs = entity.getOrNull(ViewableComponent)?.viewContextIDs ?: emptySet()
 
-        entity.getOrNull(ViewableComponent)?.also {
-            view.setViewContextIDs(it.viewContextIDs)
+        renderers.forEach {
+            it.update(
+                id,
+                pos?.position ?: Vec3D.ZERO,
+                pos?.yawPitch ?: YawPitch.ZERO,
+                name,
+                playerUuid,
+                viewContextIDs,
+            )
         }
     }
 }

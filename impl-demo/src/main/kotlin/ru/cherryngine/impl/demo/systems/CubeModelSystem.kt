@@ -6,37 +6,52 @@ import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
-import ru.cherryngine.impl.demo.view.CubeView
-import ru.cherryngine.impl.demo.view.CubeViewFactory
+import ru.cherryngine.impl.demo.renderer.CubeRenderer
+import ru.cherryngine.lib.math.Vec3D
+import ru.cherryngine.lib.math.YawPitch
 import java.util.*
 
 class CubeModelSystem(
-    private val viewFactory: CubeViewFactory,
+    private val renderers: List<CubeRenderer>,
 ) : IteratingSystem(
     family { all(CubeModelComponent) }
 ) {
-    private val views = HashMap<UUID, CubeView>()
+    private val activeIds = HashSet<UUID>()
 
     override fun onTick() {
-        val activeIds = mutableSetOf<UUID>()
-        family.forEach { activeIds.add(it[CubeModelComponent].modelId) }
-        views.keys.removeIf { uuid ->
-            if (uuid !in activeIds) { views[uuid]?.destroy(); true } else false
+        val currentIds = mutableSetOf<UUID>()
+        family.forEach { currentIds.add(it[CubeModelComponent].modelId) }
+
+        activeIds.removeIf { id ->
+            if (id !in currentIds) {
+                renderers.forEach { it.onRemove(id) }
+                true
+            } else false
         }
+
+        currentIds.forEach { id ->
+            if (activeIds.add(id)) {
+                renderers.forEach { it.onAdd(id) }
+            }
+        }
+
         super.onTick()
     }
 
     override fun onTickEntity(entity: EcsEntity) {
         val component = entity[CubeModelComponent]
-        val view = views.getOrPut(component.modelId) { viewFactory.create() }
+        val pos = entity.getOrNull(PositionComponent)
+        val viewContextIDs = entity.getOrNull(ViewableComponent)?.viewContextIDs ?: emptySet()
 
-        view.updateMaterial(component.material)
-        view.updateTransform(component.transform)
-        entity.getOrNull(PositionComponent)?.also {
-            view.updatePosition(it.position, it.yawPitch)
-        }
-        entity.getOrNull(ViewableComponent)?.also {
-            view.setViewContextIDs(it.viewContextIDs)
+        renderers.forEach {
+            it.update(
+                component.modelId,
+                pos?.position ?: Vec3D.ZERO,
+                pos?.yawPitch ?: YawPitch.ZERO,
+                component.material,
+                component.transform,
+                viewContextIDs,
+            )
         }
     }
 }

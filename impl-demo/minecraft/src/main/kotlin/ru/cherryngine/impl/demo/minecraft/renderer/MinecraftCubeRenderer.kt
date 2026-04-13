@@ -1,9 +1,9 @@
-package ru.cherryngine.impl.demo.minecraft
+package ru.cherryngine.impl.demo.minecraft.renderer
 
 import net.kyori.adventure.key.Key
 import ru.cherryngine.engine.minecraft.entity.McEntity
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
-import ru.cherryngine.impl.demo.view.CubeView
+import ru.cherryngine.impl.demo.renderer.CubeRenderer
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
@@ -14,40 +14,41 @@ import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
 import java.util.*
 import kotlin.random.Random
 
-class MinecraftCubeView(
+class MinecraftCubeRenderer(
     private val mcEntityRegistry: McEntityRegistry,
-) : CubeView {
-    private val modelId: UUID = UUID.randomUUID()
+) : CubeRenderer {
+    private val entities = HashMap<UUID, McEntity>()
 
-    init {
-        mcEntityRegistry.getOrCreate(modelId) {
-            McEntity(Random.nextInt(1000, 1_000_000), Registries.entityType[EntityTypes.ITEM_DISPLAY].value)
-        }
+    override fun onAdd(id: UUID) {
+        val mcEntity = McEntity(
+            Random.nextInt(1000, 1_000_000),
+            Registries.entityType[EntityTypes.ITEM_DISPLAY].value
+        )
+        entities[id] = mcEntity
+        mcEntityRegistry.add(mcEntity)
     }
 
-    override fun updatePosition(position: Vec3D, yawPitch: YawPitch) {
-        mcEntityRegistry.get(modelId)?.teleport(position, yawPitch)
+    override fun onRemove(id: UUID) {
+        val mcEntity = entities.remove(id) ?: return
+        mcEntityRegistry.remove(mcEntity)
     }
 
-    override fun updateMaterial(material: Key) {
-        val mcEntity = mcEntityRegistry.get(modelId) ?: return
+    override fun update(
+        id: UUID,
+        position: Vec3D,
+        yawPitch: YawPitch,
+        material: Key,
+        transform: Transform,
+        viewContextIDs: Set<String>,
+    ) {
+        val mcEntity = entities[id] ?: return
+        mcEntity.teleport(position, yawPitch)
+        mcEntity.viewContextIDs = viewContextIDs
         mcEntity.metadata[ItemDisplayMeta.DISPLAYED_ITEM] = ItemStack(Registries.item[material].value)
-    }
-
-    override fun updateTransform(transform: Transform) {
-        val mcEntity = mcEntityRegistry.get(modelId) ?: return
         mcEntity.metadata[ItemDisplayMeta.HAS_NO_GRAVITY] = true
         mcEntity.metadata[ItemDisplayMeta.TRANSLATION] = transform.translation
         mcEntity.metadata[ItemDisplayMeta.ROTATION_LEFT] = transform.rotation
         mcEntity.metadata[ItemDisplayMeta.SCALE] = transform.scale
         mcEntity.resendMeta()
-    }
-
-    override fun setViewContextIDs(contextIDs: Set<String>) {
-        mcEntityRegistry.get(modelId)?.viewContextIDs = contextIDs
-    }
-
-    override fun destroy() {
-        mcEntityRegistry.remove(modelId)
     }
 }
