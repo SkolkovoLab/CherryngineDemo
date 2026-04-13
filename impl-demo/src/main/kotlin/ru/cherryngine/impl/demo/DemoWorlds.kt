@@ -1,4 +1,4 @@
-package ru.cherryngine.impl.demo.minecraft
+package ru.cherryngine.impl.demo
 
 import jakarta.inject.Singleton
 import ru.cherryngine.lib.minecraft.registry.Registries

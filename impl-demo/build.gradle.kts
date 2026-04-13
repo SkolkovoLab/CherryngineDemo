@@ -7,6 +7,7 @@ dependencies {
     api(engine(":engine-ecs"))
     api(engine(":engine-physics"))
     api(engine(":lib-math"))
+    api(engine(":lib-polar"))
 
     runtimeOnly(project(":impl-demo:minecraft"))
     runtimeOnly(project(":impl-demo:mcprotocollib"))

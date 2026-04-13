@@ -22,12 +22,14 @@ import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.impl.demo.systems.*
 import ru.cherryngine.lib.math.Vec3D
+import ru.cherryngine.lib.world.LayerEntry
 import ru.cherryngine.lib.math.YawPitch
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class DemoInit(
+    demoWorlds: DemoWorlds,
     playerManager: PlayerManager,
     worldService: WorldService,
     setupFactories: List<DemoInstanceSetupFactory>,
@@ -41,6 +43,12 @@ class DemoInit(
     val serverWorld: ServerWorld = ServerWorld()
 
     init {
+        demoWorlds.layers.forEach { (worldName, layer) ->
+            val priority = if (worldName in demoWorlds.apartNames) 10 else 0
+            serverWorld.registerLayer(worldName, LayerEntry(layer, priority))
+        }
+        serverWorld.dimensionType = demoWorlds.overworld
+
         val setups = setupFactories.map { it.create(serverWorld) }
 
         val inputProvider = object : PlayerInputProvider {
