@@ -11,6 +11,7 @@ import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.ActiveBodyInfo
 import ru.cherryngine.engine.physics.terrain.LayerWithContext
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
+import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
@@ -55,8 +56,23 @@ class PhysicsSystem(
             val body = physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
                 physicsSpace.addPlayer(targetPos)
             }
+
+            // Синхронизируем контексты хитбокса с актуальными контекстами игрока
+            val currentContexts = entity.getOrNull(ViewableComponent)?.viewContextIDs
+            if (currentContexts != null) {
+                physicsSpace.updateBodyContexts(body, currentContexts)
+            }
+
             val hitboxPos = body.getTransform().translation
-            val pullVelocity = (targetPos - hitboxPos) * (1.0 / delta)
+            val diff = targetPos - hitboxPos
+
+            // Если игрок телепортировался — телепортируем хитбокс вместе с ним
+            if (diff.length() > 2.0) {
+                body.teleport(targetPos)
+                return@forEach
+            }
+
+            val pullVelocity = diff * (1.0 / delta)
             body.setLinearVelocity(pullVelocity)
             body.setAngularVelocity(Vec3D.ZERO)
         }
@@ -71,7 +87,8 @@ class PhysicsSystem(
                     is PhysicsComponent.BodyInfo.Player -> physicsSpace.addPlayer(Vec3D.ZERO)
                 }
             }
-            ActiveBodyInfo(body.getWorldBounds(), body.getLinearVelocity(), comp.physContextIDs)
+            val contextIDs = entity.getOrNull(ViewableComponent)?.viewContextIDs ?: comp.physContextIDs
+            ActiveBodyInfo(body.getWorldBounds(), body.getLinearVelocity(), contextIDs)
         }
 
         val layers = serverWorld.getLayersByContext()
@@ -112,9 +129,13 @@ class PhysicsSystem(
             // Обновляем визуализацию хитбокса
             val uuid = entity.getOrNull(PlayerComponent)?.uuid
             if (uuid != null) {
+                val playerContexts = entity.getOrNull(ViewableComponent)?.viewContextIDs
                 world.family { all(HitboxVisualizationComponent) }.forEach { visEntity ->
                     if (visEntity[HitboxVisualizationComponent].ownerUuid == uuid) {
                         visEntity[PositionComponent].position = hitboxPos
+                        if (playerContexts != null) {
+                            visEntity.getOrNull(ViewableComponent)?.viewContextIDs = playerContexts
+                        }
                     }
                 }
             }
