@@ -72,8 +72,8 @@ class DemoInit(
                 onRemove(playerFamily) { entity -> playerIndex.onRemove(entity[PlayerComponent].uuid) }
             }
             systems {
-                add(PlayerInitSystem("gm_construct", Vec3D(275.0, 56.0, 195.0), playerManager))
                 add(ReadClientPositionSystem(inputProvider))
+                add(PlayerInitSystem("gm_construct", Vec3D(275.0, 56.0, 195.0), playerManager))
                 add(CommandActionsSystem())
                 add(AxolotlModelSystem(axolotlViewFactory, playerManager))
                 add(CubeModelSystem(cubeViewFactory))
