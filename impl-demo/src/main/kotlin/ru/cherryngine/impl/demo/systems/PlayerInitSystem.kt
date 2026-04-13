@@ -12,6 +12,7 @@ import java.util.*
 
 class PlayerInitSystem(
     val defaultViewContextID: String,
+    val spawnPosition: Vec3D,
     val playerManager: PlayerManager,
 ) : IntervalSystem() {
     private val logger = LoggerFactory.getLogger(PlayerInitSystem::class.java)
@@ -53,7 +54,7 @@ class PlayerInitSystem(
 
                 it += ViewableComponent(setOf(defaultViewContextID))
 
-                it += PositionComponent(Vec3D(164.0, 58.0, 170.0))
+                it += PositionComponent(spawnPosition)
 
                 it += AxolotlModelComponent()
             }

@@ -3,6 +3,7 @@ package ru.cherryngine.impl.demo
 import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.configureWorld
 import jakarta.inject.Singleton
+import net.kyori.adventure.text.Component
 import org.slf4j.Logger
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.commandmanager.CommandParserRegistrar
@@ -22,6 +23,9 @@ import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.impl.demo.systems.*
 import ru.cherryngine.impl.demo.view.CompositeAxolotlViewFactory
 import ru.cherryngine.impl.demo.view.CompositeCubeViewFactory
+import ru.cherryngine.lib.math.Vec3D
+import ru.cherryngine.lib.math.YawPitch
+import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
@@ -29,8 +33,6 @@ class DemoInit(
     worldProvider: GameWorldProvider,
     playerManager: PlayerManager,
     worldService: WorldService,
-    inputProviders: List<PlayerInputProvider>,
-    outputProviders: List<PlayerOutputProvider>,
     setupFactories: List<DemoInstanceSetupFactory>,
     parserRegistrars: List<CommandParserRegistrar>,
     private val logger: Logger,
@@ -42,11 +44,19 @@ class DemoInit(
     val serverWorld: ServerWorld
 
     init {
-        val inputProvider = CompositePlayerInputProvider(inputProviders)
-        val outputProvider = CompositePlayerOutputProvider(outputProviders)
-
         serverWorld = ServerWorld()
         val setups = setupFactories.map { it.create(serverWorld) }
+
+        val inputProvider = object : PlayerInputProvider {
+            override fun getPosition(uuid: UUID) = setups.firstNotNullOfOrNull { it.inputProvider.getPosition(uuid) }
+            override fun getYawPitch(uuid: UUID) = setups.firstNotNullOfOrNull { it.inputProvider.getYawPitch(uuid) }
+        }
+        val outputProvider = object : PlayerOutputProvider {
+            override fun teleport(uuid: UUID, position: Vec3D, yawPitch: YawPitch) =
+                setups.forEach { it.outputProvider.teleport(uuid, position, yawPitch) }
+            override fun sendMessage(uuid: UUID, message: Component) =
+                setups.forEach { it.outputProvider.sendMessage(uuid, message) }
+        }
 
         val axolotlViewFactory = CompositeAxolotlViewFactory(setups.map { it.axolotlViewFactory })
         val cubeViewFactory = CompositeCubeViewFactory(setups.map { it.cubeViewFactory })
@@ -62,7 +72,7 @@ class DemoInit(
                 onRemove(playerFamily) { entity -> playerIndex.onRemove(entity[PlayerComponent].uuid) }
             }
             systems {
-                add(PlayerInitSystem("gm_construct", playerManager))
+                add(PlayerInitSystem("gm_construct", Vec3D(275.0, 56.0, 195.0), playerManager))
                 add(ReadClientPositionSystem(inputProvider))
                 add(CommandActionsSystem())
                 add(AxolotlModelSystem(axolotlViewFactory, playerManager))

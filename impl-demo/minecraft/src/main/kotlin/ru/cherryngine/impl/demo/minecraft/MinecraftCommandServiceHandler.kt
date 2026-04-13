@@ -15,6 +15,8 @@ class MinecraftCommandServiceHandler(
 ) : CommandServiceHandler {
     override fun canHandle(player: Player) = player is MinecraftPlayer
 
+    override fun onPlayerLeave(player: Player) {}
+
     override fun onPlayerJoin(player: Player) {
         player as MinecraftPlayer
         val commandsPacket = CommandNodeUtils.commandsPacket(

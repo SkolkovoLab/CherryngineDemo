@@ -15,6 +15,8 @@ class McProtocolLibCommandServiceHandler(
 ) : CommandServiceHandler {
     override fun canHandle(player: Player) = player is McProtocolLibPlayer
 
+    override fun onPlayerLeave(player: Player) {}
+
     override fun onPlayerJoin(player: Player) {
         player as McProtocolLibPlayer
         val commandsPacket = McProtocolLibCommandNodeUtils.commandsPacket(
