@@ -1,6 +1,7 @@
 package ru.cherryngine.impl.demo.minecraft
 
 import jakarta.inject.Singleton
+import ru.cherryngine.engine.core.commandmanager.SArgumentParser
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.minecraft.ChunkPool
@@ -13,7 +14,8 @@ class MinecraftDemoInstanceSetupFactory(
     private val playerManager: PlayerManager,
     private val chunkPool: ChunkPool,
     private val worldServiceHandler: MinecraftWorldServiceHandler,
+    private val parsers: List<SArgumentParser<*>>,
 ) : DemoInstanceSetupFactory {
     override fun create(serverWorld: ServerWorld): DemoInstanceSetup =
-        MinecraftDemoInstanceSetup(playerManager, chunkPool, worldServiceHandler, serverWorld)
+        MinecraftDemoInstanceSetup(playerManager, chunkPool, worldServiceHandler, serverWorld, parsers)
 }

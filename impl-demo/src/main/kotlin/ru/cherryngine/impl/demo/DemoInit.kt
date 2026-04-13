@@ -4,9 +4,6 @@ import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.configureWorld
 import jakarta.inject.Singleton
 import net.kyori.adventure.text.Component
-import org.slf4j.Logger
-import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
-import ru.cherryngine.engine.core.commandmanager.CommandParserRegistrar
 import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerInputProvider
@@ -22,8 +19,8 @@ import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.impl.demo.systems.*
 import ru.cherryngine.lib.math.Vec3D
-import ru.cherryngine.lib.world.LayerEntry
 import ru.cherryngine.lib.math.YawPitch
+import ru.cherryngine.lib.world.LayerEntry
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -33,10 +30,7 @@ class DemoInit(
     playerManager: PlayerManager,
     worldService: WorldService,
     setupFactories: List<DemoInstanceSetupFactory>,
-    parserRegistrars: List<CommandParserRegistrar>,
-    logger: Logger,
 ) {
-    val commandManager: CherryngineCommandManager
     val ecsWorld: EcsWorld
     val playerIndex: PlayerIndex
     val instance: Instance
@@ -89,9 +83,9 @@ class DemoInit(
             }
         }
 
-        commandManager = CherryngineCommandManager(logger)
-        parserRegistrars.forEach { it.registerParsers(commandManager) }
-        commandManager.registerCommands(TestCommand(ecsWorld, playerIndex))
+        setups.forEach {
+            it.commandManager.registerCommands(TestCommand(ecsWorld, playerIndex))
+        }
 
         instance = Instance(
             tickDuration = 50.milliseconds,

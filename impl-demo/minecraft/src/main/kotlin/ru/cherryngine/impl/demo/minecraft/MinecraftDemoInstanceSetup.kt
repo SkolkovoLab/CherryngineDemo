@@ -1,5 +1,7 @@
 package ru.cherryngine.impl.demo.minecraft
 
+import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
+import ru.cherryngine.engine.core.commandmanager.SArgumentParser
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerInputProvider
@@ -22,8 +24,12 @@ class MinecraftDemoInstanceSetup(
     private val chunkPool: ChunkPool,
     private val worldServiceHandler: MinecraftWorldServiceHandler,
     private val serverWorld: ServerWorld,
+    parsers: List<SArgumentParser<*>>,
 ) : DemoInstanceSetup {
     private val mcEntityRegistry = McEntityRegistry()
+
+    override val commandManager = CherryngineCommandManager(parsers)
+    private val commandTickable = MinecraftCommandTickable(playerManager, commandManager)
 
     override val axolotlRenderer: AxolotlRenderer =
         MinecraftAxolotlRenderer(mcEntityRegistry, playerManager)
@@ -38,6 +44,7 @@ class MinecraftDemoInstanceSetup(
         MinecraftPlayerOutputProvider(playerManager)
 
     override fun createTickables(): List<Tickable> = listOf(
-        MinecraftViewTickable(playerManager, chunkPool, worldServiceHandler, mcEntityRegistry, serverWorld)
+        MinecraftViewTickable(playerManager, chunkPool, worldServiceHandler, mcEntityRegistry, serverWorld),
+        commandTickable,
     )
 }

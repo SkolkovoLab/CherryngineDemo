@@ -1,5 +1,7 @@
 package ru.cherryngine.impl.demo.mcprotocollib
 
+import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
+import ru.cherryngine.engine.core.commandmanager.SArgumentParser
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerInputProvider
@@ -22,8 +24,12 @@ class McProtocolLibDemoInstanceSetup(
     private val chunkPool: McProtocolLibChunkPool,
     private val worldServiceHandler: McProtocolLibWorldServiceHandler,
     private val serverWorld: ServerWorld,
+    parsers: List<SArgumentParser<*>>,
 ) : DemoInstanceSetup {
     private val entityRegistry = McProtocolLibEntityRegistry()
+
+    override val commandManager = CherryngineCommandManager(parsers)
+    private val commandTickable = McProtocolLibCommandTickable(playerManager, commandManager)
 
     override val axolotlRenderer: AxolotlRenderer =
         McProtocolLibAxolotlRenderer(entityRegistry, playerManager)
@@ -38,6 +44,7 @@ class McProtocolLibDemoInstanceSetup(
         McProtocolLibPlayerOutputProvider(playerManager)
 
     override fun createTickables(): List<Tickable> = listOf(
-        McProtocolLibViewTickable(playerManager, chunkPool, worldServiceHandler, entityRegistry, serverWorld)
+        McProtocolLibViewTickable(playerManager, chunkPool, worldServiceHandler, entityRegistry, serverWorld),
+        commandTickable,
     )
 }

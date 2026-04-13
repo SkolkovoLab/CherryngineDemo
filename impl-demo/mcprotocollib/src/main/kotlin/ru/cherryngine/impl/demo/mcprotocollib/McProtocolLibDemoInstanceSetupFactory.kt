@@ -1,6 +1,7 @@
 package ru.cherryngine.impl.demo.mcprotocollib
 
 import jakarta.inject.Singleton
+import ru.cherryngine.engine.core.commandmanager.SArgumentParser
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibChunkPool
@@ -13,7 +14,8 @@ class McProtocolLibDemoInstanceSetupFactory(
     private val playerManager: PlayerManager,
     private val chunkPool: McProtocolLibChunkPool,
     private val worldServiceHandler: McProtocolLibWorldServiceHandler,
+    private val parsers: List<SArgumentParser<*>>,
 ) : DemoInstanceSetupFactory {
     override fun create(serverWorld: ServerWorld): DemoInstanceSetup =
-        McProtocolLibDemoInstanceSetup(playerManager, chunkPool, worldServiceHandler, serverWorld)
+        McProtocolLibDemoInstanceSetup(playerManager, chunkPool, worldServiceHandler, serverWorld, parsers)
 }
