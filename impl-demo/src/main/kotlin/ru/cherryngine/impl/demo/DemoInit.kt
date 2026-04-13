@@ -1,6 +1,5 @@
 package ru.cherryngine.impl.demo
 
-import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.configureWorld
 import jakarta.inject.Singleton
 import net.kyori.adventure.text.Component
@@ -12,8 +11,6 @@ import ru.cherryngine.engine.core.player.PlayerOutputProvider
 import ru.cherryngine.engine.core.services.WorldService
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.EcsWorldTickable
-import ru.cherryngine.engine.ecs.PlayerIndex
-import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.systems.*
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
@@ -32,7 +29,6 @@ class DemoInit(
     setupFactories: List<DemoInstanceSetupFactory>,
 ) {
     val ecsWorld: EcsWorld
-    val playerIndex: PlayerIndex
     val instance: Instance
     val serverWorld: ServerWorld = ServerWorld()
 
@@ -61,14 +57,8 @@ class DemoInit(
 
         val physicsSpace = PhysicsSpace()
         val terrainGenerator = TerrainGenerator(physicsSpace)
-        playerIndex = PlayerIndex()
 
         ecsWorld = configureWorld {
-            families {
-                val playerFamily = family { all(PlayerComponent) }
-                onAdd(playerFamily) { entity -> playerIndex.onAdd(entity, entity[PlayerComponent].uuid) }
-                onRemove(playerFamily) { entity -> playerIndex.onRemove(entity[PlayerComponent].uuid) }
-            }
             systems {
                 add(ReadClientPositionSystem(inputProvider))
                 add(PlayerInitSystem("gm_construct", Vec3D(275.0, 56.0, 195.0), playerManager))
@@ -84,7 +74,7 @@ class DemoInit(
         }
 
         setups.forEach {
-            it.commandManager.registerCommands(TestCommand(ecsWorld, playerIndex))
+            it.commandManager.registerCommands(TestCommand(ecsWorld))
         }
 
         instance = Instance(

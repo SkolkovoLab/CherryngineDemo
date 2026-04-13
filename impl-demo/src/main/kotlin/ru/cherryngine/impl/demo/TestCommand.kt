@@ -9,10 +9,10 @@ import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.EcsWorld
-import ru.cherryngine.engine.ecs.PlayerIndex
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
+import ru.cherryngine.engine.ecs.getPlayerEntity
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
 import ru.cherryngine.impl.demo.components.ApartComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
@@ -22,7 +22,6 @@ import java.util.*
 
 class TestCommand(
     private val ecsWorld: EcsWorld,
-    private val playerIndex: PlayerIndex,
 ) {
     @Command("testcommand <string> <int> <key> <uuid> <greedy>")
     @Permission("command.test")
@@ -43,7 +42,7 @@ class TestCommand(
         apartId: String,
     ) {
         ecsWorld.commandAction {
-            val entity = playerIndex.getOrThrow(sender.uuid)
+            val entity = ecsWorld.getPlayerEntity(sender.uuid)
             if (apartId == "null") {
                 entity.configure {
                     it -= ApartComponent
@@ -64,8 +63,8 @@ class TestCommand(
         other: Player,
     ) {
         ecsWorld.commandAction {
-            val entity = playerIndex.getOrThrow(sender.uuid)
-            val otherPlayer = playerIndex.getOrThrow(other.uuid)
+            val entity = ecsWorld.getPlayerEntity(sender.uuid)
+            val otherPlayer = ecsWorld.getPlayerEntity(other.uuid)
             val tmp = entity[PlayerComponent].uuid
             entity[PlayerComponent].uuid = otherPlayer[PlayerComponent].uuid
             otherPlayer[PlayerComponent].uuid = tmp
@@ -78,7 +77,7 @@ class TestCommand(
         contexts: String,
     ) {
         ecsWorld.commandAction {
-            val entity = playerIndex.getOrThrow(sender.uuid)
+            val entity = ecsWorld.getPlayerEntity(sender.uuid)
             entity[PlayerComponent].viewContextIDs = contexts.split(",").toSet()
         }
     }
@@ -88,7 +87,7 @@ class TestCommand(
         sender: Player,
     ) {
         ecsWorld.commandAction {
-            val playerEntity = playerIndex.getOrThrow(sender.uuid)
+            val playerEntity = ecsWorld.getPlayerEntity(sender.uuid)
             val spawnPosition = playerEntity[PositionComponent].position
 
             // куб видит то, что видит игрок
@@ -122,7 +121,7 @@ class TestCommand(
         sender: Player,
     ) {
         ecsWorld.commandAction {
-            val playerPos = playerIndex.getOrThrow(sender.uuid)[PositionComponent].position
+            val playerPos = ecsWorld.getPlayerEntity(sender.uuid)[PositionComponent].position
             var closest: EcsEntity? = null
             var closestDistSq = Double.MAX_VALUE
             family { all(PhysicsComponent, PositionComponent) }.forEach { entity ->
