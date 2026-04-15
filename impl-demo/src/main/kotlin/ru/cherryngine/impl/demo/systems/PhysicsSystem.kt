@@ -2,6 +2,8 @@ package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
+import ru.cherryngine.impl.demo.EcsSystemConfig
+import ru.cherryngine.impl.demo.InstanceScope
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
 import ru.cherryngine.engine.ecs.EcsEntity
@@ -158,5 +160,10 @@ class PhysicsSystem(
             it.getOrNull(PositionComponent)?.position = transform.translation
             it.getOrNull(CubeModelComponent)?.transform = transform.copy(translation = Vec3D.ZERO)
         }
+    }
+
+    object Config : EcsSystemConfig {
+        override fun create(scope: InstanceScope) =
+            PhysicsSystem(scope.physicsSpace, scope.terrainGenerator, scope.serverWorld, scope.outputProvider)
     }
 }

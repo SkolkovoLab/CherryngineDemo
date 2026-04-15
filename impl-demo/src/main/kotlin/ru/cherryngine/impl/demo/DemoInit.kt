@@ -1,88 +1,37 @@
 package ru.cherryngine.impl.demo
 
-import com.github.quillraven.fleks.configureWorld
 import jakarta.inject.Singleton
-import net.kyori.adventure.text.Component
 import ru.cherryngine.engine.core.instance.Instance
-import ru.cherryngine.engine.core.instance.ServerWorld
-import ru.cherryngine.engine.core.player.PlayerInputProvider
-import ru.cherryngine.engine.core.player.PlayerManager
-import ru.cherryngine.engine.core.player.PlayerOutputProvider
-import ru.cherryngine.engine.core.services.WorldService
-import ru.cherryngine.engine.ecs.EcsWorld
-import ru.cherryngine.engine.ecs.EcsWorldTickable
-import ru.cherryngine.engine.ecs.systems.*
-import ru.cherryngine.engine.physics.PhysicsSpace
-import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.impl.demo.systems.*
 import ru.cherryngine.lib.math.Vec3D
-import ru.cherryngine.lib.math.YawPitch
-import ru.cherryngine.lib.world.LayerEntry
-import java.util.*
-import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
-class DemoInit(
-    demoWorlds: DemoWorlds,
-    playerManager: PlayerManager,
-    worldService: WorldService,
-    setupFactories: List<DemoInstanceSetupFactory>,
-) {
-    val ecsWorld: EcsWorld
+class DemoInit(instanceFactory: InstanceFactory) {
     val instance: Instance
-    val serverWorld: ServerWorld = ServerWorld()
 
     init {
-        demoWorlds.layers.forEach { (worldName, layer) ->
-            val priority = if (worldName in demoWorlds.apartNames) 10 else 0
-            serverWorld.registerLayer(worldName, LayerEntry(layer, priority))
-        }
-        serverWorld.dimensionType = demoWorlds.overworld
-
-        val setups = setupFactories.map { it.create(serverWorld) }
-
-        val inputProvider = object : PlayerInputProvider {
-            override fun getPosition(uuid: UUID) = setups.firstNotNullOfOrNull { it.inputProvider.getPosition(uuid) }
-            override fun getYawPitch(uuid: UUID) = setups.firstNotNullOfOrNull { it.inputProvider.getYawPitch(uuid) }
-        }
-        val outputProvider = object : PlayerOutputProvider {
-            override fun teleport(uuid: UUID, position: Vec3D, yawPitch: YawPitch) =
-                setups.forEach { it.outputProvider.teleport(uuid, position, yawPitch) }
-            override fun sendMessage(uuid: UUID, message: Component) =
-                setups.forEach { it.outputProvider.sendMessage(uuid, message) }
-            override fun setVelocity(uuid: UUID, velocity: Vec3D) =
-                setups.forEach { it.outputProvider.setVelocity(uuid, velocity) }
-        }
-
-        val axolotlRenderers = setups.map { it.axolotlRenderer }
-        val cubeRenderers = setups.map { it.cubeRenderer }
-
-        val physicsSpace = PhysicsSpace()
-        val terrainGenerator = TerrainGenerator(physicsSpace)
-
-        ecsWorld = configureWorld {
-            systems {
-                add(ReadClientPositionSystem(inputProvider))
-                add(PlayerInitSystem("gm_construct", Vec3D(275.0, 56.0, 195.0), playerManager))
-                add(CommandActionsSystem())
-                add(AxolotlModelSystem(axolotlRenderers, playerManager))
-                add(CubeModelSystem(cubeRenderers))
-                add(ApartSystem())
-                add(PhysicsSystem(physicsSpace, terrainGenerator, serverWorld, outputProvider))
-                add(ViewContextSyncSystem(worldService, playerManager))
-                add(WriteClientPositionSystem(outputProvider))
-                add(ClearEventsSystem())
-            }
-        }
-
-        setups.forEach {
-            it.commandManager.registerCommands(TestCommand(ecsWorld))
-        }
-
-        instance = Instance(
-            tickDuration = 50.milliseconds,
-            tickables = listOf(EcsWorldTickable(ecsWorld)) + setups.flatMap { it.createTickables() },
+        val lobbyPrefab = InstancePrefab(
+            id = "lobby",
+            platformIds = listOf("minecraft", "mcprotocollib", "bedrock"),
+            worlds = listOf(
+                WorldLayerConfig("gm_construct", priority = 0),
+                WorldLayerConfig("apart1", priority = 10),
+                WorldLayerConfig("apart2", priority = 10, mutable = true),
+            ),
+            systems = listOf(
+                ReadClientPositionConfig,
+                PlayerInitSystem.Config("gm_construct", Vec3D(275.0, 56.0, 195.0)),
+                CommandActionsConfig,
+                AxolotlModelSystem.Config,
+                CubeModelSystem.Config,
+                ApartSystem.Config,
+                PhysicsSystem.Config,
+                ViewContextSyncConfig,
+                WriteClientPositionConfig,
+                ClearEventsConfig,
+            ),
         )
-        instance.start()
+
+        instance = instanceFactory.create(lobbyPrefab)
     }
 }

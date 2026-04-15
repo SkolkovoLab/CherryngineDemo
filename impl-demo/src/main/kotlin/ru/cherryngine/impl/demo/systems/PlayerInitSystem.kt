@@ -1,9 +1,11 @@
 package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IntervalSystem
+import kotlinx.coroutines.channels.Channel
 import net.kyori.adventure.key.Key
+import ru.cherryngine.impl.demo.EcsSystemConfig
+import ru.cherryngine.impl.demo.InstanceScope
 import org.slf4j.LoggerFactory
-import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.lib.math.Transform
@@ -16,9 +18,10 @@ import ru.cherryngine.impl.demo.components.PhysicsComponent
 import java.util.*
 
 class PlayerInitSystem(
-    val defaultViewContextID: String,
-    val spawnPosition: Vec3D,
-    val playerManager: PlayerManager,
+    private val joinChannel: Channel<UUID>,
+    private val leaveChannel: Channel<UUID>,
+    private val defaultViewContextID: String,
+    private val spawnPosition: Vec3D,
 ) : IntervalSystem() {
     private val logger = LoggerFactory.getLogger(PlayerInitSystem::class.java)
 
@@ -26,7 +29,7 @@ class PlayerInitSystem(
         // Drain leave channel → remove entities
         val toRemove = mutableSetOf<UUID>()
         while (true) {
-            val result = playerManager.playerLeaveChannel.tryReceive()
+            val result = leaveChannel.tryReceive()
             if (result.isSuccess) toRemove.add(result.getOrThrow()) else break
         }
         if (toRemove.isNotEmpty()) {
@@ -45,7 +48,7 @@ class PlayerInitSystem(
         // Drain join channel → create entities
         val toCreate = mutableListOf<UUID>()
         while (true) {
-            val result = playerManager.playerJoinChannel.tryReceive()
+            val result = joinChannel.tryReceive()
             if (result.isSuccess) toCreate.add(result.getOrThrow()) else break
         }
         val existingUUIDs = mutableSetOf<UUID>()
@@ -84,5 +87,18 @@ class PlayerInitSystem(
                 it += HitboxVisualizationComponent(playerUuid)
             }
         }
+    }
+
+    data class Config(
+        val spawnViewContext: String,
+        val spawnPosition: Vec3D,
+    ) : EcsSystemConfig {
+        override fun create(scope: InstanceScope) =
+            PlayerInitSystem(
+                joinChannel = scope.joinChannel,
+                leaveChannel = scope.leaveChannel,
+                defaultViewContextID = spawnViewContext,
+                spawnPosition = spawnPosition,
+            )
     }
 }
