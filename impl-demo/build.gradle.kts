@@ -11,6 +11,7 @@ dependencies {
 
     runtimeOnly(project(":impl-demo:minecraft"))
     runtimeOnly(project(":impl-demo:mcprotocollib"))
+    runtimeOnly(project(":impl-demo:bedrock"))
 
 //    api(engine(":engine-integration:viaversion"))
 //    api(engine(":engine-integration:grim"))

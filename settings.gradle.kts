@@ -9,6 +9,7 @@ include(
     "impl-demo",
     "impl-demo:minecraft",
     "impl-demo:mcprotocollib",
+    "impl-demo:bedrock",
 )
 
 dependencyResolutionManagement {
