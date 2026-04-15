@@ -35,6 +35,7 @@ class BedrockDemoInstanceSetup(
 
     override fun createTickables(): List<Tickable> = listOf(
         BedrockViewTickable(playerManager, worldServiceHandler, blockMapping, serverWorld),
+        BedrockCommandTickable(playerManager, commandManager),
     )
 }
 
