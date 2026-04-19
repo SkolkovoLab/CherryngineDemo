@@ -13,6 +13,7 @@ import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
 import ru.cherryngine.engine.ecs.EcsWorld
+import ru.cherryngine.engine.ecs.events.LastPlayerPositionEvent
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.lib.minecraft.registry.Registries
@@ -86,6 +87,7 @@ class InstanceFactory(
         instance.initEager()
 
         val ecsWorld = configureWorld {
+            oneShotComponents(LastPlayerPositionEvent)
             systems {
                 prefab.systems.forEach { config ->
                     add(config.create(instance))

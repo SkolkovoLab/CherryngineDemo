@@ -28,7 +28,6 @@ class DemoInit(instanceFactory: InstanceFactory) {
                 PhysicsSystem.Config,
                 ViewContextSyncConfig,
                 WriteClientPositionConfig,
-                ClearEventsConfig,
             ),
         )
 
