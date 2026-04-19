@@ -13,6 +13,7 @@ import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.InstanceJoinChannel
 import ru.cherryngine.impl.demo.InstanceLeaveChannel
+import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
@@ -27,6 +28,7 @@ class PlayerInitSystem(
     private val leaveChannel: Channel<Player>,
     private val playerRenderers: List<PlayerRenderer>,
     private val playerManager: PlayerManager,
+    private val playerPhysicsState: PlayerPhysicsState,
     private val defaultViewContextID: String,
     private val spawnPosition: Vec3D,
 ) : IntervalSystem() {
@@ -43,6 +45,7 @@ class PlayerInitSystem(
             toRemove.forEach { player ->
                 playerRenderers.forEach { it.onLeave(player) }
             }
+            toRemoveUUIDs.forEach { uuid -> playerPhysicsState.unregister(uuid) }
             world.family { all(PlayerComponent) }.forEach {
                 if (it[PlayerComponent].uuid in toRemoveUUIDs) it.remove()
             }
@@ -99,6 +102,7 @@ class PlayerInitSystem(
             leaveChannel = instance.get<InstanceLeaveChannel>().channel,
             playerRenderers = instance.getAll(),
             playerManager = instance.get(),
+            playerPhysicsState = instance.get(),
             defaultViewContextID = spawnViewContext,
             spawnPosition = spawnPosition,
         )

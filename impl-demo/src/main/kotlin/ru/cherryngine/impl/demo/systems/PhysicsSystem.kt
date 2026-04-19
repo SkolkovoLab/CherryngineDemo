@@ -14,6 +14,7 @@ import ru.cherryngine.engine.physics.terrain.ActiveBodyInfo
 import ru.cherryngine.engine.physics.terrain.LayerWithContext
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.impl.demo.EcsSystemConfig
+import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
@@ -24,11 +25,12 @@ class PhysicsSystem(
     private val terrainGenerator: TerrainGenerator,
     private val serverWorld: ServerWorld,
     private val outputProvider: PlayerOutputProvider,
+    private val playerPhysicsState: PlayerPhysicsState,
 ) : IteratingSystem(
     family { all(PhysicsComponent) }
 ) {
     companion object {
-        // Смещение центра капсулы относительно ног игрока (половина высоты 1.8)
+        // Смещение центра хитбокса (box 0.6x1.8x0.6) относительно ног игрока
         private val PLAYER_HITBOX_OFFSET = Vec3D(0.0, 0.9, 0.0)
     }
 
@@ -46,6 +48,10 @@ class PhysicsSystem(
                     is PhysicsComponent.BodyInfo.Cube -> physicsSpace.addCube(pos, Vec3D.ONE)
                     is PhysicsComponent.BodyInfo.Player -> physicsSpace.addPlayer(pos + PLAYER_HITBOX_OFFSET)
                 }
+            }
+            val playerUuid = entity.getOrNull(PlayerComponent)?.uuid
+            if (comp.bodyInfo is PhysicsComponent.BodyInfo.Player && playerUuid != null) {
+                playerPhysicsState.register(playerUuid, comp.physicsId)
             }
         }
 
@@ -113,11 +119,11 @@ class PhysicsSystem(
             val hitboxPos = body.getTransform().translation
             val diff = targetPos - hitboxPos
 
-            if (diff.length() > 0.05) {
+            if (diff.length() > 0.1) {
                 // Хитбокс не смог догнать игрока — препятствие на пути
-                val meetingPoint = hitboxPos + diff * 0.5
+                val meetingPoint = hitboxPos + diff * 0.5 + Vec3D(0.0, 0.1, 0.0)
 
-                // Тянем игрока к точке встречи (переводим обратно в координаты ног)
+                // Тянем игрока к точке встречи
                 val pushToPlayer = (meetingPoint - PLAYER_HITBOX_OFFSET) - playerPos
                 entity.getOrNull(PlayerComponent)?.uuid?.let { uuid ->
                     outputProvider.setVelocity(uuid, pushToPlayer * 20.0)
@@ -164,6 +170,6 @@ class PhysicsSystem(
 
     object Config : EcsSystemConfig {
         override fun create(instance: Instance) =
-            PhysicsSystem(instance.get(), instance.get(), instance.get(), instance.get())
+            PhysicsSystem(instance.get(), instance.get(), instance.get(), instance.get(), instance.get())
     }
 }
