@@ -6,31 +6,19 @@ import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
-import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerManager
-import ru.cherryngine.engine.mcprotocollib.McProtocolLibCommandNodeUtils
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibPlayer
-import ru.cherryngine.impl.demo.renderer.PlayerRenderer
-import java.util.*
 import kotlin.time.Duration
 
 @InstanceSingleton(platform = "mcprotocollib", stage = TickStage.PRE)
 class McProtocolLibCommandTickable(
     private val playerManager: PlayerManager,
     private val commandManager: CherryngineCommandManager,
-) : Tickable, PlayerRenderer {
-    private val playersWithCommandTree = mutableSetOf<UUID>()
+) : Tickable {
 
     override fun tick(delta: Duration) {
         for (player in playerManager.onlinePlayers()) {
             val mcplPlayer = player as? McProtocolLibPlayer ?: continue
-
-            if (mcplPlayer.uuid !in playersWithCommandTree) {
-                mcplPlayer.session.send(
-                    McProtocolLibCommandNodeUtils.commandsPacket(commandManager.commandTree().rootNode())
-                )
-                playersWithCommandTree.add(mcplPlayer.uuid)
-            }
 
             while (true) {
                 val command = mcplPlayer.pendingCommands.poll() ?: break
@@ -55,9 +43,5 @@ class McProtocolLibCommandTickable(
                     }
             }
         }
-    }
-
-    override fun onLeave(player: Player) {
-        playersWithCommandTree.remove(player.uuid)
     }
 }

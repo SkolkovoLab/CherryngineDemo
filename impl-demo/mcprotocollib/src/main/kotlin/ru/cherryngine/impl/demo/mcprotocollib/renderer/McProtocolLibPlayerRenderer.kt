@@ -6,13 +6,17 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.player.PlayerSpawnIn
 import org.geysermc.mcprotocollib.protocol.data.game.level.notify.GameEvent
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundLoginPacket
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.level.ClientboundGameEventPacket
+import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.player.Player
+import ru.cherryngine.engine.mcprotocollib.McProtocolLibCommandNodeUtils
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibPlayer
 import ru.cherryngine.impl.demo.renderer.PlayerRenderer
 
 @InstanceSingleton(platform = "mcprotocollib")
-class McProtocolLibPlayerRenderer : PlayerRenderer {
+class McProtocolLibPlayerRenderer(
+    private val commandManager: CherryngineCommandManager,
+) : PlayerRenderer {
 
     override fun onJoin(player: Player) {
         val mcplPlayer = player as? McProtocolLibPlayer ?: return
@@ -30,6 +34,9 @@ class McProtocolLibPlayerRenderer : PlayerRenderer {
             )
         )
         session.send(ClientboundGameEventPacket(GameEvent.LEVEL_CHUNKS_LOAD_START, null))
+        session.send(
+            McProtocolLibCommandNodeUtils.commandsPacket(commandManager.commandTree().rootNode())
+        )
     }
 
     override fun onViewContextChanged(player: Player, contextIDs: Set<String>) {

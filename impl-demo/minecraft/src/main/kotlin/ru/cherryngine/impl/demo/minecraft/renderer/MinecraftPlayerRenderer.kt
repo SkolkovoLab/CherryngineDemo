@@ -1,7 +1,9 @@
 package ru.cherryngine.impl.demo.minecraft.renderer
 
+import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.player.Player
+import ru.cherryngine.engine.minecraft.commandmanager.CommandNodeUtils
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
 import ru.cherryngine.impl.demo.renderer.PlayerRenderer
 import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundGameEventPacket
@@ -11,7 +13,9 @@ import ru.cherryngine.lib.minecraft.registry.Registries
 import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 
 @InstanceSingleton(platform = "minecraft")
-class MinecraftPlayerRenderer : PlayerRenderer {
+class MinecraftPlayerRenderer(
+    private val commandManager: CherryngineCommandManager,
+) : PlayerRenderer {
 
     override fun onJoin(player: Player) {
         val mcPlayer = player as? MinecraftPlayer ?: return
@@ -26,6 +30,9 @@ class MinecraftPlayerRenderer : PlayerRenderer {
         )
         mcPlayer.connection.sendPacket(
             ClientboundGameEventPacket(ClientboundGameEventPacket.GameEvent.START_WAITING_FOR_CHUNKS, 0f)
+        )
+        mcPlayer.connection.sendPacket(
+            CommandNodeUtils.commandsPacket(commandManager.commandTree().rootNode())
         )
     }
 
