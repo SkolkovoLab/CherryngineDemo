@@ -5,6 +5,7 @@ import ru.cherryngine.engine.bedrock.entity.BedrockEntity
 import ru.cherryngine.engine.bedrock.entity.BedrockEntityRegistry
 import ru.cherryngine.engine.bedrock.entity.Fmbe
 import ru.cherryngine.engine.bedrock.world.BedrockBlockMapping
+import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.impl.demo.renderer.CubeRenderer
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
@@ -15,6 +16,7 @@ import java.util.*
  * FMBE (Fox MBE) cube renderer.
  * Invisible fox holds a block in its mouth, FMBE animations control transform.
  */
+@InstanceSingleton(platform = "bedrock")
 class BedrockCubeRenderer(
     private val entityRegistry: BedrockEntityRegistry,
     private val blockMapping: BedrockBlockMapping,

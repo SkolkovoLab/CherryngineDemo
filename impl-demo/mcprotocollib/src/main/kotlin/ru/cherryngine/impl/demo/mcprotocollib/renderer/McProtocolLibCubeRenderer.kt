@@ -8,6 +8,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.Boolea
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.IntEntityMetadata
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ObjectEntityMetadata
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType
+import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntity
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntityRegistry
 import ru.cherryngine.impl.demo.renderer.CubeRenderer
@@ -19,6 +20,7 @@ import java.util.*
 import kotlin.random.Random
 import org.geysermc.mcprotocollib.protocol.data.game.item.ItemStack as McplItemStack
 
+@InstanceSingleton(platform = "mcprotocollib")
 class McProtocolLibCubeRenderer(
     private val entityRegistry: McProtocolLibEntityRegistry,
 ) : CubeRenderer {

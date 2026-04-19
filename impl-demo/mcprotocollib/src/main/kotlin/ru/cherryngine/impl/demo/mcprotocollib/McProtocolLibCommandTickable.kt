@@ -3,6 +3,8 @@ package ru.cherryngine.impl.demo.mcprotocollib
 import org.geysermc.mcprotocollib.protocol.packet.ingame.clientbound.ClientboundCommandSuggestionsPacket
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.commandmanager.CommandSender
+import ru.cherryngine.engine.core.instance.InstanceSingleton
+import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibCommandNodeUtils
@@ -10,6 +12,7 @@ import ru.cherryngine.engine.mcprotocollib.McProtocolLibPlayer
 import java.util.*
 import kotlin.time.Duration
 
+@InstanceSingleton(platform = "mcprotocollib", stage = TickStage.PRE)
 class McProtocolLibCommandTickable(
     private val playerManager: PlayerManager,
     private val commandManager: CherryngineCommandManager,

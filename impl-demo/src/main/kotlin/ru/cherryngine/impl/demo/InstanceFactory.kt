@@ -1,16 +1,17 @@
 package ru.cherryngine.impl.demo
 
 import com.github.quillraven.fleks.configureWorld
+import io.micronaut.context.ApplicationContext
 import jakarta.inject.Singleton
+import kotlinx.coroutines.channels.Channel
 import net.kyori.adventure.text.Component
+import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.InstanceRouter
 import ru.cherryngine.engine.core.player.PlayerInputProvider
-import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
-import ru.cherryngine.engine.core.services.WorldService
-import ru.cherryngine.engine.ecs.EcsWorldTickable
+import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.lib.minecraft.registry.Registries
@@ -22,8 +23,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class InstanceFactory(
-    private val playerManager: PlayerManager,
-    private val worldService: WorldService,
+    private val appContext: ApplicationContext,
     private val instanceRouter: InstanceRouter,
     private val platformModules: List<PlatformModule>,
 ) {
@@ -44,10 +44,25 @@ class InstanceFactory(
         }
         serverWorld.dimensionType = dimensionType
 
+        val joinChannel = Channel<UUID>(Channel.UNLIMITED)
+        val leaveChannel = Channel<UUID>(Channel.UNLIMITED)
+        instanceRouter.register(prefab.id, joinChannel, leaveChannel)
+
+        val instance = Instance(
+            tickDuration = 50.milliseconds,
+            platformIds = prefab.platformIds.toSet(),
+            appContext = appContext,
+        ).apply {
+            register(InstancePrefab::class.java, prefab)
+            register(ServerWorld::class.java, serverWorld)
+            register(InstanceJoinChannel(joinChannel))
+            register(InstanceLeaveChannel(leaveChannel))
+        }
+
         val activePlatforms = prefab.platformIds.map { id ->
             platformModules.firstOrNull { it.id == id }
                 ?: error("Unknown platform: $id")
-        }.map { it.createProviders(serverWorld) }
+        }.map { it.createProviders(instance, serverWorld) }
 
         val inputProvider = object : PlayerInputProvider {
             override fun getPosition(uuid: UUID) =
@@ -64,35 +79,23 @@ class InstanceFactory(
                 activePlatforms.forEach { it.outputProvider.setVelocity(uuid, velocity) }
         }
 
-        val scope = InstanceScope(
-            instanceId = prefab.id,
-            serverWorld = serverWorld,
-            inputProvider = inputProvider,
-            outputProvider = outputProvider,
-            axolotlRenderers = activePlatforms.map { it.axolotlRenderer },
-            cubeRenderers = activePlatforms.map { it.cubeRenderer },
-            playerManager = playerManager,
-            worldService = worldService,
-            instanceRouter = instanceRouter,
-        )
+        instance.register(PlayerInputProvider::class.java, inputProvider)
+        instance.register(PlayerOutputProvider::class.java, outputProvider)
+
+        instance.initEager()
 
         val ecsWorld = configureWorld {
             systems {
                 prefab.systems.forEach { config ->
-                    add(config.create(scope))
+                    add(config.create(instance))
                 }
             }
         }
+        instance.register(EcsWorld::class.java, ecsWorld)
 
-        activePlatforms.forEach {
-            it.commandManager.registerCommands(TestCommand(ecsWorld))
-        }
+        instance.get<CherryngineCommandManager>().registerCommands(TestCommand(ecsWorld))
 
-        val instance = Instance(
-            tickDuration = 50.milliseconds,
-            tickables = listOf(EcsWorldTickable(ecsWorld)) + activePlatforms.flatMap { it.tickables },
-        )
-        instance.start()
+        instance.startTicking()
         return instance
     }
 }

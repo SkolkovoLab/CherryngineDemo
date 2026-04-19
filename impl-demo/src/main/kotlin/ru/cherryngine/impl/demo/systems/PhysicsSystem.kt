@@ -2,18 +2,18 @@ package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
-import ru.cherryngine.impl.demo.EcsSystemConfig
-import ru.cherryngine.impl.demo.InstanceScope
+import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.ActiveBodyInfo
 import ru.cherryngine.engine.physics.terrain.LayerWithContext
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
-import ru.cherryngine.engine.ecs.components.ViewableComponent
+import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
@@ -163,7 +163,7 @@ class PhysicsSystem(
     }
 
     object Config : EcsSystemConfig {
-        override fun create(scope: InstanceScope) =
-            PhysicsSystem(scope.physicsSpace, scope.terrainGenerator, scope.serverWorld, scope.outputProvider)
+        override fun create(instance: Instance) =
+            PhysicsSystem(instance.get(), instance.get(), instance.get(), instance.get())
     }
 }

@@ -1,6 +1,7 @@
 package ru.cherryngine.impl.demo.minecraft.renderer
 
 import net.kyori.adventure.key.Key
+import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.minecraft.entity.McEntity
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
 import ru.cherryngine.impl.demo.renderer.CubeRenderer
@@ -14,6 +15,7 @@ import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
 import java.util.*
 import kotlin.random.Random
 
+@InstanceSingleton(platform = "minecraft")
 class MinecraftCubeRenderer(
     private val mcEntityRegistry: McEntityRegistry,
 ) : CubeRenderer {

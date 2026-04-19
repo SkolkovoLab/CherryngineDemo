@@ -6,6 +6,7 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.Boolea
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.IntEntityMetadata
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ObjectEntityMetadata
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType
+import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntity
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntityRegistry
@@ -17,6 +18,7 @@ import ru.cherryngine.lib.minecraft.entity.AxolotlMeta
 import java.util.*
 import kotlin.random.Random
 
+@InstanceSingleton(platform = "mcprotocollib")
 class McProtocolLibAxolotlRenderer(
     private val entityRegistry: McProtocolLibEntityRegistry,
     private val playerManager: PlayerManager,

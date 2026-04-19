@@ -1,20 +1,19 @@
 package ru.cherryngine.impl.demo.bedrock
 
-import org.cloudburstmc.protocol.bedrock.data.command.CommandData
-import org.cloudburstmc.protocol.bedrock.data.command.CommandOverloadData
-import org.cloudburstmc.protocol.bedrock.data.command.CommandParam
-import org.cloudburstmc.protocol.bedrock.data.command.CommandParamData
-import org.cloudburstmc.protocol.bedrock.data.command.CommandPermission
+import org.cloudburstmc.protocol.bedrock.data.command.*
 import org.cloudburstmc.protocol.bedrock.packet.AvailableCommandsPacket
 import org.incendo.cloud.parser.standard.LiteralParser
 import ru.cherryngine.engine.bedrock.BedrockPlayer
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.commandmanager.CommandSender
+import ru.cherryngine.engine.core.instance.InstanceSingleton
+import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import java.util.*
 import kotlin.time.Duration
 
+@InstanceSingleton(platform = "bedrock", stage = TickStage.PRE)
 class BedrockCommandTickable(
     private val playerManager: PlayerManager,
     private val commandManager: CherryngineCommandManager,

@@ -3,18 +3,20 @@ package ru.cherryngine.impl.demo.systems
 import com.github.quillraven.fleks.IntervalSystem
 import kotlinx.coroutines.channels.Channel
 import net.kyori.adventure.key.Key
-import ru.cherryngine.impl.demo.EcsSystemConfig
-import ru.cherryngine.impl.demo.InstanceScope
 import org.slf4j.LoggerFactory
+import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
-import ru.cherryngine.lib.math.Transform
-import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.engine.ecs.components.ViewableComponent
+import ru.cherryngine.impl.demo.EcsSystemConfig
+import ru.cherryngine.impl.demo.InstanceJoinChannel
+import ru.cherryngine.impl.demo.InstanceLeaveChannel
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
+import ru.cherryngine.lib.math.Transform
+import ru.cherryngine.lib.math.Vec3D
 import java.util.*
 
 class PlayerInitSystem(
@@ -93,10 +95,10 @@ class PlayerInitSystem(
         val spawnViewContext: String,
         val spawnPosition: Vec3D,
     ) : EcsSystemConfig {
-        override fun create(scope: InstanceScope) =
+        override fun create(instance: Instance) =
             PlayerInitSystem(
-                joinChannel = scope.joinChannel,
-                leaveChannel = scope.leaveChannel,
+                joinChannel = instance.get<InstanceJoinChannel>().channel,
+                leaveChannel = instance.get<InstanceLeaveChannel>().channel,
                 defaultViewContextID = spawnViewContext,
                 spawnPosition = spawnPosition,
             )

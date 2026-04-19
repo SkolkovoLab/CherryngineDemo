@@ -2,12 +2,12 @@ package ru.cherryngine.impl.demo.systems
 
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
+import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.ecs.EcsEntity
-import ru.cherryngine.impl.demo.EcsSystemConfig
-import ru.cherryngine.impl.demo.InstanceScope
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
+import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.components.ApartComponent
 import ru.cherryngine.lib.math.Cuboid
 import ru.cherryngine.lib.math.Vec3D
@@ -42,6 +42,6 @@ class ApartSystem : IteratingSystem(
     }
 
     object Config : EcsSystemConfig {
-        override fun create(scope: InstanceScope) = ApartSystem()
+        override fun create(instance: Instance) = ApartSystem()
     }
 }
