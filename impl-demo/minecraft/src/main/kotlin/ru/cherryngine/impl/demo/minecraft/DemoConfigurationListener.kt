@@ -10,6 +10,6 @@ import ru.cherryngine.engine.minecraft.events.PlayerConfigurationAsyncEvent
 class DemoConfigurationListener {
     @EventListener
     fun onPlayerConfiguration(event: PlayerConfigurationAsyncEvent) = runBlocking {
-        delay(3000)
+        delay(1000)
     }
 }

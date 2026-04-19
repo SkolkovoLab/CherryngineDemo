@@ -5,9 +5,11 @@ import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
+import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.minecraft.commandmanager.CommandNodeUtils
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
+import ru.cherryngine.impl.demo.renderer.PlayerRenderer
 import ru.cherryngine.lib.minecraft.network.protocol.packets.ProtocolState
 import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundCommandSuggestionsPacket
 import java.util.*
@@ -17,7 +19,7 @@ import kotlin.time.Duration
 class MinecraftCommandTickable(
     private val playerManager: PlayerManager,
     private val commandManager: CherryngineCommandManager,
-) : Tickable {
+) : Tickable, PlayerRenderer {
     private val playersWithCommandTree = mutableSetOf<UUID>()
 
     override fun tick(delta: Duration) {
@@ -57,7 +59,7 @@ class MinecraftCommandTickable(
         }
     }
 
-    fun onPlayerLeave(uuid: UUID) {
-        playersWithCommandTree.remove(uuid)
+    override fun onLeave(player: Player) {
+        playersWithCommandTree.remove(player.uuid)
     }
 }

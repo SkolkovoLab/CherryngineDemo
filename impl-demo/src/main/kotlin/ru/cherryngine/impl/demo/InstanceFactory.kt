@@ -9,6 +9,7 @@ import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.InstanceRouter
+import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
 import ru.cherryngine.engine.ecs.EcsWorld
@@ -45,7 +46,7 @@ class InstanceFactory(
         serverWorld.dimensionType = dimensionType
 
         val joinChannel = Channel<UUID>(Channel.UNLIMITED)
-        val leaveChannel = Channel<UUID>(Channel.UNLIMITED)
+        val leaveChannel = Channel<Player>(Channel.UNLIMITED)
         instanceRouter.register(prefab.id, joinChannel, leaveChannel)
 
         val instance = Instance(

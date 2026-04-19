@@ -1,7 +1,10 @@
 package ru.cherryngine.impl.demo.systems
 
 import ru.cherryngine.engine.core.instance.Instance
-import ru.cherryngine.engine.ecs.systems.*
+import ru.cherryngine.engine.ecs.systems.ClearEventsSystem
+import ru.cherryngine.engine.ecs.systems.CommandActionsSystem
+import ru.cherryngine.engine.ecs.systems.ReadClientPositionSystem
+import ru.cherryngine.engine.ecs.systems.WriteClientPositionSystem
 import ru.cherryngine.impl.demo.EcsSystemConfig
 
 object ReadClientPositionConfig : EcsSystemConfig {
@@ -17,7 +20,10 @@ object CommandActionsConfig : EcsSystemConfig {
 }
 
 object ViewContextSyncConfig : EcsSystemConfig {
-    override fun create(instance: Instance) = ViewContextSyncSystem(instance.get(), instance.get())
+    override fun create(instance: Instance) = ViewContextSyncSystem(
+        playerRenderers = instance.getAll(),
+        playerManager = instance.get(),
+    )
 }
 
 object ClearEventsConfig : EcsSystemConfig {

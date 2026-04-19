@@ -7,7 +7,6 @@ import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.IntEnt
 import org.geysermc.mcprotocollib.protocol.data.game.entity.metadata.type.ObjectEntityMetadata
 import org.geysermc.mcprotocollib.protocol.data.game.entity.type.EntityType
 import ru.cherryngine.engine.core.instance.InstanceSingleton
-import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntity
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibEntityRegistry
 import ru.cherryngine.engine.mcprotocollib.McProtocolLibPlayer
@@ -21,7 +20,6 @@ import kotlin.random.Random
 @InstanceSingleton(platform = "mcprotocollib")
 class McProtocolLibAxolotlRenderer(
     private val entityRegistry: McProtocolLibEntityRegistry,
-    private val playerManager: PlayerManager,
 ) : AxolotlRenderer {
     private val entities = HashMap<UUID, McProtocolLibEntity>()
 
