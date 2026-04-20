@@ -12,6 +12,8 @@ import ru.cherryngine.engine.core.player.InstanceRouter
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
+import net.kyori.adventure.key.Key
+import net.minestom.server.registry.Registries
 import net.minestom.server.world.DimensionType
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.lib.math.Vec3D
@@ -26,9 +28,19 @@ class InstanceFactory(
     private val appContext: ApplicationContext,
     private val instanceRouter: InstanceRouter,
     private val platformModules: List<PlatformModule>,
+    private val registries: Registries,
 ) {
     fun create(prefab: InstancePrefab): Instance {
-        val dimensionType: DimensionType = DimensionType.builder().build()
+        val overworldKey = Key.key("minecraft:overworld")
+        val dimensionType: DimensionType = registries.dimensionType().get(overworldKey)
+            ?: error("overworld DimensionType отсутствует в registries")
+
+        val biomeRegistry = registries.biome()
+        val biomeIdLookup: (String) -> Int = { id ->
+            val key = if (id.contains(':')) Key.key(id) else Key.key("minecraft", id)
+            val registryKey = biomeRegistry.getKey(key)
+            if (registryKey != null) biomeRegistry.getId(registryKey).coerceAtLeast(0) else 0
+        }
 
         val serverWorld = ServerWorld()
         prefab.worlds.forEach { worldConfig ->
@@ -36,9 +48,9 @@ class InstanceFactory(
                 .getResource("/worlds/${worldConfig.name}.polar")!!
                 .readBytes()
             val layer = if (worldConfig.mutable) {
-                PolarWorldGenerator.loadAsMutableLayer(bytes, dimensionType, worldConfig.name)
+                PolarWorldGenerator.loadAsMutableLayer(bytes, dimensionType, worldConfig.name, biomeIdLookup = biomeIdLookup)
             } else {
-                PolarWorldGenerator.loadAsLayer(bytes, dimensionType, worldConfig.name)
+                PolarWorldGenerator.loadAsLayer(bytes, dimensionType, worldConfig.name, biomeIdLookup = biomeIdLookup)
             }
             serverWorld.registerLayer(worldConfig.name, LayerEntry(layer, worldConfig.priority))
         }
