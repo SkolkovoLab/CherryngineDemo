@@ -12,11 +12,10 @@ import ru.cherryngine.engine.core.player.InstanceRouter
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
+import net.minestom.server.world.DimensionType
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import ru.cherryngine.lib.minecraft.registry.Registries
-import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 import ru.cherryngine.lib.polar.PolarWorldGenerator
 import ru.cherryngine.lib.world.LayerEntry
 import java.util.*
@@ -29,7 +28,7 @@ class InstanceFactory(
     private val platformModules: List<PlatformModule>,
 ) {
     fun create(prefab: InstancePrefab): Instance {
-        val dimensionType = Registries.dimensionType[DimensionTypes.OVERWORLD].value
+        val dimensionType: DimensionType = DimensionType.builder().build()
 
         val serverWorld = ServerWorld()
         prefab.worlds.forEach { worldConfig ->
