@@ -12,7 +12,7 @@ class DemoInit(instanceFactory: InstanceFactory) {
     init {
         val lobbyPrefab = InstancePrefab(
             id = "lobby",
-            platformIds = listOf("minecraft", "mcprotocollib", "bedrock"),
+            platformIds = listOf("minecraft", "bedrock"),
             worlds = listOf(
                 WorldLayerConfig("gm_construct", priority = 0),
                 WorldLayerConfig("apart1", priority = 10),
