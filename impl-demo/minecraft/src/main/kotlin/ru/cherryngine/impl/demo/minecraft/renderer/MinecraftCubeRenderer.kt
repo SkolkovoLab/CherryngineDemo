@@ -1,6 +1,12 @@
 package ru.cherryngine.impl.demo.minecraft.renderer
 
 import net.kyori.adventure.key.Key
+import net.minestom.server.coordinate.Vec
+import net.minestom.server.entity.EntityType
+import net.minestom.server.entity.Metadata
+import net.minestom.server.entity.MetadataDef
+import net.minestom.server.item.ItemStack
+import net.minestom.server.item.Material
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.minecraft.entity.McEntity
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
@@ -8,11 +14,7 @@ import ru.cherryngine.impl.demo.renderer.CubeRenderer
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import ru.cherryngine.lib.minecraft.entity.ItemDisplayMeta
-import ru.cherryngine.lib.minecraft.item.ItemStack
-import ru.cherryngine.lib.minecraft.registry.Registries
-import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
-import java.util.*
+import java.util.UUID
 import kotlin.random.Random
 
 @InstanceSingleton(platform = "minecraft")
@@ -24,11 +26,11 @@ class MinecraftCubeRenderer(
     override fun onAdd(id: UUID) {
         val mcEntity = McEntity(
             Random.nextInt(1000, 1_000_000),
-            Registries.entityType[EntityTypes.ITEM_DISPLAY].value
+            EntityType.ITEM_DISPLAY,
         )
-        mcEntity.metadata[ItemDisplayMeta.HAS_NO_GRAVITY] = true
-        mcEntity.metadata[ItemDisplayMeta.TRANSFORMATION_INTERPOLATION_DURATION] = 1
-        mcEntity.metadata[ItemDisplayMeta.POSITION_ROTATION_INTERPOLATION_DURATION] = 1
+        mcEntity.metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)
+        mcEntity.metadata[MetadataDef.Display.TRANSFORMATION_INTERPOLATION_DURATION.index()] = Metadata.VarInt(1)
+        mcEntity.metadata[MetadataDef.Display.POSITION_ROTATION_INTERPOLATION_DURATION.index()] = Metadata.VarInt(1)
         entities[id] = mcEntity
         mcEntityRegistry.add(mcEntity)
     }
@@ -49,11 +51,15 @@ class MinecraftCubeRenderer(
         val mcEntity = entities[id] ?: return
         mcEntity.teleport(position, yawPitch)
         mcEntity.viewContextIDs = viewContextIDs
-        mcEntity.metadata[ItemDisplayMeta.DISPLAYED_ITEM] = ItemStack(Registries.item[material].value)
-        mcEntity.metadata[ItemDisplayMeta.TRANSLATION] = transform.translation
-        mcEntity.metadata[ItemDisplayMeta.ROTATION_LEFT] = transform.rotation
-        mcEntity.metadata[ItemDisplayMeta.SCALE] = transform.scale
-        mcEntity.metadata[ItemDisplayMeta.INTERPOLATION_DELAY] = 0
+        val mat = Material.fromKey(material) ?: Material.AIR
+        val t = transform.translation
+        val s = transform.scale
+        val q = transform.rotation
+        mcEntity.metadata[MetadataDef.ItemDisplay.DISPLAYED_ITEM.index()] = Metadata.ItemStack(ItemStack.of(mat))
+        mcEntity.metadata[MetadataDef.Display.TRANSLATION.index()] = Metadata.Vector3(Vec(t.x, t.y, t.z))
+        mcEntity.metadata[MetadataDef.Display.ROTATION_LEFT.index()] = Metadata.Quaternion(floatArrayOf(q.x.toFloat(), q.y.toFloat(), q.z.toFloat(), q.w.toFloat()))
+        mcEntity.metadata[MetadataDef.Display.SCALE.index()] = Metadata.Vector3(Vec(s.x, s.y, s.z))
+        mcEntity.metadata[MetadataDef.Display.INTERPOLATION_DELAY.index()] = Metadata.VarInt(0)
         mcEntity.resendMeta()
     }
 }

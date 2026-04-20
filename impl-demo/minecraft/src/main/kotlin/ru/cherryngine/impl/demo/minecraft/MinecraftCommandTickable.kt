@@ -1,5 +1,6 @@
 package ru.cherryngine.impl.demo.minecraft
 
+import net.minestom.server.network.packet.server.play.TabCompletePacket
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.instance.InstanceSingleton
@@ -7,7 +8,6 @@ import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
-import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundCommandSuggestionsPacket
 import kotlin.time.Duration
 
 @InstanceSingleton(platform = "minecraft", stage = TickStage.PRE)
@@ -32,12 +32,12 @@ class MinecraftCommandTickable(
                         if (throwable != null) throw throwable
                         val lastSpace = input.lastIndexOf(' ')
                         mcPlayer.connection.sendPacket(
-                            ClientboundCommandSuggestionsPacket(
+                            TabCompletePacket(
                                 transactionId,
                                 lastSpace + 2,
                                 input.length - lastSpace - 1,
                                 suggestions.list().map {
-                                    ClientboundCommandSuggestionsPacket.Suggestion(it.suggestion(), null)
+                                    TabCompletePacket.Match(it.suggestion(), null)
                                 }
                             )
                         )

@@ -11,12 +11,11 @@ import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import ru.cherryngine.lib.minecraft.entity.EntityMeta
-import ru.cherryngine.lib.minecraft.entity.ShulkerMeta
-import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundSetPassengersPacket
-import ru.cherryngine.lib.minecraft.network.protocol.types.Direction
-import ru.cherryngine.lib.minecraft.registry.Registries
-import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
+import net.minestom.server.entity.EntityType
+import net.minestom.server.entity.Metadata
+import net.minestom.server.entity.MetadataDef
+import net.minestom.server.network.packet.server.play.SetPassengersPacket
+import net.minestom.server.utils.Direction
 import java.util.*
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -62,17 +61,17 @@ class MinecraftPlayerPlatformTickable(
                 val pair = platforms.getOrPut(playerUuid) {
                     val vehicle = McEntity(
                         Random.nextInt(1_000_000, 9_000_000),
-                        Registries.entityType[EntityTypes.ITEM_DISPLAY].value
+                        EntityType.ITEM_DISPLAY,
                     ).apply {
-                        metadata[EntityMeta.HAS_NO_GRAVITY] = true
+                        metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)
                         viewerPredicate = { it.uuid == playerUuid }
                     }
                     val passenger = McEntity(
                         Random.nextInt(1_000_000, 9_000_000),
-                        Registries.entityType[EntityTypes.SHULKER].value
+                        EntityType.SHULKER,
                     ).apply {
-                        metadata[EntityMeta.HAS_NO_GRAVITY] = true
-                        metadata[ShulkerMeta.ATTACH_FACE] = Direction.DOWN
+                        metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)
+                        metadata[MetadataDef.Shulker.ATTACH_FACE.index()] = Metadata.Direction(Direction.DOWN)
                         viewerPredicate = { it.uuid == playerUuid }
                     }
                     mcEntityRegistry.add(vehicle)
@@ -89,7 +88,7 @@ class MinecraftPlayerPlatformTickable(
 
                 // Каждый тик связываем шалкера с item display — packet идемпотентен.
                 mcPlayer.connection.sendPacket(
-                    ClientboundSetPassengersPacket(
+                    SetPassengersPacket(
                         pair.vehicle.entityId,
                         listOf(pair.passenger.entityId)
                     )

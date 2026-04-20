@@ -1,6 +1,10 @@
 package ru.cherryngine.impl.demo.minecraft.renderer
 
 import net.kyori.adventure.text.Component
+import net.minestom.server.entity.EntityType
+import net.minestom.server.entity.Metadata
+import net.minestom.server.entity.MetadataDef
+import net.minestom.server.entity.metadata.water.AxolotlMeta
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.minecraft.entity.McEntity
 import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
@@ -8,10 +12,7 @@ import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
 import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import ru.cherryngine.lib.minecraft.entity.AxolotlMeta
-import ru.cherryngine.lib.minecraft.registry.Registries
-import ru.cherryngine.lib.minecraft.registry.keys.EntityTypes
-import java.util.*
+import java.util.UUID
 import kotlin.random.Random
 
 @InstanceSingleton(platform = "minecraft")
@@ -23,11 +24,11 @@ class MinecraftAxolotlRenderer(
     override fun onAdd(id: UUID) {
         val mcEntity = McEntity(
             Random.nextInt(1000, 1_000_000),
-            Registries.entityType[EntityTypes.AXOLOTL].value
+            EntityType.AXOLOTL,
         ).apply {
-            metadata[AxolotlMeta.HAS_NO_GRAVITY] = true
-            metadata[AxolotlMeta.VARIANT] = AxolotlMeta.Variant.entries.random()
-            metadata[AxolotlMeta.CUSTOM_NAME_VISIBLE] = true
+            metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)
+            metadata[MetadataDef.Axolotl.VARIANT.index()] = Metadata.VarInt(AxolotlMeta.Variant.values().random().ordinal)
+            metadata[MetadataDef.CUSTOM_NAME_VISIBLE.index()] = Metadata.Boolean(true)
         }
         entities[id] = mcEntity
         mcEntityRegistry.add(mcEntity)
@@ -49,13 +50,13 @@ class MinecraftAxolotlRenderer(
         val mcEntity = entities[id] ?: return
         mcEntity.teleport(position, yawPitch)
         mcEntity.viewContextIDs = viewContextIDs
-        if (hiddenFromPlayer != null) {
-            mcEntity.viewerPredicate = { (it as? MinecraftPlayer)?.uuid != hiddenFromPlayer }
+        mcEntity.viewerPredicate = if (hiddenFromPlayer != null) {
+            { (it as? MinecraftPlayer)?.uuid != hiddenFromPlayer }
         } else {
-            mcEntity.viewerPredicate = { true }
+            { true }
         }
         if (name != null) {
-            mcEntity.metadata[AxolotlMeta.CUSTOM_NAME] = Component.text(name)
+            mcEntity.metadata[MetadataDef.CUSTOM_NAME.index()] = Metadata.OptComponent(Component.text(name))
         }
         mcEntity.resendMeta()
     }

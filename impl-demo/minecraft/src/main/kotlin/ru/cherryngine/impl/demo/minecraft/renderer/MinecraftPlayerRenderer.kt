@@ -1,16 +1,14 @@
 package ru.cherryngine.impl.demo.minecraft.renderer
 
+import net.minestom.server.entity.GameMode
+import net.minestom.server.network.packet.server.play.ChangeGameStatePacket
+import net.minestom.server.network.packet.server.play.JoinGamePacket
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.minecraft.commandmanager.CommandNodeUtils
 import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
 import ru.cherryngine.impl.demo.renderer.PlayerRenderer
-import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundGameEventPacket
-import ru.cherryngine.lib.minecraft.network.protocol.packets.play.clientbound.ClientboundLoginPacket
-import ru.cherryngine.lib.minecraft.network.protocol.types.GameMode
-import ru.cherryngine.lib.minecraft.registry.Registries
-import ru.cherryngine.lib.minecraft.registry.keys.DimensionTypes
 
 @InstanceSingleton(platform = "minecraft")
 class MinecraftPlayerRenderer(
@@ -20,16 +18,17 @@ class MinecraftPlayerRenderer(
     override fun onJoin(player: Player) {
         val mcPlayer = player as? MinecraftPlayer ?: return
         mcPlayer.connection.sendPacket(
-            ClientboundLoginPacket(
-                0, false, listOf(), 20, 8, 8, false, true, false,
-                Registries.dimensionType[DimensionTypes.OVERWORLD].value,
-                "world", 0L,
+            JoinGamePacket(
+                0, false, listOf("minecraft:overworld"), 20,
+                8, 8, false, true, false,
+                0, // dimensionType id — в идеале из registries
+                "minecraft:overworld", 0L,
                 GameMode.CREATIVE, GameMode.CREATIVE,
-                false, false, null, 0, 32, false
+                false, false, null, 0, 64, false,
             )
         )
         mcPlayer.connection.sendPacket(
-            ClientboundGameEventPacket(ClientboundGameEventPacket.GameEvent.START_WAITING_FOR_CHUNKS, 0f)
+            ChangeGameStatePacket(ChangeGameStatePacket.Reason.LEVEL_CHUNKS_LOAD_START, 0f)
         )
         mcPlayer.connection.sendPacket(
             CommandNodeUtils.commandsPacket(commandManager.commandTree().rootNode())
