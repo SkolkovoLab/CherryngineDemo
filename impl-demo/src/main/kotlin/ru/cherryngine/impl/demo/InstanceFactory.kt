@@ -16,6 +16,7 @@ import net.kyori.adventure.key.Key
 import net.minestom.server.registry.Registries
 import net.minestom.server.world.DimensionType
 import ru.cherryngine.engine.ecs.EcsWorld
+import ru.cherryngine.engine.minecraft.MinecraftServerWorld
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.lib.polar.PolarWorldGenerator
@@ -42,7 +43,7 @@ class InstanceFactory(
             if (registryKey != null) biomeRegistry.getId(registryKey).coerceAtLeast(0) else 0
         }
 
-        val serverWorld = ServerWorld()
+        val serverWorld = MinecraftServerWorld()
         prefab.worlds.forEach { worldConfig ->
             val bytes = InstanceFactory::class.java
                 .getResource("/worlds/${worldConfig.name}.polar")!!
@@ -67,6 +68,7 @@ class InstanceFactory(
         ).apply {
             register(InstancePrefab::class.java, prefab)
             register(ServerWorld::class.java, serverWorld)
+            register(MinecraftServerWorld::class.java, serverWorld)
             register(InstanceJoinChannel(joinChannel))
             register(InstanceLeaveChannel(leaveChannel))
         }

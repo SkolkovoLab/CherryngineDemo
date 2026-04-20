@@ -5,6 +5,7 @@ plugins {
 dependencies {
     api(engine(":engine-core"))
     api(engine(":engine-ecs"))
+    api(engine(":engine-minecraft"))
     api(engine(":engine-physics"))
     api(engine(":lib-math"))
     api(engine(":lib-polar"))

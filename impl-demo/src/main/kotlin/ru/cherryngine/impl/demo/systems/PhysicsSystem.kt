@@ -3,7 +3,6 @@ package ru.cherryngine.impl.demo.systems
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import ru.cherryngine.engine.core.instance.Instance
-import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
@@ -11,7 +10,6 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.engine.physics.terrain.ActiveBodyInfo
-import ru.cherryngine.engine.physics.terrain.LayerWithContext
 import ru.cherryngine.engine.physics.terrain.TerrainGenerator
 import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.PlayerPhysicsState
@@ -23,7 +21,6 @@ import ru.cherryngine.lib.math.Vec3D
 class PhysicsSystem(
     private val physicsSpace: PhysicsSpace,
     private val terrainGenerator: TerrainGenerator,
-    private val serverWorld: ServerWorld,
     private val outputProvider: PlayerOutputProvider,
     private val playerPhysicsState: PlayerPhysicsState,
 ) : IteratingSystem(
@@ -99,12 +96,7 @@ class PhysicsSystem(
             ActiveBodyInfo(body.getWorldBounds(), body.getLinearVelocity(), contextIDs)
         }
 
-        val layers = serverWorld.getLayersByContext()
-            .flatMap { (contextID, entries) ->
-                val dt = serverWorld.dimensionType ?: return@flatMap emptyList()
-                entries.map { LayerWithContext(it, setOf(contextID), dt) }
-            }
-        terrainGenerator.step(delta, activeBodies, layers)
+        terrainGenerator.step(delta, activeBodies)
         physicsSpace.update(delta)
 
         // 4. ПОСЛЕ update — механика точки встречи
@@ -170,6 +162,6 @@ class PhysicsSystem(
 
     object Config : EcsSystemConfig {
         override fun create(instance: Instance) =
-            PhysicsSystem(instance.get(), instance.get(), instance.get(), instance.get(), instance.get())
+            PhysicsSystem(instance.get(), instance.get(), instance.get(), instance.get())
     }
 }
