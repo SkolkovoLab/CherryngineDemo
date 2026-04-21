@@ -8,9 +8,9 @@ import net.minestom.server.registry.Registries
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.player.Player
-import ru.cherryngine.engine.minecraft.commandmanager.CommandNodeUtils
-import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
 import ru.cherryngine.impl.demo.renderer.PlayerRenderer
+import ru.cherryngine.platform.minecraft.java.commandmanager.CommandNodeUtils
+import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 
 @InstanceSingleton(platform = "minecraft")
 class MinecraftPlayerRenderer(

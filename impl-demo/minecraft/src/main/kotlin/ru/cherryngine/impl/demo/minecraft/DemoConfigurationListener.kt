@@ -4,7 +4,7 @@ import io.micronaut.runtime.event.annotation.EventListener
 import jakarta.inject.Singleton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import ru.cherryngine.engine.minecraft.events.PlayerConfigurationAsyncEvent
+import ru.cherryngine.platform.minecraft.java.events.PlayerConfigurationAsyncEvent
 
 @Singleton
 class DemoConfigurationListener {

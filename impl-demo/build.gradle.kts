@@ -5,14 +5,13 @@ plugins {
 dependencies {
     api(engine(":engine-core"))
     api(engine(":engine-ecs"))
-    api(engine(":engine-minecraft"))
+    api(engine(":platform-minecraft-java"))
     api(engine(":engine-physics"))
     api(engine(":lib-math"))
-    api(engine(":lib-polar"))
 
     runtimeOnly(project(":impl-demo:minecraft"))
     runtimeOnly(project(":impl-demo:bedrock"))
 
-    api(engine(":engine-integration:viaversion"))
-//    api(engine(":engine-integration:grim"))
+    api(engine(":platform-minecraft-java:integration:viaversion"))
+//    api(engine(":platform-minecraft-java:integration:grim"))
 }

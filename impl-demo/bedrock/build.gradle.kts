@@ -4,5 +4,5 @@ plugins {
 
 dependencies {
     api(project(":impl-demo"))
-    api(engine(":engine-bedrock"))
+    api(engine(":platform-minecraft-bedrock"))
 }

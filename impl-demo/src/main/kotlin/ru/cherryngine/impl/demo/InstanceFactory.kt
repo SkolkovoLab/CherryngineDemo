@@ -4,7 +4,10 @@ import com.github.quillraven.fleks.configureWorld
 import io.micronaut.context.ApplicationContext
 import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.Channel
+import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
+import net.minestom.server.registry.Registries
+import net.minestom.server.world.DimensionType
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.instance.ServerWorld
@@ -12,15 +15,12 @@ import ru.cherryngine.engine.core.player.InstanceRouter
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
-import net.kyori.adventure.key.Key
-import net.minestom.server.registry.Registries
-import net.minestom.server.world.DimensionType
 import ru.cherryngine.engine.ecs.EcsWorld
-import ru.cherryngine.engine.minecraft.MinecraftServerWorld
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import ru.cherryngine.lib.polar.PolarWorldGenerator
-import ru.cherryngine.lib.world.LayerEntry
+import ru.cherryngine.platform.minecraft.java.MinecraftServerWorld
+import ru.cherryngine.platform.minecraft.java.world.LayerEntry
+import ru.cherryngine.platform.minecraft.java.world.polar.PolarWorldGenerator
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 

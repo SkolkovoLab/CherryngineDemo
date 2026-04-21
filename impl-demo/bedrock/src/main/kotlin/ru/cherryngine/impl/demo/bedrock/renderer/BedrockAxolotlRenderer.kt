@@ -2,12 +2,12 @@ package ru.cherryngine.impl.demo.bedrock.renderer
 
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag
-import ru.cherryngine.engine.bedrock.entity.BedrockEntity
-import ru.cherryngine.engine.bedrock.entity.BedrockEntityRegistry
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
+import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntity
+import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntityRegistry
 import java.util.*
 
 @InstanceSingleton(platform = "bedrock")

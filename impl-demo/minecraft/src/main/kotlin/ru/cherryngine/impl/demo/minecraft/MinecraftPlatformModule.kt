@@ -4,10 +4,10 @@ import jakarta.inject.Singleton
 import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.instance.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerManager
-import ru.cherryngine.engine.minecraft.player.MinecraftPlayerInputProvider
-import ru.cherryngine.engine.minecraft.player.MinecraftPlayerOutputProvider
 import ru.cherryngine.impl.demo.PlatformModule
 import ru.cherryngine.impl.demo.PlatformProviders
+import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayerInputProvider
+import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayerOutputProvider
 
 @Singleton
 class MinecraftPlatformModule(

@@ -1,12 +1,12 @@
 package ru.cherryngine.impl.demo.bedrock
 
-import ru.cherryngine.engine.bedrock.BedrockPlayer
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
+import ru.cherryngine.platform.minecraft.bedrock.BedrockPlayer
 import kotlin.time.Duration
 
 @InstanceSingleton(platform = "bedrock", stage = TickStage.PRE)

@@ -1,15 +1,15 @@
 package ru.cherryngine.impl.demo.bedrock.renderer
 
 import net.kyori.adventure.key.Key
-import ru.cherryngine.engine.bedrock.entity.BedrockEntity
-import ru.cherryngine.engine.bedrock.entity.BedrockEntityRegistry
-import ru.cherryngine.engine.bedrock.entity.Fmbe
-import ru.cherryngine.engine.bedrock.world.BedrockBlockMapping
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.impl.demo.renderer.CubeRenderer
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
+import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntity
+import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntityRegistry
+import ru.cherryngine.platform.minecraft.bedrock.entity.Fmbe
+import ru.cherryngine.platform.minecraft.bedrock.world.BedrockBlockMapping
 import java.util.*
 
 /**

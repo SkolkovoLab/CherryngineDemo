@@ -3,11 +3,11 @@ package ru.cherryngine.impl.demo.bedrock.renderer
 import org.cloudburstmc.protocol.bedrock.data.command.*
 import org.cloudburstmc.protocol.bedrock.packet.AvailableCommandsPacket
 import org.incendo.cloud.parser.standard.LiteralParser
-import ru.cherryngine.engine.bedrock.BedrockPlayer
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.impl.demo.renderer.PlayerRenderer
+import ru.cherryngine.platform.minecraft.bedrock.BedrockPlayer
 
 @InstanceSingleton(platform = "bedrock")
 class BedrockPlayerRenderer(

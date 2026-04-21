@@ -6,13 +6,13 @@ import net.minestom.server.entity.Metadata
 import net.minestom.server.entity.MetadataDef
 import net.minestom.server.entity.metadata.water.AxolotlMeta
 import ru.cherryngine.engine.core.instance.InstanceSingleton
-import ru.cherryngine.engine.minecraft.entity.McEntity
-import ru.cherryngine.engine.minecraft.entity.McEntityRegistry
-import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
 import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
-import java.util.UUID
+import ru.cherryngine.platform.minecraft.java.entity.McEntity
+import ru.cherryngine.platform.minecraft.java.entity.McEntityRegistry
+import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
+import java.util.*
 import kotlin.random.Random
 
 @InstanceSingleton(platform = "minecraft")

@@ -7,7 +7,7 @@ import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
-import ru.cherryngine.engine.minecraft.player.MinecraftPlayer
+import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import kotlin.time.Duration
 
 @InstanceSingleton(platform = "minecraft", stage = TickStage.PRE)
