@@ -1,7 +1,6 @@
 package ru.cherryngine.impl.demo.minecraft.renderer
 
 import net.kyori.adventure.key.Key
-import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.Metadata
 import net.minestom.server.entity.MetadataDef
@@ -14,6 +13,8 @@ import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.platform.minecraft.java.entity.McEntity
 import ru.cherryngine.platform.minecraft.java.entity.McEntityRegistry
+import ru.cherryngine.platform.minecraft.java.utils.minestomQuaternion
+import ru.cherryngine.platform.minecraft.java.utils.minestomVec
 import java.util.*
 import kotlin.random.Random
 
@@ -56,9 +57,9 @@ class MinecraftCubeRenderer(
         val s = transform.scale
         val q = transform.rotation
         mcEntity.metadata[MetadataDef.ItemDisplay.DISPLAYED_ITEM.index()] = Metadata.ItemStack(ItemStack.of(mat))
-        mcEntity.metadata[MetadataDef.Display.TRANSLATION.index()] = Metadata.Vector3(Vec(t.x, t.y, t.z))
-        mcEntity.metadata[MetadataDef.Display.ROTATION_LEFT.index()] = Metadata.Quaternion(floatArrayOf(q.x.toFloat(), q.y.toFloat(), q.z.toFloat(), q.w.toFloat()))
-        mcEntity.metadata[MetadataDef.Display.SCALE.index()] = Metadata.Vector3(Vec(s.x, s.y, s.z))
+        mcEntity.metadata[MetadataDef.Display.TRANSLATION.index()] = Metadata.Vector3(t.minestomVec())
+        mcEntity.metadata[MetadataDef.Display.ROTATION_LEFT.index()] = Metadata.Quaternion(q.minestomQuaternion())
+        mcEntity.metadata[MetadataDef.Display.SCALE.index()] = Metadata.Vector3(s.minestomVec())
         mcEntity.metadata[MetadataDef.Display.INTERPOLATION_DELAY.index()] = Metadata.VarInt(0)
         mcEntity.resendMeta()
     }
