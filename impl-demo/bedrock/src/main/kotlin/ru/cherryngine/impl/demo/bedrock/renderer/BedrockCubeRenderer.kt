@@ -9,7 +9,7 @@ import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntity
 import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntityRegistry
 import ru.cherryngine.platform.minecraft.bedrock.entity.Fmbe
-import ru.cherryngine.platform.minecraft.bedrock.world.BedrockBlockMapping
+import ru.cherryngine.platform.minecraft.bedrock.world.BedrockItemMapping
 import java.util.*
 
 /**
@@ -19,7 +19,7 @@ import java.util.*
 @InstanceSingleton(platform = "bedrock")
 class BedrockCubeRenderer(
     private val entityRegistry: BedrockEntityRegistry,
-    private val blockMapping: BedrockBlockMapping,
+    private val itemMapping: BedrockItemMapping,
 ) : CubeRenderer {
     private val entities = HashMap<UUID, BedrockEntity>()
     private val entityMaterials = HashMap<UUID, Key>()
@@ -53,7 +53,7 @@ class BedrockCubeRenderer(
         if (entity.viewers.isEmpty()) return
 
         if (entityMaterials[id] != material) {
-            Fmbe.sendEquipment(entity, material.toString(), blockMapping)
+            Fmbe.sendEquipment(entity, material.toString(), itemMapping)
             entityMaterials[id] = material
         }
 
