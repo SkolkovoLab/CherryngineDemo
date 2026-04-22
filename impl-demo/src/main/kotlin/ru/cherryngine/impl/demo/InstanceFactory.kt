@@ -5,7 +5,6 @@ import io.micronaut.context.ApplicationContext
 import jakarta.inject.Singleton
 import kotlinx.coroutines.channels.Channel
 import net.kyori.adventure.key.Key
-import net.kyori.adventure.text.Component
 import net.minestom.server.registry.Registries
 import net.minestom.server.world.DimensionType
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
@@ -13,11 +12,7 @@ import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.world.ServerWorld
 import ru.cherryngine.engine.core.instance.InstanceRouter
 import ru.cherryngine.engine.core.player.Player
-import ru.cherryngine.engine.core.player.PlayerInputProvider
-import ru.cherryngine.engine.core.player.PlayerOutputProvider
 import ru.cherryngine.engine.ecs.EcsWorld
-import ru.cherryngine.lib.math.Vec3D
-import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.platform.minecraft.java.MinecraftServerWorld
 import ru.cherryngine.platform.minecraft.java.world.LayerEntry
 import ru.cherryngine.platform.minecraft.java.world.polar.PolarWorldGenerator
@@ -28,7 +23,6 @@ import kotlin.time.Duration.Companion.milliseconds
 class InstanceFactory(
     private val appContext: ApplicationContext,
     private val instanceRouter: InstanceRouter,
-    private val platformModules: List<PlatformModule>,
     private val registries: Registries,
 ) {
     fun create(prefab: InstancePrefab): Instance {
@@ -72,29 +66,6 @@ class InstanceFactory(
             register(InstanceJoinChannel(joinChannel))
             register(InstanceLeaveChannel(leaveChannel))
         }
-
-        val activePlatforms = prefab.platformIds.map { id ->
-            platformModules.firstOrNull { it.id == id }
-                ?: error("Unknown platform: $id")
-        }.map { it.createProviders(instance, serverWorld) }
-
-        val inputProvider = object : PlayerInputProvider {
-            override fun getPosition(uuid: UUID) =
-                activePlatforms.firstNotNullOfOrNull { it.inputProvider.getPosition(uuid) }
-            override fun getYawPitch(uuid: UUID) =
-                activePlatforms.firstNotNullOfOrNull { it.inputProvider.getYawPitch(uuid) }
-        }
-        val outputProvider = object : PlayerOutputProvider {
-            override fun teleport(uuid: UUID, position: Vec3D, yawPitch: YawPitch) =
-                activePlatforms.forEach { it.outputProvider.teleport(uuid, position, yawPitch) }
-            override fun sendMessage(uuid: UUID, message: Component) =
-                activePlatforms.forEach { it.outputProvider.sendMessage(uuid, message) }
-            override fun setVelocity(uuid: UUID, velocity: Vec3D) =
-                activePlatforms.forEach { it.outputProvider.setVelocity(uuid, velocity) }
-        }
-
-        instance.register(PlayerInputProvider::class.java, inputProvider)
-        instance.register(PlayerOutputProvider::class.java, outputProvider)
 
         instance.initEager()
 

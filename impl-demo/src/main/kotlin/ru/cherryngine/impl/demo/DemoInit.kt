@@ -19,7 +19,6 @@ class DemoInit(instanceFactory: InstanceFactory) {
                 WorldLayerConfig("apart2", priority = 10, mutable = true),
             ),
             systems = listOf(
-                ReadClientPositionConfig,
                 PlayerInitSystem.Config("gm_construct", Vec3D(275.0, 56.0, 195.0)),
                 CommandActionsConfig,
                 AxolotlModelSystem.Config,
@@ -27,7 +26,6 @@ class DemoInit(instanceFactory: InstanceFactory) {
                 ApartSystem.Config,
                 PhysicsSystem.Config,
                 ViewContextSyncConfig,
-                WriteClientPositionConfig,
                 ClearEventsConfig,
             ),
         )

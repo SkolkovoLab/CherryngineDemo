@@ -3,7 +3,7 @@ package ru.cherryngine.impl.demo.systems
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import ru.cherryngine.engine.core.instance.Instance
-import ru.cherryngine.engine.core.player.PlayerOutputProvider
+import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.EcsEntity
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
@@ -21,7 +21,7 @@ import ru.cherryngine.lib.math.Vec3D
 class PhysicsSystem(
     private val physicsSpace: PhysicsSpace,
     private val terrainGenerator: TerrainGenerator,
-    private val outputProvider: PlayerOutputProvider,
+    private val playerManager: PlayerManager,
     private val playerPhysicsState: PlayerPhysicsState,
 ) : IteratingSystem(
     family { all(PhysicsComponent) }
@@ -118,7 +118,7 @@ class PhysicsSystem(
                 // Тянем игрока к точке встречи
                 val pushToPlayer = (meetingPoint - PLAYER_HITBOX_OFFSET) - playerPos
                 entity.getOrNull(PlayerComponent)?.uuid?.let { uuid ->
-                    outputProvider.setVelocity(uuid, pushToPlayer * 20.0)
+                    playerManager.getPlayerNullable(uuid)?.setVelocity(pushToPlayer * 20.0)
                 }
 
                 // Тянем хитбокс к точке встречи
