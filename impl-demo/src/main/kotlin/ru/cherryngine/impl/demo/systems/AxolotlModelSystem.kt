@@ -10,13 +10,13 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
-import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
+import ru.cherryngine.impl.demo.renderer.AxolotlRendererDispatcher
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import java.util.*
 
 class AxolotlModelSystem(
-    private val renderers: List<AxolotlRenderer>,
+    private val dispatcher: AxolotlRendererDispatcher,
     private val playerManager: PlayerManager,
 ) : IteratingSystem(
     family { all(AxolotlModelComponent) }
@@ -27,18 +27,16 @@ class AxolotlModelSystem(
         val currentIds = mutableSetOf<UUID>()
         family.forEach { currentIds.add(it[AxolotlModelComponent].modelId) }
 
-        // Remove entities that no longer exist
         activeIds.removeIf { id ->
             if (id !in currentIds) {
-                renderers.forEach { it.onRemove(id) }
+                dispatcher.onRemove(id)
                 true
             } else false
         }
 
-        // Add new entities
         currentIds.forEach { id ->
             if (activeIds.add(id)) {
-                renderers.forEach { it.onAdd(id) }
+                dispatcher.onAdd(id)
             }
         }
 
@@ -52,20 +50,18 @@ class AxolotlModelSystem(
         val name = playerUuid?.let { playerManager.getPlayerNullable(it)?.username }
         val viewContextIDs = entity.getOrNull(ViewableComponent)?.viewContextIDs ?: emptySet()
 
-        renderers.forEach {
-            it.update(
-                id,
-                pos?.position ?: Vec3D.ZERO,
-                pos?.yawPitch ?: YawPitch.ZERO,
-                name,
-                playerUuid,
-                viewContextIDs,
-            )
-        }
+        dispatcher.update(
+            id,
+            pos?.position ?: Vec3D.ZERO,
+            pos?.yawPitch ?: YawPitch.ZERO,
+            name,
+            playerUuid,
+            viewContextIDs,
+        )
     }
 
     object Config : EcsSystemConfig {
         override fun create(instance: Instance) =
-            AxolotlModelSystem(instance.getAll(), instance.get())
+            AxolotlModelSystem(instance.get(), instance.get())
     }
 }

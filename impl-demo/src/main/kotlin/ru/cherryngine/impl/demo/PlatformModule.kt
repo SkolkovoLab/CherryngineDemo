@@ -1,7 +1,7 @@
 package ru.cherryngine.impl.demo
 
 import ru.cherryngine.engine.core.instance.Instance
-import ru.cherryngine.engine.core.instance.ServerWorld
+import ru.cherryngine.engine.core.world.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerOutputProvider
 

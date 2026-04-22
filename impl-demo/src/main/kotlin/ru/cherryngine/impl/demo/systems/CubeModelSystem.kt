@@ -8,13 +8,13 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.components.CubeModelComponent
-import ru.cherryngine.impl.demo.renderer.CubeRenderer
+import ru.cherryngine.impl.demo.renderer.CubeRendererDispatcher
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import java.util.*
 
 class CubeModelSystem(
-    private val renderers: List<CubeRenderer>,
+    private val dispatcher: CubeRendererDispatcher,
 ) : IteratingSystem(
     family { all(CubeModelComponent) }
 ) {
@@ -26,14 +26,14 @@ class CubeModelSystem(
 
         activeIds.removeIf { id ->
             if (id !in currentIds) {
-                renderers.forEach { it.onRemove(id) }
+                dispatcher.onRemove(id)
                 true
             } else false
         }
 
         currentIds.forEach { id ->
             if (activeIds.add(id)) {
-                renderers.forEach { it.onAdd(id) }
+                dispatcher.onAdd(id)
             }
         }
 
@@ -45,20 +45,18 @@ class CubeModelSystem(
         val pos = entity.getOrNull(PositionComponent)
         val viewContextIDs = entity.getOrNull(ViewableComponent)?.viewContextIDs ?: emptySet()
 
-        renderers.forEach {
-            it.update(
-                component.modelId,
-                pos?.position ?: Vec3D.ZERO,
-                pos?.yawPitch ?: YawPitch.ZERO,
-                component.material,
-                component.transform,
-                viewContextIDs,
-            )
-        }
+        dispatcher.update(
+            component.modelId,
+            pos?.position ?: Vec3D.ZERO,
+            pos?.yawPitch ?: YawPitch.ZERO,
+            component.material,
+            component.transform,
+            viewContextIDs,
+        )
     }
 
     object Config : EcsSystemConfig {
         override fun create(instance: Instance) =
-            CubeModelSystem(instance.getAll())
+            CubeModelSystem(instance.get())
     }
 }

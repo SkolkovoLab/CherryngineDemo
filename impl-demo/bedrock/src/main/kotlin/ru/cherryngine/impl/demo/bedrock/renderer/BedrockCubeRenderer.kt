@@ -2,10 +2,12 @@ package ru.cherryngine.impl.demo.bedrock.renderer
 
 import net.kyori.adventure.key.Key
 import ru.cherryngine.engine.core.instance.InstanceSingleton
+import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.impl.demo.renderer.CubeRenderer
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
+import ru.cherryngine.platform.minecraft.bedrock.BedrockPlayer
 import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntity
 import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntityRegistry
 import ru.cherryngine.platform.minecraft.bedrock.entity.Fmbe
@@ -20,10 +22,12 @@ import java.util.*
 class BedrockCubeRenderer(
     private val entityRegistry: BedrockEntityRegistry,
     private val itemMapping: BedrockItemMapping,
-) : CubeRenderer {
+) : CubeRenderer<BedrockPlayer> {
     private val entities = HashMap<UUID, BedrockEntity>()
     private val entityMaterials = HashMap<UUID, Key>()
     private val sentAnimations = HashMap<UUID, Fmbe.State>()
+
+    override fun canHandle(target: Player): Boolean = target is BedrockPlayer
 
     override fun onAdd(id: UUID) {
         val entity = Fmbe.createEntity()
@@ -38,17 +42,23 @@ class BedrockCubeRenderer(
         entityRegistry.remove(entity)
     }
 
+    override fun show(id: UUID, player: BedrockPlayer) {
+        entities[id]?.subscribers?.add(player)
+    }
+
+    override fun hide(id: UUID, player: BedrockPlayer) {
+        entities[id]?.subscribers?.remove(player)
+    }
+
     override fun update(
         id: UUID,
         position: Vec3D,
         yawPitch: YawPitch,
         material: Key,
         transform: Transform,
-        viewContextIDs: Set<String>,
     ) {
         val entity = entities[id] ?: return
         entity.teleport(position, yawPitch)
-        entity.viewContextIDs = viewContextIDs
 
         if (entity.viewers.isEmpty()) return
 
@@ -64,5 +74,4 @@ class BedrockCubeRenderer(
             sentAnimations[id] = state
         }
     }
-
 }

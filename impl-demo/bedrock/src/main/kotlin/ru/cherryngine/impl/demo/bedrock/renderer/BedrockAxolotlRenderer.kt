@@ -3,9 +3,11 @@ package ru.cherryngine.impl.demo.bedrock.renderer
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityFlag
 import ru.cherryngine.engine.core.instance.InstanceSingleton
+import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
+import ru.cherryngine.platform.minecraft.bedrock.BedrockPlayer
 import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntity
 import ru.cherryngine.platform.minecraft.bedrock.entity.BedrockEntityRegistry
 import java.util.*
@@ -13,8 +15,10 @@ import java.util.*
 @InstanceSingleton(platform = "bedrock")
 class BedrockAxolotlRenderer(
     private val entityRegistry: BedrockEntityRegistry,
-) : AxolotlRenderer {
+) : AxolotlRenderer<BedrockPlayer> {
     private val entities = HashMap<UUID, BedrockEntity>()
+
+    override fun canHandle(target: Player): Boolean = target is BedrockPlayer
 
     override fun onAdd(id: UUID) {
         val entity = BedrockEntity(identifier = "minecraft:axolotl")
@@ -34,21 +38,27 @@ class BedrockAxolotlRenderer(
         entityRegistry.remove(entity)
     }
 
+    override fun show(id: UUID, player: BedrockPlayer) {
+        entities[id]?.subscribers?.add(player)
+    }
+
+    override fun hide(id: UUID, player: BedrockPlayer) {
+        entities[id]?.subscribers?.remove(player)
+    }
+
     override fun update(
         id: UUID,
         position: Vec3D,
         yawPitch: YawPitch,
         name: String?,
         hiddenFromPlayer: UUID?,
-        viewContextIDs: Set<String>,
     ) {
         val entity = entities[id] ?: return
         entity.teleport(position, yawPitch)
-        entity.viewContextIDs = viewContextIDs
-        if (hiddenFromPlayer != null) {
-            entity.viewerPredicate = { it.uuid != hiddenFromPlayer }
+        entity.viewerPredicate = if (hiddenFromPlayer != null) {
+            { it.uuid != hiddenFromPlayer }
         } else {
-            entity.viewerPredicate = { true }
+            { true }
         }
         if (name != null) {
             entity.metadata[EntityDataTypes.NAME] = name

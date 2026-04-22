@@ -56,7 +56,6 @@ class MinecraftPlayerPlatformTickable(
                     snap(floorY),
                     snap(hitboxBottom.z)
                 )
-                val viewContextIDs = mcPlayer.viewContextIDs
 
                 val pair = platforms.getOrPut(playerUuid) {
                     val vehicle = McEntity(
@@ -65,6 +64,7 @@ class MinecraftPlayerPlatformTickable(
                     ).apply {
                         metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)
                         viewerPredicate = { it.uuid == playerUuid }
+                        subscribers.add(mcPlayer)
                     }
                     val passenger = McEntity(
                         Random.nextInt(1_000_000, 9_000_000),
@@ -73,6 +73,7 @@ class MinecraftPlayerPlatformTickable(
                         metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)
                         metadata[MetadataDef.Shulker.ATTACH_FACE.index()] = Metadata.Direction(Direction.DOWN)
                         viewerPredicate = { it.uuid == playerUuid }
+                        subscribers.add(mcPlayer)
                     }
                     mcEntityRegistry.add(vehicle)
                     mcEntityRegistry.add(passenger)
@@ -83,8 +84,6 @@ class MinecraftPlayerPlatformTickable(
                 val anchorPos = platformTop - Vec3D(0.0, SHULKER_HEIGHT, 0.0)
                 pair.vehicle.teleport(anchorPos, YawPitch.ZERO)
                 pair.passenger.teleport(anchorPos, YawPitch.ZERO)
-                pair.vehicle.viewContextIDs = viewContextIDs
-                pair.passenger.viewContextIDs = viewContextIDs
 
                 // Каждый тик связываем шалкера с item display — packet идемпотентен.
                 mcPlayer.connection.sendPacket(

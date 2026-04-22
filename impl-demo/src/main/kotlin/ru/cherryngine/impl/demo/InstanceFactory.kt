@@ -10,8 +10,8 @@ import net.minestom.server.registry.Registries
 import net.minestom.server.world.DimensionType
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.Instance
-import ru.cherryngine.engine.core.instance.ServerWorld
-import ru.cherryngine.engine.core.player.InstanceRouter
+import ru.cherryngine.engine.core.world.ServerWorld
+import ru.cherryngine.engine.core.instance.InstanceRouter
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerInputProvider
 import ru.cherryngine.engine.core.player.PlayerOutputProvider

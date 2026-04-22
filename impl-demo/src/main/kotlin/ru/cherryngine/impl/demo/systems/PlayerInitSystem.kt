@@ -18,7 +18,7 @@ import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
-import ru.cherryngine.impl.demo.renderer.PlayerRenderer
+import ru.cherryngine.impl.demo.renderer.PlayerRendererDispatcher
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import java.util.*
@@ -26,7 +26,7 @@ import java.util.*
 class PlayerInitSystem(
     private val joinChannel: Channel<UUID>,
     private val leaveChannel: Channel<Player>,
-    private val playerRenderers: List<PlayerRenderer>,
+    private val playerRendererDispatcher: PlayerRendererDispatcher,
     private val playerManager: PlayerManager,
     private val playerPhysicsState: PlayerPhysicsState,
     private val defaultViewContextID: String,
@@ -43,7 +43,7 @@ class PlayerInitSystem(
         if (toRemove.isNotEmpty()) {
             val toRemoveUUIDs = toRemove.mapTo(HashSet()) { it.uuid }
             toRemove.forEach { player ->
-                playerRenderers.forEach { it.onLeave(player) }
+                playerRendererDispatcher.onLeave(player)
             }
             toRemoveUUIDs.forEach { uuid -> playerPhysicsState.unregister(uuid) }
             world.family { all(PlayerComponent) }.forEach {
@@ -68,7 +68,7 @@ class PlayerInitSystem(
             val player = playerManager.getPlayerNullable(playerUuid) ?: return@forEach
 
             logger.info("Creating ECS entity for player $playerUuid")
-            playerRenderers.forEach { it.onJoin(player) }
+            playerRendererDispatcher.onJoin(player)
 
             world.entity {
                 it += PlayerComponent(playerUuid, setOf(defaultViewContextID))
@@ -100,7 +100,7 @@ class PlayerInitSystem(
         override fun create(instance: Instance) = PlayerInitSystem(
             joinChannel = instance.get<InstanceJoinChannel>().channel,
             leaveChannel = instance.get<InstanceLeaveChannel>().channel,
-            playerRenderers = instance.getAll(),
+            playerRendererDispatcher = instance.get(),
             playerManager = instance.get(),
             playerPhysicsState = instance.get(),
             defaultViewContextID = spawnViewContext,

@@ -2,7 +2,7 @@ package ru.cherryngine.impl.demo.minecraft
 
 import jakarta.inject.Singleton
 import ru.cherryngine.engine.core.instance.Instance
-import ru.cherryngine.engine.core.instance.ServerWorld
+import ru.cherryngine.engine.core.world.ServerWorld
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.impl.demo.PlatformModule
 import ru.cherryngine.impl.demo.PlatformProviders

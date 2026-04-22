@@ -7,12 +7,14 @@ import net.minestom.server.entity.MetadataDef
 import net.minestom.server.item.ItemStack
 import net.minestom.server.item.Material
 import ru.cherryngine.engine.core.instance.InstanceSingleton
+import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.impl.demo.renderer.CubeRenderer
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.platform.minecraft.java.entity.McEntity
 import ru.cherryngine.platform.minecraft.java.entity.McEntityRegistry
+import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import ru.cherryngine.platform.minecraft.java.utils.minestomQuaternion
 import ru.cherryngine.platform.minecraft.java.utils.minestomVec
 import java.util.*
@@ -21,8 +23,18 @@ import kotlin.random.Random
 @InstanceSingleton(platform = "minecraft")
 class MinecraftCubeRenderer(
     private val mcEntityRegistry: McEntityRegistry,
-) : CubeRenderer {
+) : CubeRenderer<MinecraftPlayer> {
     private val entities = HashMap<UUID, McEntity>()
+
+    override fun canHandle(target: Player): Boolean = target is MinecraftPlayer
+
+    override fun show(id: UUID, player: MinecraftPlayer) {
+        entities[id]?.subscribers?.add(player)
+    }
+
+    override fun hide(id: UUID, player: MinecraftPlayer) {
+        entities[id]?.subscribers?.remove(player)
+    }
 
     override fun onAdd(id: UUID) {
         val mcEntity = McEntity(
@@ -47,11 +59,9 @@ class MinecraftCubeRenderer(
         yawPitch: YawPitch,
         material: Key,
         transform: Transform,
-        viewContextIDs: Set<String>,
     ) {
         val mcEntity = entities[id] ?: return
         mcEntity.teleport(position, yawPitch)
-        mcEntity.viewContextIDs = viewContextIDs
         val mat = Material.fromKey(material) ?: Material.AIR
         val t = transform.translation
         val s = transform.scale

@@ -16,7 +16,7 @@ import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 class MinecraftPlayerRenderer(
     private val commandManager: CherryngineCommandManager,
     private val registries: Registries,
-) : PlayerRenderer {
+) : PlayerRenderer<MinecraftPlayer> {
     private val overworldDimensionTypeId: Int by lazy {
         val dim = registries.dimensionType()
         val key = dim.getKey(Key.key("minecraft:overworld"))
@@ -24,9 +24,10 @@ class MinecraftPlayerRenderer(
         dim.getId(key)
     }
 
-    override fun onJoin(player: Player) {
-        val mcPlayer = player as? MinecraftPlayer ?: return
-        mcPlayer.connection.sendPacket(
+    override fun canHandle(target: Player): Boolean = target is MinecraftPlayer
+
+    override fun onJoin(player: MinecraftPlayer) {
+        player.connection.sendPacket(
             JoinGamePacket(
                 0, false, listOf("minecraft:overworld"), 20,
                 8, 8, false, true, false,
@@ -36,19 +37,18 @@ class MinecraftPlayerRenderer(
                 false, false, null, 0, 64, false,
             )
         )
-        mcPlayer.connection.sendPacket(
+        player.connection.sendPacket(
             ChangeGameStatePacket(ChangeGameStatePacket.Reason.LEVEL_CHUNKS_LOAD_START, 0f)
         )
-        mcPlayer.connection.sendPacket(
+        player.connection.sendPacket(
             CommandNodeUtils.commandsPacket(commandManager.commandTree().rootNode())
         )
     }
 
-    override fun onViewContextChanged(player: Player, contextIDs: Set<String>) {
-        val mcPlayer = player as? MinecraftPlayer ?: return
-        if (mcPlayer.viewContextIDs == contextIDs) return
-        mcPlayer.viewContextIDs = contextIDs
-        mcPlayer.sentChunksBase = null
-        mcPlayer.sentChunks.clear()
+    override fun onViewContextChanged(player: MinecraftPlayer, contextIDs: Set<String>) {
+        if (player.viewContextIDs == contextIDs) return
+        player.viewContextIDs = contextIDs
+        player.sentChunksBase = null
+        player.sentChunks.clear()
     }
 }

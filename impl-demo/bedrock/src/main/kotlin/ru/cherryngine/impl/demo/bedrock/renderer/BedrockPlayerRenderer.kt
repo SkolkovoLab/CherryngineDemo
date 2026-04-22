@@ -12,18 +12,18 @@ import ru.cherryngine.platform.minecraft.bedrock.BedrockPlayer
 @InstanceSingleton(platform = "bedrock")
 class BedrockPlayerRenderer(
     private val commandManager: CherryngineCommandManager,
-) : PlayerRenderer {
+) : PlayerRenderer<BedrockPlayer> {
 
-    override fun onJoin(player: Player) {
-        val bp = player as? BedrockPlayer ?: return
-        sendAvailableCommands(bp)
+    override fun canHandle(target: Player): Boolean = target is BedrockPlayer
+
+    override fun onJoin(player: BedrockPlayer) {
+        sendAvailableCommands(player)
     }
 
-    override fun onViewContextChanged(player: Player, contextIDs: Set<String>) {
-        val bedrockPlayer = player as? BedrockPlayer ?: return
-        if (bedrockPlayer.viewContextIDs == contextIDs) return
-        bedrockPlayer.viewContextIDs = contextIDs
-        bedrockPlayer.sentChunks.clear()
+    override fun onViewContextChanged(player: BedrockPlayer, contextIDs: Set<String>) {
+        if (player.viewContextIDs == contextIDs) return
+        player.viewContextIDs = contextIDs
+        player.sentChunks.clear()
     }
 
     private fun sendAvailableCommands(player: BedrockPlayer) {

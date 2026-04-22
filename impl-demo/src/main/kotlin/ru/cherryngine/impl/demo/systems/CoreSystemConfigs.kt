@@ -21,7 +21,7 @@ object CommandActionsConfig : EcsSystemConfig {
 
 object ViewContextSyncConfig : EcsSystemConfig {
     override fun create(instance: Instance) = ViewContextSyncSystem(
-        playerRenderers = instance.getAll(),
+        playerRendererDispatcher = instance.get(),
         playerManager = instance.get(),
     )
 }
