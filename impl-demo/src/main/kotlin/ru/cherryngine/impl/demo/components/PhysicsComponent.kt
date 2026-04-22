@@ -6,15 +6,9 @@ import java.util.*
 
 data class PhysicsComponent(
     val physicsId: UUID = UUID.randomUUID(),
-    val bodyInfo: BodyInfo,
     val physContextIDs: Set<String> = emptySet(),
 ) : EcsComponent<PhysicsComponent> {
     override fun type() = PhysicsComponent
 
     companion object : ComponentType<PhysicsComponent>()
-
-    sealed interface BodyInfo {
-        object Cube : BodyInfo
-        object Player : BodyInfo
-    }
 }

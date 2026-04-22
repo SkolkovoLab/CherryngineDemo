@@ -17,7 +17,6 @@ import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
-import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.impl.demo.renderer.PlayerRendererDispatcher
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
@@ -75,10 +74,6 @@ class PlayerInitSystem(
                 it += ViewableComponent(setOf(defaultViewContextID))
                 it += PositionComponent(spawnPosition)
                 it += AxolotlModelComponent()
-                it += PhysicsComponent(
-                    bodyInfo = PhysicsComponent.BodyInfo.Player,
-                    physContextIDs = setOf(defaultViewContextID)
-                )
             }
 
             world.entity {

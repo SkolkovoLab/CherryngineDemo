@@ -6,6 +6,7 @@ dependencies {
     api(engine(":engine-core"))
     api(engine(":engine-ecs"))
     api(engine(":platform-minecraft-java"))
+    api(engine(":platform-minecraft-bedrock"))
     api(engine(":engine-physics"))
     api(engine(":lib-math"))
 

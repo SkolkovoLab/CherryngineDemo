@@ -93,7 +93,7 @@ class TestCommand(
             val viewableContexts = playerEntity[ViewableComponent].viewContextIDs
 
             entity {
-                it += PhysicsComponent(bodyInfo = PhysicsComponent.BodyInfo.Cube, physContextIDs = viewableContexts)
+                it += PhysicsComponent(physContextIDs = viewableContexts)
                 it += PositionComponent(spawnPosition)
                 it += CubeModelComponent(material = Key.key("tnt"), transform = Transform())
                 it += ViewableComponent(viewableContexts)
