@@ -1,9 +1,12 @@
 package ru.cherryngine.impl.demo.minecraft.renderer
 
 import net.kyori.adventure.key.Key
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.entity.GameMode
 import net.minestom.server.network.packet.server.play.ChangeGameStatePacket
 import net.minestom.server.network.packet.server.play.JoinGamePacket
+import net.minestom.server.network.packet.server.play.TeamsPacket
 import net.minestom.server.registry.Registries
 import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.instance.InstanceSingleton
@@ -42,6 +45,20 @@ class MinecraftPlayerRenderer(
         )
         player.connection.sendPacket(
             CommandNodeUtils.commandsPacket(commandManager.commandTree().rootNode())
+        )
+        player.connection.sendPacket(
+            TeamsPacket(
+                "no_collision", TeamsPacket.CreateTeamAction(
+                    Component.empty(),
+                    0,
+                    TeamsPacket.NameTagVisibility.ALWAYS,
+                    TeamsPacket.CollisionRule.NEVER,
+                    NamedTextColor.WHITE,
+                    Component.empty(),
+                    Component.empty(),
+                    listOf(player.username)
+                )
+            )
         )
     }
 
