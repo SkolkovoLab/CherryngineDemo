@@ -2,6 +2,7 @@ package ru.cherryngine.impl.demo.hitbox
 
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.player.Player
+import ru.cherryngine.engine.core.player.PlayerPositionSource
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.lib.math.Vec3D
@@ -15,20 +16,15 @@ import kotlin.time.DurationUnit
 class DemoPlayerHitboxDriver(
     private val physicsSpace: PhysicsSpace,
     private val playerPhysicsState: PlayerPhysicsState,
+    private val positionSources: List<PlayerPositionSource>,
 ) : PlayerHitboxDriver {
     companion object {
         // Смещение центра хитбокса (box 0.6x1.8x0.6) относительно ног игрока.
         private val PLAYER_HITBOX_OFFSET = Vec3D(0.0, 0.9, 0.0)
         // Порог телепорта: если хитбокс отстаёт дальше этого — моментальный перенос.
         private const val TELEPORT_THRESHOLD = 2.0
-        // Порог "застрял": если даже после симуляции diff больше этого — включаем meeting-point.
+        // Порог "застрял": если diff больше — возвращаем клиента к хитбоксу.
         private const val STUCK_THRESHOLD = 0.1
-        // Множитель для player.setVelocity (Minecraft: клиент интерпретирует velocity в блоках/тик).
-        private const val PLAYER_PUSH_SPEED = 20.0
-        // Доля пути к точке встречи (0.5 = середина между игроком и хитбоксом).
-        private const val MEETING_POINT_RATIO = 0.5
-        // Небольшая Y-прибавка к meeting-point — помогает выбраться из terrain.
-        private val MEETING_POINT_LIFT = Vec3D(0.0, 0.1, 0.0)
     }
 
     override fun canHandle(player: Player): Boolean =
@@ -56,7 +52,6 @@ class DemoPlayerHitboxDriver(
     }
 
     override fun postSimulate(player: Player, delta: Duration) {
-        val deltaSec = delta.toDouble(DurationUnit.SECONDS)
         val physicsId = playerPhysicsState.getPhysicsId(player.uuid) ?: return
         val body = physicsSpace.getOrCreateBody(physicsId, player.viewContextIDs) {
             physicsSpace.addPlayer(player.clientPosition + PLAYER_HITBOX_OFFSET)
@@ -67,15 +62,27 @@ class DemoPlayerHitboxDriver(
         val diff = targetPos - hitboxPos
         if (diff.length() <= STUCK_THRESHOLD) return
 
-        val meetingPoint = hitboxPos + diff * MEETING_POINT_RATIO + MEETING_POINT_LIFT
+        val serverFeetPos = hitboxPos - PLAYER_HITBOX_OFFSET
+        // Если клиента поднимает (новая Y > старой), добавляем 1/16 блока — чтобы клиент
+        // гарантированно оказался ВЫШЕ платформы шалкера под ногами, а не впритык к ней
+        // (иначе клиент может провалиться обратно и шалкер не появится).
+        val finalFeetPos = if (serverFeetPos.y > player.clientPosition.y) {
+            serverFeetPos + Vec3D(0.0, 1.0 / 16.0, 0.0)
+        } else {
+            serverFeetPos
+        }
 
-        // Тянем игрока к точке встречи через клиентский velocity
-        val pushToPlayer = (meetingPoint - PLAYER_HITBOX_OFFSET) - player.clientPosition
-        player.setVelocity(pushToPlayer * PLAYER_PUSH_SPEED)
+        // 1. Обновляем активный PositionSource (обычно ECS PositionComponent) — иначе
+        //    PlayerPositionPostSyncTickable может запуститься после нас в POST-стадии
+        //    и откатить клиента к старому PositionComponent.position (порядок Tickable'ов
+        //    внутри одной stage не гарантирован).
+        positionSources.firstOrNull { it.canHandle(player) }
+            ?.acceptClientMovement(player, finalFeetPos, player.clientYawPitch)
 
-        // Тянем хитбокс к точке встречи (скорость сработает на следующем pre-sim)
-        val pushToHitbox = meetingPoint - hitboxPos
-        body.setLinearVelocity(pushToHitbox * (1.0 / deltaSec))
+        // 2. Физически возвращаем клиента на серверно-корректную позицию (ноги хитбокса).
+        //    correctClientPosition — платформо-специфичная мягкая коррекция: Java шлёт relative
+        //    teleport через RelativeFlags.ALL, Bedrock — absolute с сохранённым yawPitch.
+        player.correctClientPosition(finalFeetPos)
     }
 
     private fun resolvePhysicsId(playerUuid: UUID): UUID {
