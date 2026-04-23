@@ -14,14 +14,18 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.getPlayerEntity
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
+import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.components.ApartComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.lib.math.Transform
+import ru.cherryngine.lib.math.Vec3D
 import java.util.*
 
 class TestCommand(
     private val ecsWorld: EcsWorld,
+    private val physicsSpace: PhysicsSpace,
+    private val playerPhysicsState: PlayerPhysicsState,
 ) {
     @Command("testcommand <string> <int> <key> <uuid> <greedy>")
     @Permission("command.test")
@@ -95,7 +99,26 @@ class TestCommand(
             entity {
                 it += PhysicsComponent(physContextIDs = viewableContexts)
                 it += PositionComponent(spawnPosition)
-                it += CubeModelComponent(material = Key.key("tnt"), transform = Transform())
+                it += CubeModelComponent(material = Key.key("tnt"), transform = Transform.ZERO)
+                it += ViewableComponent(viewableContexts)
+            }
+        }
+    }
+
+    @Command("phys slab")
+    fun physSlabCommand(
+        sender: Player,
+    ) {
+        ecsWorld.commandAction {
+            val playerEntity = ecsWorld.getPlayerEntity(sender.uuid)
+            val spawnPosition = playerEntity[PositionComponent].position
+            val viewableContexts = playerEntity[ViewableComponent].viewContextIDs
+
+            val slabSize = Vec3D(1.0, 0.5, 1.0)
+            entity {
+                it += PhysicsComponent(physContextIDs = viewableContexts, size = slabSize)
+                it += PositionComponent(spawnPosition)
+                it += CubeModelComponent(material = Key.key("tnt"), transform = Transform(scale = slabSize))
                 it += ViewableComponent(viewableContexts)
             }
         }

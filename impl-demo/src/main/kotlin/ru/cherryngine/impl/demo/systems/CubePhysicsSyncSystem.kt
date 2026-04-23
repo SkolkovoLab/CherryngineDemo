@@ -9,6 +9,7 @@ import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
+import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 
 /**
@@ -23,12 +24,20 @@ class CubePhysicsSyncSystem(
     override fun onTickEntity(entity: EcsEntity) {
         val comp = entity[PhysicsComponent]
         val body = physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
-            physicsSpace.addCube(Vec3D.ZERO, Vec3D.ONE)
+            physicsSpace.addCube(Vec3D.ZERO, comp.size)
         }
         entity.configure {
-            val transform = body.getTransform()
-            it.getOrNull(PositionComponent)?.position = transform.translation
-            it.getOrNull(CubeModelComponent)?.transform = transform.copy(translation = Vec3D.ZERO)
+            val bodyTransform = body.getTransform()
+            it.getOrNull(PositionComponent)?.position = bodyTransform.translation
+            // Сохраняем scale из CubeModelComponent (задаётся при спавне и не меняется),
+            // чтобы визуал slab'а оставался плоским. Body переносит только translation+rotation.
+            it.getOrNull(CubeModelComponent)?.let { model ->
+                model.transform = Transform(
+                    translation = Vec3D.ZERO,
+                    rotation = bodyTransform.rotation,
+                    scale = model.transform.scale,
+                )
+            }
         }
     }
 

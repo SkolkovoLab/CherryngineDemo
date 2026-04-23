@@ -78,7 +78,9 @@ class InstanceFactory(
         }
         instance.register(EcsWorld::class.java, ecsWorld)
 
-        instance.get<CherryngineCommandManager>().registerCommands(TestCommand(ecsWorld))
+        instance.get<CherryngineCommandManager>().registerCommands(
+            TestCommand(ecsWorld, instance.get(), instance.get())
+        )
 
         instance.startTicking()
         return instance

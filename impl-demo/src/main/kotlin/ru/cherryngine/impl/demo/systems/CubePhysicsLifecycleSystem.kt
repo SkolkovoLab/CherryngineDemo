@@ -25,7 +25,7 @@ class CubePhysicsLifecycleSystem(
         val pos = entity.getOrNull(PositionComponent)?.position ?: Vec3D.ZERO
         physicsSpace.keepAlive(comp.physicsId)
         physicsSpace.getOrCreateBody(comp.physicsId, comp.physContextIDs) {
-            physicsSpace.addCube(pos, Vec3D.ONE)
+            physicsSpace.addCube(pos, comp.size)
         }
     }
 
