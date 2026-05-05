@@ -2,7 +2,9 @@ package ru.cherryngine.impl.demo.hitbox
 
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.player.Player
-import ru.cherryngine.engine.core.player.PlayerPositionSource
+import ru.cherryngine.engine.ecs.EcsWorld
+import ru.cherryngine.engine.ecs.components.PositionComponent
+import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.lib.math.Vec3D
@@ -16,7 +18,7 @@ import kotlin.time.DurationUnit
 class DemoPlayerHitboxDriver(
     private val physicsSpace: PhysicsSpace,
     private val playerPhysicsState: PlayerPhysicsState,
-    private val positionSources: List<PlayerPositionSource>,
+    private val ecsWorld: EcsWorld,
 ) : PlayerHitboxDriver {
     companion object {
         // Смещение центра хитбокса (box 0.6x1.8x0.6) относительно ног игрока.
@@ -109,6 +111,10 @@ class DemoPlayerHitboxDriver(
         val hitboxPos = body.getTransform().translation
         val diff = targetPos - hitboxPos
         if (diff.length() <= STUCK_THRESHOLD) return
+        // Тело сильно отстало от клиента (например, ECS только что телепортировал клиента
+        // на spawn в этом же POST-тике) — не тянем клиента обратно к stale-позиции тела.
+        // На следующем preSimulate тело само телепортируется к клиенту через TELEPORT_THRESHOLD-ветку.
+        if (diff.length() > TELEPORT_THRESHOLD) return
 
         val serverFeetPos = hitboxPos - PLAYER_HITBOX_OFFSET
         // Если клиента поднимает (новая Y > старой), добавляем 1/16 блока — чтобы клиент
@@ -120,12 +126,17 @@ class DemoPlayerHitboxDriver(
             serverFeetPos
         }
 
-        // 1. Обновляем активный PositionSource (обычно ECS PositionComponent) — иначе
-        //    PlayerPositionPostSyncTickable может запуститься после нас в POST-стадии
-        //    и откатить клиента к старому PositionComponent.position (порядок Tickable'ов
-        //    внутри одной stage не гарантирован).
-        positionSources.firstOrNull { it.canHandle(player) }
-            ?.acceptClientMovement(player, finalFeetPos, player.clientYawPitch)
+        // 1. Обновляем ECS PositionComponent — иначе PlayerPositionPostSyncTickable
+        //    может запуститься после нас в POST-стадии и откатить клиента к старому
+        //    PositionComponent.position (порядок Tickable'ов внутри одной stage не гарантирован).
+        ecsWorld.getPlayerEntityOrNull(player.uuid)?.let { entity ->
+            with(ecsWorld) {
+                entity.getOrNull(PositionComponent)?.let {
+                    it.position = finalFeetPos
+                    it.yawPitch = player.clientYawPitch
+                }
+            }
+        }
 
         // 2. Физически возвращаем клиента на серверно-корректную позицию (ноги хитбокса).
         //    correctClientPosition — платформо-специфичная мягкая коррекция: Java шлёт relative

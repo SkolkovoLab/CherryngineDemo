@@ -6,7 +6,9 @@ import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
+import ru.cherryngine.engine.core.player.CommandDispatcher
 import ru.cherryngine.engine.core.player.PlayerManager
+import ru.cherryngine.engine.core.player.SuggestionDispatcher
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import kotlin.time.Duration
 
@@ -14,24 +16,22 @@ import kotlin.time.Duration
 class MinecraftCommandTickable(
     private val playerManager: PlayerManager,
     private val commandManager: CherryngineCommandManager,
+    private val commandDispatcher: CommandDispatcher,
+    private val suggestionDispatcher: SuggestionDispatcher,
 ) : Tickable {
 
     override fun tick(delta: Duration) {
         for (player in playerManager.onlinePlayers()) {
-            val mcPlayer = player as? MinecraftPlayer ?: continue
-
-            while (true) {
-                val command = mcPlayer.pendingCommands.poll() ?: break
-                commandManager.commandExecutor().executeCommand(mcPlayer as CommandSender, command)
+            commandDispatcher.pollCommands(player).forEach { command ->
+                commandManager.commandExecutor().executeCommand(player as CommandSender, command)
             }
 
-            while (true) {
-                val (transactionId, input) = mcPlayer.pendingSuggestions.poll() ?: break
-                commandManager.suggestionFactory().suggest(mcPlayer as CommandSender, input)
+            suggestionDispatcher.pollSuggestions(player).forEach { (transactionId, input) ->
+                commandManager.suggestionFactory().suggest(player as CommandSender, input)
                     .whenComplete { suggestions, throwable ->
                         if (throwable != null) throw throwable
                         val lastSpace = input.lastIndexOf(' ')
-                        mcPlayer.connection.sendPacket(
+                        (player as? MinecraftPlayer)?.connection?.sendPacket(
                             TabCompletePacket(
                                 transactionId,
                                 lastSpace + 2,
