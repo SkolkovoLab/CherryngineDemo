@@ -9,11 +9,16 @@ import ru.cherryngine.engine.core.utils.scrollAmount
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
+import ru.cherryngine.impl.demo.components.GrabbingComponent
 import ru.cherryngine.impl.demo.components.SelectedToolComponent
 import ru.cherryngine.impl.demo.components.Tool
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import java.util.UUID
 import kotlin.time.Duration
+
+private const val GRAB_DISTANCE_STEP = 0.5
+private const val GRAB_MIN_DISTANCE = 1.5
+private const val GRAB_MAX_DISTANCE = 20.0
 
 @InstanceSingleton(platform = "minecraft", stage = TickStage.PRE)
 class MinecraftToolScrollTickable(
@@ -44,11 +49,18 @@ class MinecraftToolScrollTickable(
             val playerUuid = mc.uuid
             ecsWorld.commandAction {
                 val entity = getPlayerEntityOrNull(playerUuid) ?: return@commandAction
-                if (SelectedToolComponent !in entity) return@commandAction
-                val cmp = entity[SelectedToolComponent]
-                val n = Tool.entries.size
-                val newIdx = ((cmp.tool.ordinal + totalDelta) % n + n) % n
-                cmp.tool = Tool.entries[newIdx]
+                val grabbing = entity.getOrNull(GrabbingComponent)
+                if (grabbing != null) {
+                    // Пока держим куб — колесо двигает его ближе/дальше.
+                    // Инверсия: scroll up (totalDelta < 0) = от себя, scroll down = к себе.
+                    grabbing.distance = (grabbing.distance - totalDelta * GRAB_DISTANCE_STEP)
+                        .coerceIn(GRAB_MIN_DISTANCE, GRAB_MAX_DISTANCE)
+                } else {
+                    val cmp = entity.getOrNull(SelectedToolComponent) ?: return@commandAction
+                    val n = Tool.entries.size
+                    val newIdx = ((cmp.tool.ordinal + totalDelta) % n + n) % n
+                    cmp.tool = Tool.entries[newIdx]
+                }
             }
         }
 

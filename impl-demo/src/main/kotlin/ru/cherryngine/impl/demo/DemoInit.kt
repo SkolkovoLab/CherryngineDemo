@@ -25,6 +25,7 @@ class DemoInit(instanceFactory: InstanceFactory) {
                 CubeModelSystem.Config,
                 ApartSystem.Config,
                 CubePhysicsLifecycleSystem.Config,
+                GrabSystem.Config,
                 PhysicsSimulationSystem.Config,
                 CubePhysicsSyncSystem.Config,
                 HitboxVisualizationSystem.Config,

@@ -6,7 +6,8 @@ import ru.cherryngine.engine.ecs.EcsComponent
 enum class Tool(val displayName: String) {
     CREATE_CUBE("Create Cube"),
     CREATE_SLAB("Create Slab"),
-    REMOVE_NEAREST("Remove Nearest"),
+    REMOVE("Remove"),
+    GRAB("Grab"),
 }
 
 data class SelectedToolComponent(

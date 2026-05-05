@@ -4,6 +4,7 @@ import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
+import ru.cherryngine.engine.core.shape.ShapeRaycaster
 import ru.cherryngine.engine.core.world.WorldRaycasterDispatcher
 import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
@@ -15,7 +16,8 @@ import kotlin.time.Duration
 class BedrockToolUseTickable(
     private val playerManager: PlayerManager,
     private val ecsWorld: EcsWorld,
-    private val raycasterDispatcher: WorldRaycasterDispatcher,
+    private val worldRaycaster: WorldRaycasterDispatcher,
+    private val shapeRaycaster: ShapeRaycaster,
 ) : Tickable {
 
     override fun tick(delta: Duration) {
@@ -27,7 +29,7 @@ class BedrockToolUseTickable(
             if (uses <= 0) continue
             val playerUuid = bp.uuid
             ecsWorld.commandAction {
-                repeat(uses) { useTool(playerUuid, raycasterDispatcher) }
+                repeat(uses) { useTool(playerUuid, worldRaycaster, shapeRaycaster) }
             }
         }
     }

@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory
 import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerManager
+import ru.cherryngine.engine.core.shape.ShapeGeometry
+import ru.cherryngine.engine.core.shape.ShapeWorld
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
@@ -18,7 +20,9 @@ import ru.cherryngine.impl.demo.components.AxolotlModelComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
 import ru.cherryngine.impl.demo.components.SelectedToolComponent
+import ru.cherryngine.impl.demo.components.ShapeRegistrationComponent
 import ru.cherryngine.impl.demo.renderer.PlayerRendererDispatcher
+import ru.cherryngine.impl.demo.shape.PlayerShape
 import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import java.util.*
@@ -29,6 +33,7 @@ class PlayerInitSystem(
     private val playerRendererDispatcher: PlayerRendererDispatcher,
     private val playerManager: PlayerManager,
     private val playerPhysicsState: PlayerPhysicsState,
+    private val shapeWorld: ShapeWorld,
     private val defaultViewContextID: String,
     private val spawnPosition: Vec3D,
 ) : IntervalSystem() {
@@ -70,13 +75,27 @@ class PlayerInitSystem(
             logger.info("Creating ECS entity for player $playerUuid")
             playerRendererDispatcher.onJoin(player)
 
-            world.entity {
+            val playerEntityRef = world.entity {
                 it += PlayerComponent(playerUuid, setOf(defaultViewContextID))
                 it += ViewableComponent(setOf(defaultViewContextID))
                 it += PositionComponent(spawnPosition)
                 it += AxolotlModelComponent()
                 it += SelectedToolComponent()
             }
+
+            // Шейп игрока — капсула, читающая текущую позицию из PositionComponent.
+            // Регистрация уйдёт через ShapeRegistrationComponent.onRemove когда entity удалится.
+            val ecsWorld = world
+            val playerShape = PlayerShape(
+                geometry = ShapeGeometry.Capsule(radius = 0.3f, halfHeight = 0.9f),
+                getTransform = {
+                    val pos = with(ecsWorld) { playerEntityRef.getOrNull(PositionComponent) }
+                    Transform(translation = pos?.position ?: Vec3D.ZERO)
+                },
+                playerUuid = playerUuid,
+            )
+            val registration = shapeWorld.registerGroup(listOf(playerShape))
+            playerEntityRef.configure { it += ShapeRegistrationComponent(registration) }
 
             world.entity {
                 it += PositionComponent(spawnPosition)
@@ -100,6 +119,7 @@ class PlayerInitSystem(
             playerRendererDispatcher = instance.get(),
             playerManager = instance.get(),
             playerPhysicsState = instance.get(),
+            shapeWorld = instance.get(),
             defaultViewContextID = spawnViewContext,
             spawnPosition = spawnPosition,
         )
