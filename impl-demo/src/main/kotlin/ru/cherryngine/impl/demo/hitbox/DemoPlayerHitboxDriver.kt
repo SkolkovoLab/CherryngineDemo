@@ -8,6 +8,7 @@ import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.impl.demo.input.MovementDispatcher
+import ru.cherryngine.impl.demo.output.PlayerMoverDispatcher
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.platform.minecraft.bedrock.BedrockPlayer
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
@@ -21,6 +22,7 @@ class DemoPlayerHitboxDriver(
     private val playerPhysicsState: PlayerPhysicsState,
     private val ecsWorld: EcsWorld,
     private val movementDispatcher: MovementDispatcher,
+    private val moverDispatcher: PlayerMoverDispatcher,
 ) : PlayerHitboxDriver {
     companion object {
         // Смещение центра хитбокса (box 0.6x1.8x0.6) относительно ног игрока.
@@ -145,7 +147,7 @@ class DemoPlayerHitboxDriver(
         // 2. Физически возвращаем клиента на серверно-корректную позицию (ноги хитбокса).
         //    correctClientPosition — платформо-специфичная мягкая коррекция: Java шлёт relative
         //    teleport через RelativeFlags.ALL, Bedrock — absolute с сохранённым yawPitch.
-        player.correctClientPosition(finalFeetPos)
+        moverDispatcher.correctClientPosition(player, finalFeetPos)
     }
 
     private fun resolvePhysicsId(playerUuid: UUID): UUID {

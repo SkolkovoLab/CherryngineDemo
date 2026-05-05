@@ -8,6 +8,7 @@ import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.impl.demo.input.MovementDispatcher
+import ru.cherryngine.impl.demo.output.PlayerMoverDispatcher
 import kotlin.time.Duration
 
 /**
@@ -20,6 +21,7 @@ class PlayerPositionPostSyncTickable(
     private val playerManager: PlayerManager,
     private val ecsWorld: EcsWorld,
     private val movementDispatcher: MovementDispatcher,
+    private val moverDispatcher: PlayerMoverDispatcher,
     private val shadow: PlayerPositionShadow,
 ) : Tickable {
     override fun tick(delta: Duration) {
@@ -28,7 +30,7 @@ class PlayerPositionPostSyncTickable(
             val ecsPos = with(ecsWorld) { entity.getOrNull(PositionComponent) } ?: continue
             val client = movementDispatcher.pollMovement(player)
             if (client == null || ecsPos.position != client.position || ecsPos.yawPitch != client.yawPitch) {
-                player.teleport(ecsPos.position, ecsPos.yawPitch)
+                moverDispatcher.teleport(player, ecsPos.position, ecsPos.yawPitch)
             }
             shadow[player.uuid] = PositionSnapshot(ecsPos.position, ecsPos.yawPitch)
         }
