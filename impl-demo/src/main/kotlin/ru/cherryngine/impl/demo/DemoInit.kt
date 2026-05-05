@@ -28,6 +28,7 @@ class DemoInit(instanceFactory: InstanceFactory) {
                 PhysicsSimulationSystem.Config,
                 CubePhysicsSyncSystem.Config,
                 HitboxVisualizationSystem.Config,
+                ToolSelectionDisplaySystem.Config,
                 ViewContextSyncConfig,
                 ClearEventsConfig,
             ),
