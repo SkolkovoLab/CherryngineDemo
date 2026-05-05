@@ -7,6 +7,7 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.PlayerPhysicsState
+import ru.cherryngine.impl.demo.input.MovementDispatcher
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.platform.minecraft.bedrock.BedrockPlayer
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
@@ -19,6 +20,7 @@ class DemoPlayerHitboxDriver(
     private val physicsSpace: PhysicsSpace,
     private val playerPhysicsState: PlayerPhysicsState,
     private val ecsWorld: EcsWorld,
+    private val movementDispatcher: MovementDispatcher,
 ) : PlayerHitboxDriver {
     companion object {
         // Смещение центра хитбокса (box 0.6x1.8x0.6) относительно ног игрока.
@@ -48,8 +50,9 @@ class DemoPlayerHitboxDriver(
         player is MinecraftPlayer || player is BedrockPlayer
 
     override fun preSimulate(player: Player, delta: Duration) {
+        val movement = movementDispatcher.pollMovement(player) ?: return
         val deltaSec = delta.toDouble(DurationUnit.SECONDS)
-        val targetPos = player.clientPosition + PLAYER_HITBOX_OFFSET
+        val targetPos = movement.position + PLAYER_HITBOX_OFFSET
         val physicsId = resolvePhysicsId(player.uuid)
 
         physicsSpace.keepAlive(physicsId)
@@ -102,12 +105,13 @@ class DemoPlayerHitboxDriver(
     }
 
     override fun postSimulate(player: Player, delta: Duration) {
+        val movement = movementDispatcher.pollMovement(player) ?: return
         val physicsId = playerPhysicsState.getPhysicsId(player.uuid) ?: return
         val body = physicsSpace.getOrCreateBody(physicsId, player.viewContextIDs) {
-            physicsSpace.addPlayer(player.clientPosition + PLAYER_HITBOX_OFFSET)
+            physicsSpace.addPlayer(movement.position + PLAYER_HITBOX_OFFSET)
         }
 
-        val targetPos = player.clientPosition + PLAYER_HITBOX_OFFSET
+        val targetPos = movement.position + PLAYER_HITBOX_OFFSET
         val hitboxPos = body.getTransform().translation
         val diff = targetPos - hitboxPos
         if (diff.length() <= STUCK_THRESHOLD) return
@@ -120,7 +124,7 @@ class DemoPlayerHitboxDriver(
         // Если клиента поднимает (новая Y > старой), добавляем 1/16 блока — чтобы клиент
         // гарантированно оказался ВЫШЕ платформы шалкера под ногами, а не впритык к ней
         // (иначе клиент может провалиться обратно и шалкер не появится).
-        val finalFeetPos = if (serverFeetPos.y > player.clientPosition.y) {
+        val finalFeetPos = if (serverFeetPos.y > movement.position.y) {
             serverFeetPos + Vec3D(0.0, 1.0 / 16.0, 0.0)
         } else {
             serverFeetPos
@@ -133,7 +137,7 @@ class DemoPlayerHitboxDriver(
             with(ecsWorld) {
                 entity.getOrNull(PositionComponent)?.let {
                     it.position = finalFeetPos
-                    it.yawPitch = player.clientYawPitch
+                    it.yawPitch = movement.yawPitch
                 }
             }
         }
