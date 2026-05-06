@@ -8,16 +8,16 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.components.GrabbingComponent
-import ru.cherryngine.impl.demo.components.PhysicsComponent
+import ru.cherryngine.impl.demo.components.findPhysicsEntity
 import ru.cherryngine.lib.math.Vec3D
 
 private const val EYE_HEIGHT = 1.62
 
 /**
  * Каждый тик для каждого игрока с GrabbingComponent: считает целевую точку
- * `eye + dir * grab.distance` и пушит туда схваченный physics-body через
- * setLinearVelocity((target - currentPos) / delta). Идёт ПЕРЕД PhysicsSimulationSystem
- * чтобы velocity успела примениться в этом же тике.
+ * `eye + dir * grab.distance` и пушит туда схваченный physics-объект (куб ИЛИ
+ * машину) через physicsSpace.setLinearVelocity((target - currentPos) / delta).
+ * Идёт ПЕРЕД PhysicsSimulationSystem чтобы velocity успела примениться в этом же тике.
  *
  * Если схваченный entity больше не существует (удалили REMOVE-инструментом
  * например) — GrabbingComponent снимается с игрока.
@@ -31,30 +31,27 @@ class GrabSystem(
         val grab = entity[GrabbingComponent]
         val playerPos = entity[PositionComponent]
 
-        val grabbed = world.family { all(PhysicsComponent) }
-            .firstOrNull { it[PhysicsComponent].physicsId == grab.grabbedPhysicsId }
-
+        val grabbed = world.findPhysicsEntity(grab.grabbedPhysicsId)
         if (grabbed == null) {
             entity.configure { it -= GrabbingComponent }
             return
         }
 
-        val grabbedPhys = grabbed[PhysicsComponent]
-        val body = physicsSpace.getOrCreateBody(grabbedPhys.physicsId, grabbedPhys.physContextIDs) {
-            // Сюда не должны попасть — body уже создан CubePhysicsLifecycleSystem на этом или прошлом тике.
-            physicsSpace.addCube(Vec3D.ZERO, grabbedPhys.size)
+        val current = physicsSpace.getBodyTransform(grab.grabbedPhysicsId)?.translation
+        if (current == null) {
+            entity.configure { it -= GrabbingComponent }
+            return
         }
 
         val eye = playerPos.position + Vec3D(0.0, EYE_HEIGHT, 0.0)
         val dir = playerPos.yawPitch.direction()
         val target = eye + dir * grab.distance
 
-        val current = body.getTransform().translation
         val deltaSec = deltaTime.toDouble()
         if (deltaSec > 0.0) {
-            body.setLinearVelocity((target - current) / deltaSec)
+            physicsSpace.setLinearVelocity(grab.grabbedPhysicsId, (target - current) / deltaSec)
         }
-        body.setAngularVelocity(Vec3D.ZERO)
+        physicsSpace.setAngularVelocity(grab.grabbedPhysicsId, Vec3D.ZERO)
     }
 
     object Config : EcsSystemConfig {

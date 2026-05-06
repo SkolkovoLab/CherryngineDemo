@@ -7,6 +7,7 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.PlayerPhysicsState
+import ru.cherryngine.impl.demo.components.RidingCarComponent
 import ru.cherryngine.impl.demo.input.MovementDispatcher
 import ru.cherryngine.impl.demo.output.PlayerMoverDispatcher
 import ru.cherryngine.lib.math.Vec3D
@@ -52,6 +53,7 @@ class DemoPlayerHitboxDriver(
         player is MinecraftPlayer || player is BedrockPlayer
 
     override fun preSimulate(player: Player, delta: Duration) {
+        if (isRidingCar(player)) return
         val movement = movementDispatcher.pollMovement(player) ?: return
         val deltaSec = delta.toDouble(DurationUnit.SECONDS)
         val targetPos = movement.position + PLAYER_HITBOX_OFFSET
@@ -107,6 +109,7 @@ class DemoPlayerHitboxDriver(
     }
 
     override fun postSimulate(player: Player, delta: Duration) {
+        if (isRidingCar(player)) return
         val movement = movementDispatcher.pollMovement(player) ?: return
         val physicsId = playerPhysicsState.getPhysicsId(player.uuid) ?: return
         val body = physicsSpace.getOrCreateBody(physicsId, player.viewContextIDs) {
@@ -148,6 +151,12 @@ class DemoPlayerHitboxDriver(
         //    correctClientPosition — платформо-специфичная мягкая коррекция: Java шлёт relative
         //    teleport через RelativeFlags.ALL, Bedrock — absolute с сохранённым yawPitch.
         moverDispatcher.correctClientPosition(player, finalFeetPos)
+    }
+
+    /** Пока игрок сидит в машине, hitbox-симуляцию не трогаем — позицией управляет CarDriveSystem. */
+    private fun isRidingCar(player: Player): Boolean {
+        val entity = ecsWorld.getPlayerEntityOrNull(player.uuid) ?: return false
+        return with(ecsWorld) { RidingCarComponent in entity }
     }
 
     private fun resolvePhysicsId(playerUuid: UUID): UUID {

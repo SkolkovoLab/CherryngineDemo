@@ -8,6 +8,8 @@ enum class Tool(val displayName: String) {
     CREATE_SLAB("Create Slab"),
     REMOVE("Remove"),
     GRAB("Grab"),
+    SPAWN_CAR("Spawn Car"),
+    INTERACT("Interact"),
 }
 
 data class SelectedToolComponent(
