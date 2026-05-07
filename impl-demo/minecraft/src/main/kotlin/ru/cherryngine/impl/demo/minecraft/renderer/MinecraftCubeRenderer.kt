@@ -13,12 +13,12 @@ import ru.cherryngine.lib.math.Transform
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.platform.minecraft.java.entity.McEntity
+import ru.cherryngine.platform.minecraft.java.entity.McEntityIds
 import ru.cherryngine.platform.minecraft.java.entity.McEntityRegistry
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import ru.cherryngine.platform.minecraft.java.utils.minestomQuaternion
 import ru.cherryngine.platform.minecraft.java.utils.minestomVec
 import java.util.*
-import kotlin.random.Random
 
 @InstanceSingleton(platform = "minecraft")
 class MinecraftCubeRenderer(
@@ -38,7 +38,7 @@ class MinecraftCubeRenderer(
 
     override fun onAdd(id: UUID) {
         val mcEntity = McEntity(
-            Random.nextInt(1000, 1_000_000),
+            McEntityIds.next(),
             EntityType.ITEM_DISPLAY,
         )
         mcEntity.metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)

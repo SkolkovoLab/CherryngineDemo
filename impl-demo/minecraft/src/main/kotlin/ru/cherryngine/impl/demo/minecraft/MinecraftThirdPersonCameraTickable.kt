@@ -16,11 +16,11 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.platform.minecraft.java.entity.McEntity
+import ru.cherryngine.platform.minecraft.java.entity.McEntityIds
 import ru.cherryngine.platform.minecraft.java.entity.McEntityRegistry
 import ru.cherryngine.platform.minecraft.java.player.MinecraftClientState
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import java.util.UUID
-import kotlin.random.Random
 import kotlin.time.Duration
 
 /**
@@ -91,7 +91,7 @@ class MinecraftThirdPersonCameraTickable(
             val horse = cameraHorses.getOrPut(playerUuid) {
                 freshlyCreated = true
                 McEntity(
-                    Random.nextInt(1_000_000, 9_000_000),
+                    McEntityIds.next(),
                     EntityType.HORSE,
                 ).apply {
                     metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)

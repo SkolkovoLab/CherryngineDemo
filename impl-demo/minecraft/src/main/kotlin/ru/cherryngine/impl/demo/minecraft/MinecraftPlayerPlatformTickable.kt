@@ -14,11 +14,11 @@ import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.platform.minecraft.java.entity.McEntity
+import ru.cherryngine.platform.minecraft.java.entity.McEntityIds
 import ru.cherryngine.platform.minecraft.java.entity.McEntityRegistry
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import java.util.*
 import kotlin.math.roundToInt
-import kotlin.random.Random
 import kotlin.time.Duration
 
 @InstanceSingleton(platform = "minecraft", stage = TickStage.POST)
@@ -59,7 +59,7 @@ class MinecraftPlayerPlatformTickable(
 
                 val pair = platforms.getOrPut(playerUuid) {
                     val vehicle = McEntity(
-                        Random.nextInt(1_000_000, 9_000_000),
+                        McEntityIds.next(),
                         EntityType.ITEM_DISPLAY,
                     ).apply {
                         metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)
@@ -67,7 +67,7 @@ class MinecraftPlayerPlatformTickable(
                         subscribers.add(mcPlayer)
                     }
                     val passenger = McEntity(
-                        Random.nextInt(1_000_000, 9_000_000),
+                        McEntityIds.next(),
                         EntityType.SHULKER,
                     ).apply {
                         metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)

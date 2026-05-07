@@ -11,10 +11,10 @@ import ru.cherryngine.impl.demo.renderer.AxolotlRenderer
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.lib.math.YawPitch
 import ru.cherryngine.platform.minecraft.java.entity.McEntity
+import ru.cherryngine.platform.minecraft.java.entity.McEntityIds
 import ru.cherryngine.platform.minecraft.java.entity.McEntityRegistry
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import java.util.*
-import kotlin.random.Random
 
 @InstanceSingleton(platform = "minecraft")
 class MinecraftAxolotlRenderer(
@@ -26,7 +26,7 @@ class MinecraftAxolotlRenderer(
 
     override fun onAdd(id: UUID) {
         val mcEntity = McEntity(
-            Random.nextInt(1000, 1_000_000),
+            McEntityIds.next(),
             EntityType.AXOLOTL,
         ).apply {
             metadata[MetadataDef.HAS_NO_GRAVITY.index()] = Metadata.Boolean(true)
