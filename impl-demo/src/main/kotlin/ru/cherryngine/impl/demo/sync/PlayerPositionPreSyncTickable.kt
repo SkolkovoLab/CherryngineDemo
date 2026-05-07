@@ -5,15 +5,23 @@ import ru.cherryngine.engine.core.instance.TickStage
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.EcsWorld
+import ru.cherryngine.engine.ecs.components.InputTargetComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.impl.demo.input.MovementDispatcher
 import kotlin.time.Duration
 
 /**
- * PRE-стадия: если ECS-PositionComponent не двигался с прошлого тика
- * (равен последнему applied), доверяем клиенту — пишем его репорт в ECS.
- * Клиентский репорт читаем через MovementDispatcher.
+ * PRE-стадия: синхронизирует ECS-позицию игрока с клиентским репортом.
+ *
+ * Если player-entity сам себе InputTarget (первое лицо) — синхронизируем
+ * и position, и yawPitch (но только если ECS-позиция не двигалась с прошлого
+ * тика, т.е. равна applied — иначе серверная физика перезатёрла бы клиентский
+ * репорт).
+ *
+ * Если игрок в third-person (например в машине) — позицию не трогаем
+ * (управляет другая система), но yawPitch всё равно обновляем: камеру нужно
+ * вращать вслед за мышкой клиента.
  */
 @InstanceSingleton(stage = TickStage.PRE)
 class PlayerPositionPreSyncTickable(
@@ -26,14 +34,23 @@ class PlayerPositionPreSyncTickable(
         for (player in playerManager.onlinePlayers()) {
             val entity = ecsWorld.getPlayerEntityOrNull(player.uuid) ?: continue
             val ecsPos = with(ecsWorld) { entity.getOrNull(PositionComponent) } ?: continue
-            val desired = PositionSnapshot(ecsPos.position, ecsPos.yawPitch)
-            val applied = shadow[player.uuid]
-            if (applied != null && desired == applied) {
-                val client = movementDispatcher.pollMovement(player) ?: continue
-                val snap = PositionSnapshot(client.position, client.yawPitch)
-                ecsPos.position = snap.position
-                ecsPos.yawPitch = snap.yawPitch
-                shadow[player.uuid] = snap
+            val client = movementDispatcher.pollMovement(player) ?: continue
+
+            val hasInputTarget = with(ecsWorld) {
+                entity.getOrNull(InputTargetComponent)?.playerUuid == player.uuid
+            }
+
+            if (hasInputTarget) {
+                val desired = PositionSnapshot(ecsPos.position, ecsPos.yawPitch)
+                val applied = shadow[player.uuid]
+                if (applied != null && desired == applied) {
+                    val snap = PositionSnapshot(client.position, client.yawPitch)
+                    ecsPos.position = snap.position
+                    ecsPos.yawPitch = snap.yawPitch
+                    shadow[player.uuid] = snap
+                }
+            } else {
+                ecsPos.yawPitch = client.yawPitch
             }
         }
     }

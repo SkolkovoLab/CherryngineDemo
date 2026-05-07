@@ -9,6 +9,7 @@ import ru.cherryngine.engine.core.player.Player
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.shape.ShapeGeometry
 import ru.cherryngine.engine.core.shape.ShapeWorld
+import ru.cherryngine.engine.ecs.components.InputTargetComponent
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
@@ -77,6 +78,7 @@ class PlayerInitSystem(
 
             val playerEntityRef = world.entity {
                 it += PlayerComponent(playerUuid, setOf(defaultViewContextID))
+                it += InputTargetComponent(playerUuid)
                 it += ViewableComponent(setOf(defaultViewContextID))
                 it += PositionComponent(spawnPosition)
                 it += AxolotlModelComponent()

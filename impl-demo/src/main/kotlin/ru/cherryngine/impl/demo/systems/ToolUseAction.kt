@@ -8,6 +8,9 @@ import ru.cherryngine.engine.core.shape.ShapeFilter
 import ru.cherryngine.engine.core.shape.ShapeRaycaster
 import ru.cherryngine.engine.core.world.WorldRaycasterDispatcher
 import ru.cherryngine.engine.ecs.EcsWorld
+import ru.cherryngine.engine.ecs.components.CameraMode
+import ru.cherryngine.engine.ecs.components.CameraTargetComponent
+import ru.cherryngine.engine.ecs.components.InputTargetComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
@@ -161,7 +164,18 @@ fun EcsWorld.useTool(
             val cube = request.hit?.shape as? PhysicsCubeShape ?: return
             val target = findPhysicsEntity(cube.physicsId) ?: return
             if (CarComponent in target) {
-                playerEntity.configure { it += RidingCarComponent(cube.physicsId) }
+                // Игрок садится в машину: инпут и камера перенаправляются на car-entity.
+                // RidingCarComponent на игроке — маркер для DemoPlayerHitboxDriver.
+                // CameraTargetComponent живёт на ЦЕЛИ камеры (машина), а не на игроке —
+                // фокус для камеры это точка машины, и сам игрок при этом не трогается.
+                playerEntity.configure {
+                    it += RidingCarComponent()
+                    it -= InputTargetComponent
+                }
+                target.configure {
+                    it += InputTargetComponent(playerUuid)
+                    it += CameraTargetComponent(playerUuid, CameraMode.ThirdPerson(radius = 8.0))
+                }
             }
         }
     }

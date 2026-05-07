@@ -32,7 +32,7 @@ class MinecraftPlayerRenderer(
     override fun onJoin(player: MinecraftPlayer) {
         player.connection.sendPacket(
             JoinGamePacket(
-                0, false, listOf("minecraft:overworld"), 20,
+                player.entityId, false, listOf("minecraft:overworld"), 20,
                 8, 8, false, true, false,
                 overworldDimensionTypeId,
                 "minecraft:overworld", 0L,
