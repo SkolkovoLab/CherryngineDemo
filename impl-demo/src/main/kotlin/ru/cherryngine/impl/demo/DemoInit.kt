@@ -31,7 +31,7 @@ class DemoInit(instanceFactory: InstanceFactory) {
                 PhysicsSimulationSystem.Config,
                 CubePhysicsSyncSystem.Config,
                 CarPhysicsSyncSystem.Config,
-                CarWheelSyncSystem.Config,
+                CarModelSystem.Config,
                 HitboxVisualizationSystem.Config,
                 ToolSelectionDisplaySystem.Config,
                 ViewContextSyncConfig,

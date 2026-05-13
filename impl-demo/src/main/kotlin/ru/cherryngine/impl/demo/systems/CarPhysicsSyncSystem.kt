@@ -8,34 +8,23 @@ import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.components.CarComponent
-import ru.cherryngine.impl.demo.components.CubeModelComponent
-import ru.cherryngine.lib.math.Transform
-import ru.cherryngine.lib.math.Vec3D
 
 /**
- * После симуляции копирует chassis-transform машины в PositionComponent +
- * CubeModelComponent.transform — visual чассис ездит вместе с body.
+ * После симуляции копирует chassis-translation в PositionComponent машины.
+ * Используется view-culling'ом (рендерер машины + камера третьего лица читают
+ * это поле) и shape-raycast'ом (PhysicsCubeShape по chassisTransform). Сам
+ * визуальный рендер машины (chassis + колёса) уже идёт через CarRenderer и
+ * читает трансформы напрямую из VehicleBody.
  */
 class CarPhysicsSyncSystem(
     private val physicsSpace: PhysicsSpace,
 ) : IteratingSystem(
-    family { all(CarComponent, CubeModelComponent) }
+    family { all(CarComponent, PositionComponent) }
 ) {
     override fun onTickEntity(entity: EcsEntity) {
         val car = entity[CarComponent]
         val vehicle = physicsSpace.getVehicleBody(car.carPhysicsId) ?: return
-        val transform = vehicle.getTransform()
-
-        entity.configure {
-            it.getOrNull(PositionComponent)?.position = transform.translation
-            it.getOrNull(CubeModelComponent)?.let { model ->
-                model.transform = Transform(
-                    translation = Vec3D.ZERO,
-                    rotation = transform.rotation,
-                    scale = model.transform.scale,
-                )
-            }
-        }
+        entity[PositionComponent].position = vehicle.getTransform().translation
     }
 
     object Config : EcsSystemConfig {

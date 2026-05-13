@@ -21,7 +21,6 @@ import ru.cherryngine.impl.demo.components.PhysicsComponent
 import ru.cherryngine.impl.demo.components.RidingCarComponent
 import ru.cherryngine.impl.demo.components.SelectedToolComponent
 import ru.cherryngine.impl.demo.components.Tool
-import ru.cherryngine.impl.demo.components.WheelComponent
 import ru.cherryngine.impl.demo.components.findPhysicsEntity
 import ru.cherryngine.impl.demo.shape.PhysicsCubeShape
 import ru.cherryngine.lib.math.Transform
@@ -110,14 +109,14 @@ fun EcsWorld.useTool(
 
         Tool.SPAWN_CAR -> {
             // Машина — Jolt VehicleConstraint в PhysicsSpace, ECS держит только маркер
-            // CarComponent + визуал. CarPhysicsLifecycleSystem подберёт это и создаст
-            // VehicleBody при первом тике.
+            // CarComponent. CarPhysicsLifecycleSystem подберёт это и создаст VehicleBody
+            // при первом тике, CarModelSystem отдаст визуал в CarRenderer (chassis + 4 колеса).
             //
-            // Spawn-lift = chassisHalfHeight + suspensionMax + tiny margin.
-            // Привязка точно такая чтобы wheels-bottom при максимально-вытянутой подвеске
-            // оказались чуть НАД terrain'ом — иначе ray-cast подвески промахивается во
-            // время свободного падения, и чассис ударяется коллизионным боксом о землю
-            // раньше чем подвеска успевает сработать → лежит на пузе.
+            // Spawn-lift = chassisHalfHeight + suspensionMax + tiny margin. Чтобы при
+            // максимально-вытянутой подвеске wheels-bottom оказались чуть НАД terrain'ом
+            // — иначе ray-cast подвески промахивается во время свободного падения, и
+            // чассис ударяется коллизионным боксом о землю раньше чем подвеска успевает
+            // сработать → лежит на пузе.
             val carSize = Vec3D(2.5, 1.5, 6.0)
             val wheelRadius = minOf(carSize.y, carSize.x) * 0.25
             val suspMax = wheelRadius * 2.0
@@ -125,27 +124,10 @@ fun EcsWorld.useTool(
             val groundHit = computeSpawnPos(playerPos, yp, worldRaycaster, viewableContexts, backOff = 0.0)
             val spawnPos = groundHit + Vec3D(0.0, lift, 0.0)
 
-            val carPhysicsId = UUID.randomUUID()
             entity {
-                it += CarComponent(carPhysicsId = carPhysicsId, physContextIDs = viewableContexts, chassisSize = carSize)
+                it += CarComponent(physContextIDs = viewableContexts, chassisSize = carSize)
                 it += PositionComponent(spawnPos)
-                it += CubeModelComponent(material = Key.key("red_concrete"), transform = Transform(scale = carSize))
                 it += ViewableComponent(viewableContexts)
-            }
-
-            // 4 визуальных колеса — позиции и ротация льются из VehicleConstraint каждый тик.
-            // Размер блочка: диаметр × диаметр × ширина (как у jolt-wheel).
-            val wheelSize = Vec3D(wheelRadius * 2.0, wheelRadius * 2.0, wheelRadius * 0.6)
-            for (i in 0..3) {
-                entity {
-                    it += WheelComponent(carPhysicsId = carPhysicsId, wheelIndex = i)
-                    it += PositionComponent(spawnPos)
-                    it += CubeModelComponent(
-                        material = Key.key("black_concrete"),
-                        transform = Transform(scale = wheelSize),
-                    )
-                    it += ViewableComponent(viewableContexts)
-                }
             }
         }
 
