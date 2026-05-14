@@ -16,8 +16,23 @@ import ru.cherryngine.impl.demo.components.RidingCarComponent
 import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import java.util.UUID
+import kotlin.math.abs
 
 private const val FORWARD_SPEED_THRESHOLD = 0.5
+
+/** rad/tick добавка к yaw angular velocity при W+S+руль на стоящей машине.
+ *  Нужен — без него car абсолютно static (front locked → slip angle = 0 →
+ *  lateral friction force = 0 → нет yaw torque, вращение не запускается). */
+private const val BURNOUT_STEER_YAW_PER_TICK = 0.2
+
+/** m/s — выше этой скорости burnout-kick полностью отключается (hard-gate).
+ *  Цель — не давать неестественной закрутки на полном ходу: W+S на скорости
+ *  должен просто тормозить front-brake'ом, и только когда car замедлился ниже
+ *  порога — kick включается и начинает раскручивать пончик. Hard-gate (вместо
+ *  ramp) потому что при ramp car часто слегка катится 1-2 m/s пока physics
+ *  балансирует engine push vs front-brake, и ослабленный kick не запускает
+ *  вращение. */
+private const val BURNOUT_KICK_MAX_SPEED = 5.0
 
 /**
  * Каждый тик для каждой машины с InputTargetComponent: читает последний
@@ -69,15 +84,25 @@ class CarDriveSystem(
         val signedSpeed = vehicle.getLinearVelocity().dot(forwardDir)
 
         // WheeledVehicleController.setDriverInput(forward, right, brake, handBrake), все в [-1..1].
+        // W+S одновременно — burnout: forward=1 (газ на rear) + brake=1. Per-axle
+        // brake-torque настроен так, что front locked (frontBrakeTorque=4000),
+        // rear free (rearBrakeTorque=0), и engine крутит задние через свободный
+        // foot-brake. Это даёт настоящий physics-эффект: стоим, задние буксуют;
+        // с рулём — задняя ось скользит, машина крутится вокруг передней оси.
+        val burnout = input.forward() && input.backward()
         var forward = 0f
         var brake = 0f
         when {
+            burnout -> {
+                forward = 1f
+                brake = 1f
+            }
             input.forward() && signedSpeed < -FORWARD_SPEED_THRESHOLD -> brake = 1f
             input.backward() && signedSpeed > FORWARD_SPEED_THRESHOLD -> brake = 1f
             input.forward() -> forward = 1f
             input.backward() -> forward = -1f
         }
-        if (forward == 0f && brake == 0f) brake = 0.25f
+        if (!burnout && forward == 0f && brake == 0f) brake = 0.25f
 
         val right = when {
             input.right() -> 1f
@@ -92,6 +117,16 @@ class CarDriveSystem(
             vehicle.activate()
         }
         vehicle.setDriverInput(forward, right, brake, handBrake)
+
+        // Burnout + руль — kick yaw. Без него car абсолютно статична (front locked
+        // → slip angle = 0 → lateral friction = 0 → нет yaw force), вращение не
+        // запускается. Accumulative add (не override) — friction physics дальше
+        // сама решает pivot point: front locked = max longitudinal resistance →
+        // pivot тяготеет к передней оси.
+        if (burnout && right != 0f && abs(signedSpeed) < BURNOUT_KICK_MAX_SPEED) {
+            val ang = vehicle.getAngularVelocity()
+            vehicle.setAngularVelocity(Vec3D(ang.x, ang.y - right * BURNOUT_STEER_YAW_PER_TICK, ang.z))
+        }
     }
 
     private fun exit(carEntity: EcsEntity, playerUuid: UUID) {

@@ -28,6 +28,8 @@ object DemoCars {
         maxPitchRollAngleDegrees = 60f,
         engineMaxTorque = 900f,
         engineMaxRpm = 7000f,
+        frontBrakeTorque = 4000f,
+        rearBrakeTorque = 0f,
         rearHandBrakeTorque = 4000f,
         limitedSlipRatio = 1.4f,
         antiRollBarFrontStiffness = 500f,
