@@ -85,6 +85,12 @@ class CarDriveSystem(
             else -> 0f
         }
         val handBrake = if (input.jump()) 1f else 0f
+
+        // Jolt усыпляет неактивные body после простоя — driver-input при этом
+        // молча игнорится. Активируем chassis перед input'ом если игрок что-то жмёт.
+        if (forward != 0f) {
+            vehicle.activate()
+        }
         vehicle.setDriverInput(forward, right, brake, handBrake)
     }
 
