@@ -13,8 +13,11 @@ import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.EcsSystemConfig
 import ru.cherryngine.impl.demo.components.CarComponent
 import ru.cherryngine.impl.demo.components.RidingCarComponent
+import ru.cherryngine.lib.math.Vec3D
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import java.util.UUID
+
+private const val FORWARD_SPEED_THRESHOLD = 0.5
 
 /**
  * Каждый тик для каждой машины с InputTargetComponent: читает последний
@@ -57,19 +60,31 @@ class CarDriveSystem(
 
         val vehicle = physicsSpace.getVehicleBody(carComp.carPhysicsId) ?: return
 
+        // Signed-скорость машины вдоль её forward-оси: > 0 — едет вперёд,
+        // < 0 — назад, около 0 — стоит. Нужно чтобы W при движении назад (и S при
+        // движении вперёд) работали как тормоз, а не как «газ в противоположную»:
+        // иначе игрок при попытке остановиться сразу включает реверс.
+        val chassisRot = vehicle.getTransform().rotation
+        val forwardDir = chassisRot.apply(Vec3D.PLUS_Z)
+        val signedSpeed = vehicle.getLinearVelocity().dot(forwardDir)
+
         // WheeledVehicleController.setDriverInput(forward, right, brake, handBrake), все в [-1..1].
-        val forward = when {
-            input.forward() -> 1f
-            input.backward() -> -1f
-            else -> 0f
+        var forward = 0f
+        var brake = 0f
+        when {
+            input.forward() && signedSpeed < -FORWARD_SPEED_THRESHOLD -> brake = 1f
+            input.backward() && signedSpeed > FORWARD_SPEED_THRESHOLD -> brake = 1f
+            input.forward() -> forward = 1f
+            input.backward() -> forward = -1f
         }
+        if (forward == 0f && brake == 0f) brake = 0.25f
+
         val right = when {
             input.right() -> 1f
             input.left() -> -1f
             else -> 0f
         }
-        val brake = if (input.jump()) 1f else 0f
-        val handBrake = 0f
+        val handBrake = if (input.jump()) 1f else 0f
         vehicle.setDriverInput(forward, right, brake, handBrake)
     }
 

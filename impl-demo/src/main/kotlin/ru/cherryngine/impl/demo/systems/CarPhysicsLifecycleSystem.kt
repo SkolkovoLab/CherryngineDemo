@@ -33,15 +33,12 @@ class CarPhysicsLifecycleSystem(
 
         physicsSpace.keepAlive(car.carPhysicsId)
         physicsSpace.getOrCreateVehicleBody(car.carPhysicsId, car.physContextIDs) {
-            physicsSpace.addCar(
-                position = pos,
-                chassisSize = car.chassisSize,
-            )
+            physicsSpace.addCar(position = pos, settings = car.settings)
         }
 
         if (entity.getOrNull(ShapeRegistrationComponent) == null) {
             val chassisShape = PhysicsCubeShape(
-                geometry = ShapeGeometry.Box(car.chassisSize / 2.0),
+                geometry = ShapeGeometry.Box(car.settings.chassisSize / 2.0),
                 getTransform = {
                     physicsSpace.getBodyTransform(car.carPhysicsId) ?: Transform.ZERO
                 },

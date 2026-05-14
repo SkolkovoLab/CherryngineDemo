@@ -14,6 +14,7 @@ import ru.cherryngine.engine.ecs.components.InputTargetComponent
 import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
+import ru.cherryngine.impl.demo.DemoCars
 import ru.cherryngine.impl.demo.components.CarComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
 import ru.cherryngine.impl.demo.components.GrabbingComponent
@@ -112,20 +113,16 @@ fun EcsWorld.useTool(
             // CarComponent. CarPhysicsLifecycleSystem подберёт это и создаст VehicleBody
             // при первом тике, CarModelSystem отдаст визуал в CarRenderer (chassis + 4 колеса).
             //
-            // Spawn-lift = chassisHalfHeight + suspensionMax + tiny margin. Чтобы при
-            // максимально-вытянутой подвеске wheels-bottom оказались чуть НАД terrain'ом
-            // — иначе ray-cast подвески промахивается во время свободного падения, и
-            // чассис ударяется коллизионным боксом о землю раньше чем подвеска успевает
-            // сработать → лежит на пузе.
-            val carSize = Vec3D(2.5, 1.5, 6.0)
-            val wheelRadius = minOf(carSize.y, carSize.x) * 0.25
-            val suspMax = wheelRadius * 2.0
-            val lift = carSize.y * 0.5 + suspMax + 0.1
+            // CarComponent default'ы — sample-размер (1.8×0.4×4, wheelR=0.3, suspMax=0.5).
+            // Spawn-lift = chassisHalfHeight + suspensionMax + margin: чтобы wheels-bottom
+            // при максимально-вытянутой подвеске оказались чуть НАД terrain'ом.
+            val car = CarComponent(settings = DemoCars.DRIFT_COUPE, physContextIDs = viewableContexts)
+            val lift = car.settings.chassisSize.y * 0.5 + car.settings.suspensionMaxLength + 0.1
             val groundHit = computeSpawnPos(playerPos, yp, worldRaycaster, viewableContexts, backOff = 0.0)
             val spawnPos = groundHit + Vec3D(0.0, lift, 0.0)
 
             entity {
-                it += CarComponent(physContextIDs = viewableContexts, chassisSize = carSize)
+                it += car
                 it += PositionComponent(spawnPos)
                 it += ViewableComponent(viewableContexts)
             }

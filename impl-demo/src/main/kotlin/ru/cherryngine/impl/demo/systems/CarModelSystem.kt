@@ -60,13 +60,11 @@ class CarModelSystem(
         val chassisTransform = Transform(
             translation = chassisRaw.translation,
             rotation = chassisRaw.rotation,
-            scale = car.chassisSize,
+            scale = car.settings.chassisSize,
         )
 
-        // Формула wheel-размера дублирует PhysicsSpace.addCar — оба места знают
-        // только chassisSize. При изменении формулы поправить в обоих местах.
-        val wheelRadius = minOf(car.chassisSize.y, car.chassisSize.x) * 0.25
-        val wheelSize = Vec3D(wheelRadius * 2.0, wheelRadius * 2.0, wheelRadius * 0.6)
+        val wheelDiameter = car.settings.wheelRadius.toDouble() * 2.0
+        val wheelSize = Vec3D(wheelDiameter, wheelDiameter, car.settings.wheelWidth.toDouble())
         val wheelTransforms = List(4) { i ->
             val raw = vehicle.getWheelTransform(i)
             Transform(
