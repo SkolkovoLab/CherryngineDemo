@@ -29,8 +29,8 @@ class MinecraftPlayerMover(
                 0,
                 position.minestomVec(),
                 Vec.ZERO,
-                yawPitch.yaw.toFloat(),
-                yawPitch.pitch.toFloat(),
+                yawPitch.yaw,
+                yawPitch.pitch,
                 0
             )
         )
