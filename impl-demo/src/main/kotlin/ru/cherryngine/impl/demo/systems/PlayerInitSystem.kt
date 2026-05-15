@@ -18,10 +18,19 @@ import ru.cherryngine.impl.demo.InstanceJoinChannel
 import ru.cherryngine.impl.demo.InstanceLeaveChannel
 import ru.cherryngine.impl.demo.PlayerPhysicsState
 import ru.cherryngine.impl.demo.components.AxolotlModelComponent
+import ru.cherryngine.impl.demo.components.CreateCubeToolComponent
+import ru.cherryngine.impl.demo.components.CreateSlabToolComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
+import ru.cherryngine.impl.demo.components.DisplayNameComponent
+import ru.cherryngine.impl.demo.components.GrabToolComponent
 import ru.cherryngine.impl.demo.components.HitboxVisualizationComponent
-import ru.cherryngine.impl.demo.components.SelectedToolComponent
+import ru.cherryngine.impl.demo.components.InInventoryComponent
+import ru.cherryngine.impl.demo.components.InteractToolComponent
+import ru.cherryngine.impl.demo.components.InventoryComponent
+import ru.cherryngine.impl.demo.components.ItemComponent
+import ru.cherryngine.impl.demo.components.RemoveToolComponent
 import ru.cherryngine.impl.demo.components.ShapeRegistrationComponent
+import ru.cherryngine.impl.demo.components.SpawnCarToolComponent
 import ru.cherryngine.impl.demo.renderer.PlayerRendererDispatcher
 import ru.cherryngine.impl.demo.shape.PlayerShape
 import ru.cherryngine.lib.math.Transform
@@ -53,7 +62,11 @@ class PlayerInitSystem(
             }
             toRemoveUUIDs.forEach { uuid -> playerPhysicsState.unregister(uuid) }
             world.family { all(PlayerComponent) }.forEach {
-                if (it[PlayerComponent].uuid in toRemoveUUIDs) it.remove()
+                if (it[PlayerComponent].uuid in toRemoveUUIDs) {
+                    // Уносим item-entity из инвентаря — иначе они осиротеют (item без location-компонента).
+                    it.getOrNull(InventoryComponent)?.slots?.forEach { item -> item?.remove() }
+                    it.remove()
+                }
             }
             world.family { all(HitboxVisualizationComponent) }.forEach {
                 if (it[HitboxVisualizationComponent].ownerUuid in toRemoveUUIDs) it.remove()
@@ -82,8 +95,49 @@ class PlayerInitSystem(
                 it += ViewableComponent(setOf(defaultViewContextID))
                 it += PositionComponent(spawnPosition)
                 it += AxolotlModelComponent()
-                it += SelectedToolComponent()
             }
+
+            // Стартовый инвентарь: по одному предмету на каждый инструмент в слотах 0–5.
+            // Каждая item-entity несёт ItemComponent + DisplayName + InInventory (location-инвариант)
+            // + маркер конкретного инструмента, который читает useTool/ToolUseAction.
+            val inventoryCmp = InventoryComponent()
+            inventoryCmp.slots[0] = world.entity {
+                it += ItemComponent()
+                it += DisplayNameComponent("Create Cube")
+                it += InInventoryComponent(playerEntityRef, 0)
+                it += CreateCubeToolComponent()
+            }
+            inventoryCmp.slots[1] = world.entity {
+                it += ItemComponent()
+                it += DisplayNameComponent("Create Slab")
+                it += InInventoryComponent(playerEntityRef, 1)
+                it += CreateSlabToolComponent()
+            }
+            inventoryCmp.slots[2] = world.entity {
+                it += ItemComponent()
+                it += DisplayNameComponent("Remove")
+                it += InInventoryComponent(playerEntityRef, 2)
+                it += RemoveToolComponent()
+            }
+            inventoryCmp.slots[3] = world.entity {
+                it += ItemComponent()
+                it += DisplayNameComponent("Grab")
+                it += InInventoryComponent(playerEntityRef, 3)
+                it += GrabToolComponent()
+            }
+            inventoryCmp.slots[4] = world.entity {
+                it += ItemComponent()
+                it += DisplayNameComponent("Spawn Car")
+                it += InInventoryComponent(playerEntityRef, 4)
+                it += SpawnCarToolComponent()
+            }
+            inventoryCmp.slots[5] = world.entity {
+                it += ItemComponent()
+                it += DisplayNameComponent("Interact")
+                it += InInventoryComponent(playerEntityRef, 5)
+                it += InteractToolComponent()
+            }
+            playerEntityRef.configure { it += inventoryCmp }
 
             // Шейп игрока — капсула, читающая текущую позицию из PositionComponent.
             // Регистрация уйдёт через ShapeRegistrationComponent.onRemove когда entity удалится.

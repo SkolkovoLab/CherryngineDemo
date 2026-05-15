@@ -16,12 +16,17 @@ import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.impl.demo.DemoCars
 import ru.cherryngine.impl.demo.components.CarComponent
+import ru.cherryngine.impl.demo.components.CreateCubeToolComponent
+import ru.cherryngine.impl.demo.components.CreateSlabToolComponent
 import ru.cherryngine.impl.demo.components.CubeModelComponent
+import ru.cherryngine.impl.demo.components.GrabToolComponent
 import ru.cherryngine.impl.demo.components.GrabbingComponent
+import ru.cherryngine.impl.demo.components.InteractToolComponent
+import ru.cherryngine.impl.demo.components.InventoryComponent
 import ru.cherryngine.impl.demo.components.PhysicsComponent
+import ru.cherryngine.impl.demo.components.RemoveToolComponent
 import ru.cherryngine.impl.demo.components.RidingCarComponent
-import ru.cherryngine.impl.demo.components.SelectedToolComponent
-import ru.cherryngine.impl.demo.components.Tool
+import ru.cherryngine.impl.demo.components.SpawnCarToolComponent
 import ru.cherryngine.impl.demo.components.findPhysicsEntity
 import ru.cherryngine.impl.demo.shape.PhysicsCubeShape
 import ru.cherryngine.lib.math.Transform
@@ -39,13 +44,14 @@ fun EcsWorld.useTool(
     shapeRaycaster: ShapeRaycaster,
 ) {
     val playerEntity = getPlayerEntityOrNull(playerUuid) ?: return
-    val tool = playerEntity.getOrNull(SelectedToolComponent)?.tool ?: return
+    val inventory = playerEntity.getOrNull(InventoryComponent) ?: return
+    val activeItem = inventory.slots[inventory.activeSlot] ?: return
     val playerPos = playerEntity[PositionComponent].position
     val yp = playerEntity[PositionComponent].yawPitch
     val viewableContexts = playerEntity[ViewableComponent].viewContextIDs
 
-    when (tool) {
-        Tool.CREATE_CUBE -> {
+    when {
+        CreateCubeToolComponent in activeItem -> {
             val spawnPos = computeSpawnPos(playerPos, yp, worldRaycaster, viewableContexts, backOff = 0.5)
             entity {
                 it += PhysicsComponent(physContextIDs = viewableContexts)
@@ -55,7 +61,7 @@ fun EcsWorld.useTool(
             }
         }
 
-        Tool.CREATE_SLAB -> {
+        CreateSlabToolComponent in activeItem -> {
             val slabSize = Vec3D(1.0, 0.5, 1.0)
             // back-off на половину высоты, чтобы плита легла на грань блока, а не вросла в него
             val spawnPos = computeSpawnPos(playerPos, yp, worldRaycaster, viewableContexts, backOff = 0.25)
@@ -67,7 +73,7 @@ fun EcsWorld.useTool(
             }
         }
 
-        Tool.GRAB -> {
+        GrabToolComponent in activeItem -> {
             // Тоггл: если уже что-то держим — отпускаем; иначе raycast и берём первый PHYSICS-шейп.
             val existing = playerEntity.getOrNull(GrabbingComponent)
             if (existing != null) {
@@ -91,7 +97,7 @@ fun EcsWorld.useTool(
             }
         }
 
-        Tool.REMOVE -> {
+        RemoveToolComponent in activeItem -> {
             // Raycast по PHYSICS_OBJECTS — берём первый шейп под прицелом, ищем ECS-entity
             // по physicsId (он же owner у PhysicsCubeShape) и удаляем.
             val eye = playerPos + Vec3D(0.0, EYE_HEIGHT, 0.0)
@@ -108,7 +114,7 @@ fun EcsWorld.useTool(
             findPhysicsEntity(cube.physicsId)?.remove()
         }
 
-        Tool.SPAWN_CAR -> {
+        SpawnCarToolComponent in activeItem -> {
             // Машина — Jolt VehicleConstraint в PhysicsSpace, ECS держит только маркер
             // CarComponent. CarPhysicsLifecycleSystem подберёт это и создаст VehicleBody
             // при первом тике, CarModelSystem отдаст визуал в CarRenderer (chassis + 4 колеса).
@@ -128,7 +134,7 @@ fun EcsWorld.useTool(
             }
         }
 
-        Tool.INTERACT -> {
+        InteractToolComponent in activeItem -> {
             // Универсальный «interact» — пока знает только про машины.
             val eye = playerPos + Vec3D(0.0, EYE_HEIGHT, 0.0)
             val dir = yp.direction()

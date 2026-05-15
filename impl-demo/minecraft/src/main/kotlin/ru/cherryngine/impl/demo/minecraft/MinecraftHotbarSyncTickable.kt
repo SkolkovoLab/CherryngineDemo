@@ -10,8 +10,7 @@ import ru.cherryngine.engine.ecs.EcsWorld
 import ru.cherryngine.engine.ecs.getPlayerEntityOrNull
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem.Companion.commandAction
 import ru.cherryngine.impl.demo.components.GrabbingComponent
-import ru.cherryngine.impl.demo.components.SelectedToolComponent
-import ru.cherryngine.impl.demo.components.Tool
+import ru.cherryngine.impl.demo.components.InventoryComponent
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import java.util.UUID
 import kotlin.time.Duration
@@ -21,13 +20,13 @@ private const val GRAB_MIN_DISTANCE = 1.5
 private const val GRAB_MAX_DISTANCE = 20.0
 
 @InstanceSingleton(platform = "minecraft", stage = TickStage.PRE)
-class MinecraftToolScrollTickable(
+class MinecraftHotbarSyncTickable(
     private val playerManager: PlayerManager,
     private val ecsWorld: EcsWorld,
 ) : Tickable {
 
-    // Per-player состояние "слот на конец прошлого тика" — нужно для scrollAmount(prev, new).
-    // Слот на платформенном Player не храним: tools — демо-понятие.
+    // Слот клиента на конец прошлого тика. Нужен только для scrollAmount() в режиме grab:
+    // там мы крутим distance по знаковой дельте, а не двигаем активный слот.
     private val prevSlot = HashMap<UUID, Int>()
 
     override fun tick(delta: Duration) {
@@ -44,7 +43,7 @@ class MinecraftToolScrollTickable(
                 prev = newSlot
             }
             prevSlot[mc.uuid] = prev
-            if (totalDelta == 0) continue
+            val lastSlot = prev
 
             val playerUuid = mc.uuid
             ecsWorld.commandAction {
@@ -53,13 +52,12 @@ class MinecraftToolScrollTickable(
                 if (grabbing != null) {
                     // Пока держим куб — колесо двигает его ближе/дальше.
                     // Инверсия: scroll up (totalDelta < 0) = от себя, scroll down = к себе.
+                    // activeSlot не трогаем — клиентский слот всё равно сменится, но это нас не касается.
                     grabbing.distance = (grabbing.distance - totalDelta * GRAB_DISTANCE_STEP)
                         .coerceIn(GRAB_MIN_DISTANCE, GRAB_MAX_DISTANCE)
                 } else {
-                    val cmp = entity.getOrNull(SelectedToolComponent) ?: return@commandAction
-                    val n = Tool.entries.size
-                    val newIdx = ((cmp.tool.ordinal + totalDelta) % n + n) % n
-                    cmp.tool = Tool.entries[newIdx]
+                    val inventory = entity.getOrNull(InventoryComponent) ?: return@commandAction
+                    inventory.activeSlot = lastSlot.coerceIn(0, inventory.size - 1)
                 }
             }
         }

@@ -5,7 +5,8 @@ import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.components.PlayerComponent
 import ru.cherryngine.impl.demo.EcsSystemConfig
-import ru.cherryngine.impl.demo.components.SelectedToolComponent
+import ru.cherryngine.impl.demo.components.DisplayNameComponent
+import ru.cherryngine.impl.demo.components.InventoryComponent
 import ru.cherryngine.impl.demo.renderer.ToolSelectionRendererDispatcher
 
 class ToolSelectionDisplaySystem(
@@ -14,9 +15,12 @@ class ToolSelectionDisplaySystem(
 ) : IntervalSystem() {
 
     override fun onTick() {
-        world.family { all(PlayerComponent, SelectedToolComponent) }.forEach { entity ->
+        world.family { all(PlayerComponent, InventoryComponent) }.forEach { entity ->
             val player = playerManager.getPlayerNullable(entity[PlayerComponent].uuid) ?: return@forEach
-            dispatcher.showTool(player, entity[SelectedToolComponent].tool)
+            val inventory = entity[InventoryComponent]
+            val activeItem = inventory.slots[inventory.activeSlot] ?: return@forEach
+            val displayName = activeItem.getOrNull(DisplayNameComponent)?.name ?: return@forEach
+            dispatcher.showTool(player, displayName)
         }
     }
 
