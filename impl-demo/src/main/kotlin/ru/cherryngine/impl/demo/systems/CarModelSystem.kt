@@ -4,7 +4,6 @@ import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import ru.cherryngine.engine.core.instance.Instance
 import ru.cherryngine.engine.ecs.EcsEntity
-import ru.cherryngine.engine.ecs.components.PositionComponent
 import ru.cherryngine.engine.ecs.components.ViewableComponent
 import ru.cherryngine.engine.physics.PhysicsSpace
 import ru.cherryngine.impl.demo.EcsSystemConfig
@@ -54,7 +53,7 @@ class CarModelSystem(
     override fun onTickEntity(entity: EcsEntity) {
         val car = entity[CarComponent]
         val vehicle = physicsSpace.getVehicleBody(car.carPhysicsId) ?: return
-        val viewContextIDs = entity.getOrNull(ViewableComponent)?.viewContextIDs ?: emptySet()
+        val viewContextIDs = entity.getOrNull(ViewableComponent)?.visibleInContextIds ?: emptySet()
 
         val chassisRaw = vehicle.getTransform()
         val chassisTransform = Transform(

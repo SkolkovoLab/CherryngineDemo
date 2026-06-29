@@ -1,7 +1,6 @@
 package ru.cherryngine.impl.demo.systems
 
 import ru.cherryngine.engine.core.instance.Instance
-import ru.cherryngine.engine.ecs.systems.ClearEventsSystem
 import ru.cherryngine.engine.ecs.systems.CommandActionsSystem
 import ru.cherryngine.impl.demo.EcsSystemConfig
 
@@ -14,8 +13,4 @@ object ViewContextSyncConfig : EcsSystemConfig {
         playerRendererDispatcher = instance.get(),
         playerManager = instance.get(),
     )
-}
-
-object ClearEventsConfig : EcsSystemConfig {
-    override fun create(instance: Instance) = ClearEventsSystem()
 }

@@ -48,7 +48,7 @@ fun EcsWorld.useTool(
     val activeItem = inventory.slots[inventory.activeSlot] ?: return
     val playerPos = playerEntity[PositionComponent].position
     val yp = playerEntity[PositionComponent].yawPitch
-    val viewableContexts = playerEntity[ViewableComponent].viewContextIDs
+    val viewableContexts = playerEntity[ViewableComponent].visibleInContextIds
 
     when {
         CreateCubeToolComponent in activeItem -> {

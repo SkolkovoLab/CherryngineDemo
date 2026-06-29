@@ -2,6 +2,7 @@ package ru.cherryngine.impl.demo.sync
 
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
+import ru.cherryngine.engine.core.instance.TickablePriority
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.EcsWorld
@@ -23,7 +24,8 @@ import kotlin.time.Duration
  * (управляет другая система), но yawPitch всё равно обновляем: камеру нужно
  * вращать вслед за мышкой клиента.
  */
-@InstanceSingleton(stage = TickStage.PRE)
+@InstanceSingleton
+@TickablePriority(stage = TickStage.PRE)
 class PlayerPositionPreSyncTickable(
     private val playerManager: PlayerManager,
     private val ecsWorld: EcsWorld,

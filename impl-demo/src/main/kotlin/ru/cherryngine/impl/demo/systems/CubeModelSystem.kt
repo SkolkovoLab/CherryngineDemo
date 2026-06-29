@@ -43,7 +43,7 @@ class CubeModelSystem(
     override fun onTickEntity(entity: EcsEntity) {
         val component = entity[CubeModelComponent]
         val pos = entity.getOrNull(PositionComponent)
-        val viewContextIDs = entity.getOrNull(ViewableComponent)?.viewContextIDs ?: emptySet()
+        val viewContextIDs = entity.getOrNull(ViewableComponent)?.visibleInContextIds ?: emptySet()
 
         dispatcher.update(
             component.modelId,

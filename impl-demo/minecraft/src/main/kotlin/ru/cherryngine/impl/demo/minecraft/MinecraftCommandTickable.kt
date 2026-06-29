@@ -5,6 +5,7 @@ import ru.cherryngine.engine.core.commandmanager.CherryngineCommandManager
 import ru.cherryngine.engine.core.commandmanager.CommandSender
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
+import ru.cherryngine.engine.core.instance.TickablePriority
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.impl.demo.input.CommandDispatcher
@@ -12,7 +13,8 @@ import ru.cherryngine.impl.demo.input.SuggestionDispatcher
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import kotlin.time.Duration
 
-@InstanceSingleton(platform = "minecraft", stage = TickStage.PRE)
+@InstanceSingleton(platform = "minecraft")
+@TickablePriority(stage = TickStage.PRE)
 class MinecraftCommandTickable(
     private val playerManager: PlayerManager,
     private val commandManager: CherryngineCommandManager,

@@ -16,6 +16,6 @@ class ViewContextSyncSystem(
     override fun onTickEntity(entity: EcsEntity) {
         val playerComponent = entity[PlayerComponent]
         val player = playerManager.getPlayerNullable(playerComponent.uuid) ?: return
-        playerRendererDispatcher.onViewContextChanged(player, playerComponent.viewContextIDs)
+        playerRendererDispatcher.onViewContextChanged(player, playerComponent.presentInContextIds)
     }
 }

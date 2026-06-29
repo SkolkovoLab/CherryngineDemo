@@ -2,6 +2,7 @@ package ru.cherryngine.impl.demo.bedrock
 
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
+import ru.cherryngine.engine.core.instance.TickablePriority
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.ecs.EcsWorld
@@ -16,7 +17,8 @@ private const val GRAB_DISTANCE_STEP = 0.5
 private const val GRAB_MIN_DISTANCE = 1.5
 private const val GRAB_MAX_DISTANCE = 20.0
 
-@InstanceSingleton(platform = "bedrock", stage = TickStage.PRE)
+@InstanceSingleton(platform = "bedrock")
+@TickablePriority(stage = TickStage.PRE)
 class BedrockHotbarSyncTickable(
     private val playerManager: PlayerManager,
     private val ecsWorld: EcsWorld,

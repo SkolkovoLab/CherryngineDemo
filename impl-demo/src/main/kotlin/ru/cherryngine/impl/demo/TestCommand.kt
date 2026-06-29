@@ -82,7 +82,7 @@ class TestCommand(
     ) {
         ecsWorld.commandAction {
             val entity = ecsWorld.getPlayerEntity(sender.uuid)
-            entity[PlayerComponent].viewContextIDs = contexts.split(",").toSet()
+            entity[PlayerComponent].presentInContextIds = contexts.split(",").toSet()
         }
     }
 
@@ -94,7 +94,7 @@ class TestCommand(
             val playerEntity = ecsWorld.getPlayerEntity(sender.uuid)
             val spawnPosition = playerEntity[PositionComponent].position
 
-            val viewableContexts = playerEntity[ViewableComponent].viewContextIDs
+            val viewableContexts = playerEntity[ViewableComponent].visibleInContextIds
 
             entity {
                 it += PhysicsComponent(physContextIDs = viewableContexts)
@@ -112,7 +112,7 @@ class TestCommand(
         ecsWorld.commandAction {
             val playerEntity = ecsWorld.getPlayerEntity(sender.uuid)
             val spawnPosition = playerEntity[PositionComponent].position
-            val viewableContexts = playerEntity[ViewableComponent].viewContextIDs
+            val viewableContexts = playerEntity[ViewableComponent].visibleInContextIds
 
             val slabSize = Vec3D(1.0, 0.5, 1.0)
             entity {

@@ -36,7 +36,7 @@ class HitboxVisualizationSystem(
         // item_display рендерит item вокруг entity position — нужен центр body,
         // не bottom, иначе scale=1.8 уезжает на 0.9 ниже хитбокса.
         entity[PositionComponent].position = transform.translation
-        entity[ViewableComponent].viewContextIDs = player.viewContextIDs
+        entity[ViewableComponent].visibleInContextIds = player.viewContextIDs
     }
 
     object Config : EcsSystemConfig {

@@ -3,6 +3,7 @@ package ru.cherryngine.impl.demo.minecraft
 import net.minestom.server.network.packet.client.play.ClientUseItemPacket
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
+import ru.cherryngine.engine.core.instance.TickablePriority
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.shape.ShapeRaycaster
@@ -14,7 +15,8 @@ import ru.cherryngine.impl.demo.systems.useTool
 import ru.cherryngine.platform.minecraft.java.player.MinecraftPlayer
 import kotlin.time.Duration
 
-@InstanceSingleton(platform = "minecraft", stage = TickStage.PRE)
+@InstanceSingleton(platform = "minecraft")
+@TickablePriority(stage = TickStage.PRE)
 class MinecraftToolUseTickable(
     private val playerManager: PlayerManager,
     private val ecsWorld: EcsWorld,

@@ -28,16 +28,16 @@ class ApartSystem : IteratingSystem(
             val apartName = entity.getOrNull(ApartComponent)?.apartName
             if (apartName != null) {
                 positionComponent.position = enterPosition
-                playerComponent.viewContextIDs = setOf("gm_construct", apartName)
-                entity.getOrNull(ViewableComponent)?.viewContextIDs = setOf(apartName)
+                playerComponent.presentInContextIds = setOf("gm_construct", apartName)
+                entity.getOrNull(ViewableComponent)?.visibleInContextIds = setOf(apartName)
             }
         }
 
         if (exitCuboid.isInside(positionComponent.position)) {
             positionComponent.position = exitPosition
 
-            playerComponent.viewContextIDs = setOf("gm_construct")
-            entity.getOrNull(ViewableComponent)?.viewContextIDs = setOf("gm_construct")
+            playerComponent.presentInContextIds = setOf("gm_construct")
+            entity.getOrNull(ViewableComponent)?.visibleInContextIds = setOf("gm_construct")
         }
     }
 

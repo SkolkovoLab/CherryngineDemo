@@ -7,6 +7,7 @@ import net.minestom.server.network.packet.server.play.SetPassengersPacket
 import net.minestom.server.utils.Direction
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
+import ru.cherryngine.engine.core.instance.TickablePriority
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.physics.PhysicsSpace
@@ -21,7 +22,8 @@ import java.util.*
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 
-@InstanceSingleton(platform = "minecraft", stage = TickStage.POST)
+@InstanceSingleton(platform = "minecraft")
+@TickablePriority(stage = TickStage.POST)
 class MinecraftPlayerPlatformTickable(
     private val playerManager: PlayerManager,
     private val mcEntityRegistry: McEntityRegistry,

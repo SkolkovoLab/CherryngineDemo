@@ -2,6 +2,7 @@ package ru.cherryngine.impl.demo.bedrock
 
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
+import ru.cherryngine.engine.core.instance.TickablePriority
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.shape.ShapeRaycaster
@@ -12,7 +13,8 @@ import ru.cherryngine.impl.demo.systems.useTool
 import ru.cherryngine.platform.minecraft.bedrock.BedrockPlayer
 import kotlin.time.Duration
 
-@InstanceSingleton(platform = "bedrock", stage = TickStage.PRE)
+@InstanceSingleton(platform = "bedrock")
+@TickablePriority(stage = TickStage.PRE)
 class BedrockToolUseTickable(
     private val playerManager: PlayerManager,
     private val ecsWorld: EcsWorld,

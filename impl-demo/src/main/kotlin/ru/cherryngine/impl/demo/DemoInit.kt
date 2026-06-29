@@ -35,7 +35,6 @@ class DemoInit(instanceFactory: InstanceFactory) {
                 HitboxVisualizationSystem.Config,
                 ToolSelectionDisplaySystem.Config,
                 ViewContextSyncConfig,
-                ClearEventsConfig,
             ),
         )
 

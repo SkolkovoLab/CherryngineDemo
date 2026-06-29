@@ -48,7 +48,7 @@ class AxolotlModelSystem(
         val pos = entity.getOrNull(PositionComponent)
         val playerUuid = entity.getOrNull(PlayerComponent)?.uuid
         val name = playerUuid?.let { playerManager.getPlayerNullable(it)?.username }
-        val viewContextIDs = entity.getOrNull(ViewableComponent)?.viewContextIDs ?: emptySet()
+        val viewContextIDs = entity.getOrNull(ViewableComponent)?.visibleInContextIds ?: emptySet()
 
         dispatcher.update(
             id,

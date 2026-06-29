@@ -6,6 +6,7 @@ import net.minestom.server.entity.MetadataDef
 import net.minestom.server.network.packet.server.play.SetPassengersPacket
 import ru.cherryngine.engine.core.instance.InstanceSingleton
 import ru.cherryngine.engine.core.instance.TickStage
+import ru.cherryngine.engine.core.instance.TickablePriority
 import ru.cherryngine.engine.core.instance.Tickable
 import ru.cherryngine.engine.core.player.PlayerManager
 import ru.cherryngine.engine.core.world.WorldRaycasterDispatcher
@@ -56,7 +57,8 @@ import kotlin.time.Duration
  * Workaround на проникновение камеры в стены: дополнительный raycast по блокам
  * и ограничение radius'а до hit-distance.
  */
-@InstanceSingleton(platform = "minecraft", stage = TickStage.POST)
+@InstanceSingleton(platform = "minecraft")
+@TickablePriority(stage = TickStage.POST)
 class MinecraftThirdPersonCameraTickable(
     private val playerManager: PlayerManager,
     private val mcEntityRegistry: McEntityRegistry,
